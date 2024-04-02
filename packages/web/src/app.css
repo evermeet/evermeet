@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --max-width: 820px;
+    --max-width-wide-page: 960px;
+    --max-width-extra-wide-page: 1080px;
+}
+
+@layer components {
+
+    .page-wide {
+        @apply max-w-[--max-width-wide-page] mx-auto mt-4 px-4;
+    }
+    .page-extra-wide {
+        @apply max-w-[--max-width-extra-wide-page] mx-auto;
+    }
+
+    .itembox {
+        @apply border border-neutral bg-base-300 rounded-lg py-5 px-4 transition-all duration-300;
+    }
+    .itembox-hover {
+        @apply hover:border-base-content;
+    }
+}

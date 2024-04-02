@@ -82,3 +82,8 @@ api.listen({ port: 3000 }, function (err, address) {
   }
   // Server is now listening on ${address}
 })
+
+export default async function handler(req, res) {
+  await api.ready()
+  api.server.emit('request', req, res)
+}

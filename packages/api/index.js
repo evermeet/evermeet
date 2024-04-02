@@ -1,8 +1,11 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { initDatabase } from './lib/db.js'
+import { parse } from 'yaml'
+import fs from 'node:fs'
 
-
+const config = parse(fs.readFileSync('../../config.yaml', 'utf-8'))
+const pkg = JSON.parse(fs.readFileSync('../../package.json', 'utf-8'))
 const db = await initDatabase()
 
 function eventView (event, opts = {}) {

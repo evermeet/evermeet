@@ -24,6 +24,13 @@
                 src={item.img} alt={item.name} />
         </div>
 
+        <div class="mt-6">
+            <div class="itembox text-neutral-content flex gap-3">
+                <div>You have manage access for this event.</div>
+                <a href="/manage/event/{item.id}"><button class="btn btn-secondary">Manage&nbsp;↗</button></a>
+            </div>
+        </div>
+
         {#if item.calendar}
             <div class="mt-6">
                 <div class="flex gap-4 items-center">

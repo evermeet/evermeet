@@ -23,4 +23,26 @@
     .itembox-hover {
         @apply hover:border-base-content;
     }
+
+    .xtabs {
+        @apply flex gap-4;
+    }
+
+    .xtabs > a {
+        @apply py-2 text-neutral-content hover:text-base-content;
+    }
+    .xtabs > a.active {
+        @apply border border-2 border-t-0 border-l-0 border-r-0 text-base-content;
+    }
+
+    .form > div {
+        @apply mb-4;
+    }
+    .form label {
+        @apply block font-semibold mb-2;
+    }
+
+    .settings hr {
+        @apply border-neutral mt-8;
+    }
 }

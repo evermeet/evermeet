@@ -30,7 +30,10 @@ export function prepareServer () {
 
     // Declare a routes
     api.get('/', function (request, reply) {
-        reply.send({ hello: 'world' })
+        reply.send({
+            app: pkg.name,
+            version: pkg.version
+        })
     })
 
     api.get('/query/:id', (req, reply) => {
@@ -53,6 +56,11 @@ export function prepareServer () {
         }
 
         return reply.code(404).send({ error: 'notfound' })
+    })
+
+    api.get('/event/:id', (req, reply) => {
+      const event = db.events.findOne({ id: req.params.id })
+      reply.send(eventView(event))
     })
 
     api.get('/events', (req, reply) => {

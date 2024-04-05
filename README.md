@@ -6,24 +6,15 @@ It's an open and libre replacement for centralized platforms like [Luma](https:/
 
 ## Features
 
-- ⚙️ Event Creation and Management
-- 🎨 Customizable Landing Pages
-- 🎟️ Ticket Sales and Registration
-- 📝 Call for Papers (CFP) Management
+- ⚙️ Event Management
+- 🎟️ Ticket Sales
 - 📅 Program Management
 - 🎤 Speaker Management
 - 👥 Attendee Management
-- 🌐 Social Sharing
 - 💳 Payment Processing
-- 🌍 Multilingual Support
-- ♿ Accessibility Features
-- 📊 Analytics and Reporting
-- 📧 Customizable Email Communication
-- 🛠️ Integration Capabilities
-- 🔄 Open-Source and Extensible
-- 🏠 Self-Hosted Option
-- 🌐 Federated Protocol
-- 💬 Community Engagement
+- 📊 Analytics
+- 📧 Email Communication
+- 🔄 Open-Source
 
 
 ## License

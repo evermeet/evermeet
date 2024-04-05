@@ -6,7 +6,7 @@ It's an open and libre replacement for centralized platforms like [Luma](https:/
 
 **The application is now in a state of heavy development and the expected release of the preview version is in June 2024, and the release of the production version (v1.0) in October 2024.**
 
-## Features
+## Planned Features
 
 - ⚙️ Event Management
 - 🎟️ Ticket Sales & Registration

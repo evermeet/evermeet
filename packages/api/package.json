@@ -1,6 +1,6 @@
 {
   "name": "@evermeet/api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.1",

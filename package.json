@@ -1,4 +1,8 @@
 {
     "name": "evermeet",
-    "version": "0.1.0-preview"
+    "version": "0.1.0-preview",
+    "workspaces": [
+        "./packages/api",
+        "./packages/web"
+    ]
 }

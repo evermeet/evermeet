@@ -111,9 +111,9 @@ export function makeRoutes(app, api) {
     })
 
     app.get('/api/me', async (req, reply) => {
-        const sessionId = req.headers['deluma-session-id'];
+        const sessionId = req.headers['evermeet-session-id'];
         if (!sessionId) {
-            return reply.code(401).send({ error: 'no sessionId ("deluma-session-id" header)'})
+            return reply.code(401).send({ error: 'no sessionId ("evermeet-session-id" header)'})
         }
         const session = await api.cols.sessions.findOne({ selector: { id: sessionId }}).exec()
         if (!session) {

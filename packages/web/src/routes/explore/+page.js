@@ -1,6 +1,6 @@
 
 import { apiCall } from '../../lib/api.js';
 
-export function load({ params, fetch }) {
+export async function load({ params, fetch, parent }) {
 	return apiCall(fetch, 'explore');
 }

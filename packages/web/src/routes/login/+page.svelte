@@ -35,7 +35,7 @@
             return false;
         }
 
-        Cookies.set('deluma-session-id', resp.sessionId, { expires: 1000, secure: true, sameSite: 'Lax' })
+        Cookies.set('evermeet-session-id', resp.sessionId, { expires: 1000, secure: true, sameSite: 'Lax' })
         user.set(resp.user)
         goto('/events');
     }

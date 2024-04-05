@@ -10,7 +10,7 @@ import fs from 'node:fs'
 export async function initDatabase() {
 
     const encryptedStorage = wrappedKeyEncryptionCryptoJsStorage({
-        name: 'deluma-test',
+        name: 'evermeet-test',
         storage: getRxStorageMongoDB({
             /**
              * MongoDB connection string
@@ -21,7 +21,7 @@ export async function initDatabase() {
     })
 
     const db = await createRxDatabase({
-        name: 'deluma-test',
+        name: 'evermeet-test',
         storage: encryptedStorage,
         password: 'yeibae8ceX4japhukuyaegeiZ8pha6uR'
     });

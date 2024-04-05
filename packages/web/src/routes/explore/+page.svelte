@@ -1,6 +1,7 @@
 <script>
     import EventBox from '../../components/EventBox.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
+    import { config } from '$lib/config';
 
     export let data;
 
@@ -10,6 +11,10 @@
     ]
 
 </script>
+
+<svelte:head>
+    <title>Explore | {config.sitename || config.domain}</title> 
+</svelte:head>
 
 <div class="page-wide">
     <h1 class="text-3xl font-semibold">Explore</h1>

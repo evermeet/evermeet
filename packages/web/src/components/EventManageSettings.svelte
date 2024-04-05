@@ -17,15 +17,15 @@
     const syncMethods = [
         {
             id: "luma-r2l-v1:sync",
-            name: "Lu.ma → deluma"
+            name: "Lu.ma → evermeet"
         },
         {
             id: 'meetup-r2l-v1:sync',
-            name: 'Meetup.com → deluma'
+            name: 'Meetup.com → evermeet'
         },
         {
             id: 'pretix-r2l-v1:sync',
-            name: 'Pretix → deluma'
+            name: 'Pretix → evermeet'
         }
     ]
 

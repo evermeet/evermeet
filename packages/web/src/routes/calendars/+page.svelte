@@ -1,12 +1,17 @@
 <script>
     import EventDetail from '../../components/EventDetail.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
+    import { config } from '$lib/config';
 
     const calendars = [
         {slug: "tree", name: "tree", subs: 5, img: 'https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3', personal: true},
         {slug: "web3privacy", name: "Web3Privacy Now Events", subs: 256, img: 'https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/97/99ef3056-7787-4e83-9247-fca4d4fa948d' },
     ]
 </script>
+
+<svelte:head>
+    <title>Calendars | {config.sitename || config.domain}</title> 
+</svelte:head>
 
 <div class="page-wide">
     <h1 class="text-3xl font-semibold">Calendars</h1>

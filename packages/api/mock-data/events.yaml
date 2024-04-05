@@ -59,6 +59,9 @@
     **What is** [**Web3privacy Now**](http://web3privacy.info)
 
     Leading privacy x web3 think-tank powered by Ethereum & Zcash foundation grants, supported in 2023 by 50 partners from Nym to Secret Network, responsible for the biggest privacy-enhancing DB at Git & accelerating privacy to support lives of 100M people.
+  sync:
+    - method: luma-r2l-v1:sync
+      url: https://lu.ma/w3pn-meetup-ams1
 
 - slug: w3pn-m24ber
   name: W3PN Meetup @ ETHBerlin 4
@@ -94,6 +97,7 @@
     But there is hope: The soils to grow new ideas have never been more nutritious. It has never been more urgent to double down on new revolutionary concepts and ideas. It is high time to change the world.
 
     For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
+  web: https://ethberlin.org/
 
 - slug: w3pn-s24prg
   name: Web3Privacy Now Summit @ ETHPrague 2024

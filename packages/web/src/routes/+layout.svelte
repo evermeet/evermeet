@@ -1,22 +1,70 @@
 <script>
     import "../app.css";
-    import { Ticket, Calendar, Sparkles, Fire } from 'svelte-heros-v2';
+    import { Ticket, Calendar, Sparkles, Fire, WrenchScrewdriver } from 'svelte-heros-v2';
+    import { browser } from '$app/environment';
     import { config, pkg } from '../lib/config.js';
+    import { page } from '$app/stores';
+    import { user } from '$lib/stores';
+
+    export let data;
+
+    if (data.user && browser) {
+        user.set(data.user)
+    }
+
+    const menu = [
+        {
+            title: 'Events',
+            url: '/events',
+            ico: Ticket
+        },
+        {
+            title: 'Calendars',
+            url: '/calendars',
+            ico: Calendar
+        },
+        {
+            title: 'Explore',
+            url: '/explore',
+            ico: Sparkles
+        },
+        {
+            title: 'Admin',
+            url: '/admin',
+            ico: WrenchScrewdriver
+        }
+    ]
+    
 </script>
 
 <div class="navbar px-6">
     <div class="navbar-start">
-        <div class="font-mono flex gap-1.5 text-sm items-center"><Fire /> {config.sitename || config.domain}</div>
+        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center"><Fire /> {config.sitename || config.domain}</a></div>
     </div>
     <div class="navbar-center max-w-[80rem] w-auto">
-        <ul class="menu menu-horizontal w-full">
-            <li><a href="/events"><Ticket /> Events</a></li>
-            <li><a href="/calendars"><Calendar /> Calendars</a></li>
-            <li><a href="/explore"><Sparkles /> Explore</a></li>
-        </ul>
+        {#if $user}
+            <ul class="menu menu-horizontal w-full gap-1">
+                {#each menu as mi}
+                    <li><a href={mi.url} class="{$page.url.pathname.match(new RegExp("^"+mi.url)) ? 'active' : ''}"><svelte:component this={mi.ico} /> {mi.title}</a></li>
+                {/each}
+            </ul>
+        {/if}
     </div>
     <div class="navbar-end">
-        <button class="btn btn-sm">Login</button>
+        {#if $user}
+            <div class="dropdown dropdown-end dropdown-hover">
+                <div tabindex="0" class="w-8 h-8">
+                    <img src={$user.img} class="w-8 h-8 rounded-full aspect-square border border-4 border-transparent hover:border-neutral cursor-pointer" />
+                </div>
+                <ul tabindex="0" class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+                    <li><a href="/me">My profile</a></li>
+                    <li><a href="/me/settings">Settings</a></li>
+                    <li><a href="/logout">Sign Out</a></li>
+                </ul>
+            </div>
+        {:else}
+            <a href="/login?next={encodeURIComponent($page.url.pathname)}"><button class="btn btn-sm">Login</button></a>
+        {/if}
     </div>
 </div>
 

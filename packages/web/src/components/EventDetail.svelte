@@ -4,6 +4,7 @@
     import countries from 'i18n-iso-countries';
     import enLocale from 'i18n-iso-countries/langs/en.json';
     import { parse, parseInline } from 'marked';
+    import { user } from '$lib/stores';
 
     countries.registerLocale(enLocale);
 
@@ -24,12 +25,14 @@
                 src={item.img} alt={item.name} />
         </div>
 
-        <div class="mt-6">
-            <div class="itembox text-neutral-content flex gap-3">
-                <div>You have manage access for this event.</div>
-                <a href="/manage/event/{item.id}"><button class="btn btn-secondary">Manage&nbsp;↗</button></a>
+        {#if $user}
+            <div class="mt-6">
+                <div class="itembox text-neutral-content flex gap-3">
+                    <div>You have manage access for this event.</div>
+                    <a href="/manage/event/{item.id}"><button class="btn btn-secondary">Manage&nbsp;↗</button></a>
+                </div>
             </div>
-        </div>
+        {/if}
 
         {#if item.calendar}
             <div class="mt-6">

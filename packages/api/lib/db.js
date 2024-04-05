@@ -1,34 +1,59 @@
-import { createFilesystemAdapter, Collection } from 'signaldb'
+import { createRxDatabase, addRxPlugin } from 'rxdb';
+import { getRxStorageMongoDB } from 'rxdb/plugins/storage-mongodb';
+import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
+//import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
+//addRxPlugin(RxDBDevModePlugin);
+
 import { parse } from 'yaml'
 import fs from 'node:fs'
 
+export async function initDatabase() {
+
+    const encryptedStorage = wrappedKeyEncryptionCryptoJsStorage({
+        name: 'deluma-test',
+        storage: getRxStorageMongoDB({
+            /**
+             * MongoDB connection string
+             * @link https://www.mongodb.com/docs/manual/reference/connection-string/
+             */
+            connection: 'mongodb://localhost:27017'
+        })
+    })
+
+    const db = await createRxDatabase({
+        name: 'deluma-test',
+        storage: encryptedStorage,
+        password: 'yeibae8ceX4japhukuyaegeiZ8pha6uR'
+    });
+
+    return db
+}
 
 async function loadMock(fn) {
     const res = fs.readFileSync('./mock-data/' + fn + '.yaml', 'utf-8')
     return parse(res)
 }
 
-export async function initDatabase() {
-
-    const calendars = new Collection({
-        //persistence: createFilesystemAdapter('./data/calendars.json'),
-    })
-    const events = new Collection({
-        //persistence: createFilesystemAdapter('./data/events.json'),
-    })
-
+function ObjectId () {
+    var timestamp = (new Date().getTime() / 1000 | 0).toString(16);
+    return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
+        return (Math.random() * 16 | 0).toString(16);
+    }).toLowerCase();
+};
+  
+export async function loadMockData (api) {
     // setup mock data
-    const mockCalendars = await loadMock('calendars')
-    const mockEvents = await loadMock('events')
-    //console.log({ mockCalendars, mockEvents })
+    const db = api.db
 
-    mockCalendars.map((x) => calendars.insert(x))
-    mockEvents.map((x) => events.insert(x))
-    
-    console.log('database ready')
+    const cols = [
+        'events',
+        'calendars',
+        'users'
+    ]
 
-    return {
-        calendars,
-        events
-    };
+    for (const c of cols) {
+        await api.cols[c].find({}).remove()
+        const items = await loadMock(c)
+        items.map(async (x) => await api.cols[c].insert(Object.assign({ id: ObjectId() }, x)))
+    }
 }

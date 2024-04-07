@@ -27,11 +27,11 @@
             url: '/explore',
             ico: Sparkles
         },
-        {
+        /*{
             title: 'Admin',
             url: '/admin',
             ico: WrenchScrewdriver
-        }
+        }*/
     ]
     
 </script>
@@ -60,7 +60,7 @@
                     <CurrentTime />
                 </li>
                 {#if $user}
-                    <li><a href="/new">Create Event</a></li>
+                    <li><a href="/create">Create Event</a></li>
                 {:else if $page.url.pathname != '/explore'}
                     <li><a href="/explore">Explore events ↗</a></li>
                 {/if}
@@ -79,12 +79,13 @@
                 </div>
                 <ul tabindex="0" class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box w-44">
                     <li><a href="/me">My profile</a></li>
+                    <li><a href="/admin">Administration</a></li>
                     <li><a href="/me/settings">Settings</a></li>
                     <li><a href="/logout">Sign Out</a></li>
                 </ul>
             </div>
         {:else}
-            <a href="/login?next={encodeURIComponent($page.url.pathname)}"><button class="btn btn-sm btn-accent">Login</button></a>
+            <a class="btn btn-sm btn-accent" href="/login?next={encodeURIComponent($page.url.pathname)}">Login</a>
         {/if}
     </div>
 </div>

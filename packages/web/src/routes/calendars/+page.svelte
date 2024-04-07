@@ -14,11 +14,8 @@
 </svelte:head>
 
 <div class="page-wide">
-    <h1 class="text-3xl font-semibold">Calendars</h1>
-
-    <div class="mt-6">
-        <h2 class="text-xl font-semibold">My Calendars</h2>
-    </div>
+    <h1 class="heading1">Calendars</h1>
+    <h2 class="heading2">My Calendars</h2>
 
     <div class="mt-6 grid grid-cols-3 gap-3">
         {#each calendars as c}
@@ -26,12 +23,10 @@
         {/each}
     </div>
 
-    <div class="mt-8 w-full h-1 border border-neutral border-l-0 border-r-0 border-b-0">  
+    <div class="mt-8 mb-6 w-full h-1 border border-neutral border-l-0 border-r-0 border-b-0">  
     </div>
 
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold">Subscribed Calendars</h2>
-    </div>
+    <h2 class="heading2">Subscribed Calendars</h2>
 
     <div class="mt-6">
         {#each calendars as c}

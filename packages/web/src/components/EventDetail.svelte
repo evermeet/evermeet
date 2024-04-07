@@ -30,7 +30,7 @@
             <div class="mt-6">
                 <div class="itembox text-neutral-content flex gap-3">
                     <div>You have manage access for this event.</div>
-                    <a href="/manage/event/{item.id}"><button class="btn btn-secondary">Manage&nbsp;↗</button></a>
+                    <a class="btn btn-secondary" href="/manage/event/{item.id}">Manage&nbsp;↗</a>
                 </div>
             </div>
         {/if}

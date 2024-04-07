@@ -18,10 +18,10 @@
     }
 
     .itembox {
-        @apply border border-neutral bg-base-300 rounded-lg py-5 px-4 transition-all duration-300;
+        @apply border border-neutral/50 bg-base-300 rounded-lg py-5 px-4 transition-all duration-300;
     }
     .itembox-hover {
-        @apply hover:border-base-content;
+        @apply hover:border-base-content/25;
     }
 
     .xtabs {
@@ -44,5 +44,25 @@
 
     .settings hr {
         @apply border-neutral mt-8;
+    }
+
+    .heading1 {
+        @apply text-3xl font-semibold mb-6;
+    }
+    .heading2 {
+        @apply text-xl font-semibold mb-3;
+    }
+
+    .popup-menu {
+        @apply z-[1] shadow bg-base-300 rounded-lg py-1.5;
+    }
+    .popup-menu li {
+        @apply rounded-lg mx-1.5 data-[highlighted]:bg-base-content/10;
+    }
+    .popup-menu li a {
+        @apply px-[1rem] py-[0.5rem] cursor-pointer flex items-center;
+    }
+    .popup-menu li .item {
+        @apply px-[1rem] py-[0.5rem] cursor-pointer;
     }
 }

@@ -13,8 +13,6 @@ export async function load({ fetch, cookies }) {
         user = resp.user;
     }
 
-    console.log(sessionId)
-
     return {
         sessionId,
         user,

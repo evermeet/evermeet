@@ -85,6 +85,11 @@ export function makeRoutes(app, api) {
         } 
         reply.send(out)
     })
+    app.get('/api/admin/collection/:collectionName', async (req, reply) => {
+        const items = await api.cols[req.params.collectionName].find({}).exec()
+        reply.send({ items })
+    })
+
 
     app.post('/api/login', async (req, reply) => {
         const { email } = req.body

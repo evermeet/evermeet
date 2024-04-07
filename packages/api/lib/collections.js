@@ -20,11 +20,13 @@ export function makeCollections (api) {
                 ]
             },
             methods: {
-                async view () {
+                async view (opts = {}) {
                     const json = this.toJSON()
                     if (json.calendarId) {
                         const calendar = await api.cols.calendars.findOne({ selector: { id: json.calendarId }}).exec()
-                        json.calendar = await calendar.view()
+                        if (calendar && opts.calendar !== false) {
+                            json.calendar = await calendar.view()
+                        }
                     }
                     return json;
                 },
@@ -49,8 +51,13 @@ export function makeCollections (api) {
                 }
             },
             methods: {
-                async view () {
+                async view (opts = {}) {
                     const json = this.toJSON()
+                    json.events = []
+                    const events = await api.cols.events.find({ selector: { calendarId: json.id }}).exec();
+                    for (const e of events) {
+                        json.events.push(await e.view({ calendar: false }))
+                    }
                     return json;
                 }
             },

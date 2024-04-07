@@ -17,9 +17,9 @@
 </svelte:head>
 
 <div class="page-wide">
-    <h1 class="text-3xl font-semibold">Explore</h1>
+    <h1 class="heading1">Explore</h1>
 
-    <h2 class="text-xl font-semibold mt-6">Featured Calendars</h2>
+    <h2 class="heading2">Featured Calendars</h2>
 
     <div class="mt-6 grid grid-cols-3 gap-3">
         {#each data.calendars as item}

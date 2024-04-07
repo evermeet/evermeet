@@ -27,7 +27,7 @@
 
     formData.subscribe((current) => {
 
-        console.log(current, orig)
+        //console.log(current, orig)
         if (JSON.stringify(current) !== orig) {
             isChanged = true
         }

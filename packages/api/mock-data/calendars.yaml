@@ -99,9 +99,17 @@
   description: |
     Otevřená kryptoměnová konference. Propojujeme komunity. 💚💜
 
-- slug: monerokon
+- id: aiTah6Ax8ayihe
+  slug: monerokon
   name: MoneroKon
   subs: 133
   img: https://avatars.githubusercontent.com/u/107953504?s=200&v=4
   description: |
     Annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems.
+
+- slug: holkyvkryptu
+  name: Holky v kryptu
+  subs: 0
+  img: https://pbs.twimg.com/profile_images/1354399247312027651/RvZdIMHe_400x400.jpg
+  description: |
+    Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague

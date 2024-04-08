@@ -6,6 +6,8 @@ It's an open and libre replacement for centralized platforms like [Luma](https:/
 
 **The application is now in a state of heavy development and the expected release of the preview version is in June 2024, and the release of the production version (v1.0) in October 2024.**
 
+* Matrix channel: [#evermeet:matrix.org](https://matrix.to/#/%23evermeet:matrix.org)
+
 ## Planned Features
 
 - ⚙️ Event Management
@@ -18,6 +20,10 @@ It's an open and libre replacement for centralized platforms like [Luma](https:/
 - 📧 Email Communication
 - 🔄 Open-Source
 
+
+## Maintainers
+
+* [@burningtree](https://github.com/burningtree)
 
 ## License
 

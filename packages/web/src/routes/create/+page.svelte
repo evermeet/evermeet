@@ -51,18 +51,18 @@
                 <div class="px-6 py-1 flex gap-4">
                     <ul class="timeline timeline-vertical timeline-snap-icon timeline-compact opacity-75">
                         <li class="">
-                        <div class="timeline-middle pt-1 text-neutral-content">
-                            <div class="w-2.5 h-2.5">
-                            <svg height="100%" width="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="45" cx="50" cy="50" fill="currentColor" /></svg>
+                            <div class="timeline-middle pt-1 text-neutral-content">
+                                <div class="w-2.5 h-2.5">
+                                    <svg height="100%" width="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="45" cx="50" cy="50" fill="currentColor" /></svg>
+                                </div>
                             </div>
-                        </div>
-                        <div class="timeline-end ml-3 mb-2">
-                            <div class="flex">
-                                <div class="w-16 text-neutral-content">Start</div>
-                                <DateSelector bind={dateStart} />
+                            <div class="timeline-end ml-3 mb-2">
+                                <div class="flex">
+                                    <div class="w-16 text-neutral-content">Start</div>
+                                    <DateSelector bind={dateStart} />
+                                </div>
                             </div>
-                        </div>
-                        <hr class="bg-neutral-content/25 mt-1"/>
+                            <hr class="bg-neutral-content/25 mt-1"/>
                         </li>
                         <li>
                             <hr class="bg-neutral-content/25 mt-1"/>

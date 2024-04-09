@@ -1,7 +1,7 @@
 <script>
     import EventBox from '../../components/EventBox.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
-    import { config } from '$lib/config';
+    import { config } from '$lib/stores';
 
     export let data;
 
@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-    <title>Explore | {config.sitename || config.domain}</title> 
+    <title>Explore | {$config.sitename || $config.domain}</title> 
 </svelte:head>
 
 <div class="page-wide">

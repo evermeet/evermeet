@@ -2,10 +2,9 @@
     import { MapPin } from 'svelte-heros-v2';
     import { format } from 'date-fns';
     import countries from 'i18n-iso-countries';
-    import { config } from '$lib/config';
     import enLocale from 'i18n-iso-countries/langs/en.json';
     import { parse, parseInline } from 'marked';
-    import { user } from '$lib/stores';
+    import { user, config } from '$lib/stores';
 
     countries.registerLocale(enLocale);
 
@@ -15,7 +14,7 @@
 </script>
 
 <svelte:head>
-    <title>{item.name} | {config.sitename || config.domain}</title> 
+    <title>{item.name} | {$config.sitename || $config.domain}</title> 
 </svelte:head>
 
 <div class="flex gap-8">

@@ -1,7 +1,7 @@
 <script>
     import EventDetail from '../../components/EventDetail.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
-    import { config } from '$lib/config';
+    import { config } from '$lib/stores';
 
     const calendars = [
         {slug: "tree", name: "tree", subs: 5, img: 'https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3', personal: true},
@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-    <title>Calendars | {config.sitename || config.domain}</title> 
+    <title>Calendars | {$config.sitename || $config.domain}</title> 
 </svelte:head>
 
 <div class="page-wide">

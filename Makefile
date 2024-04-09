@@ -7,7 +7,7 @@ build:
 	pnpm run -r build
 
 docker:
-	sudo docker build -t treecz/deluma . --progress=plain
+	sudo docker build --platform linux/amd64 -t treecz/evermeet . --progress=plain
 
 run-docker:
-	sudo docker run -p 3030:3000 treecz/deluma
+	sudo docker run -p 3030:3000 treecz/evermeet

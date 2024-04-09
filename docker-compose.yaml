@@ -1,17 +1,17 @@
 services:
   evermeet:
-    build: .
-    ports:
-      - 3030:3000
-      - 3031:3001
+    image: f6527d3d0fcaed9ef411ed6999de9b6efcc2594f8995ab54918457696758af4f
     volumes:
       - ./config-docker.yaml:/home/node/app/config.yaml
-  ferretdb:
-    image: ghcr.io/ferretdb/ferretdb
-    restart: on-failure
-    ports:
-      - 27017
-    environment:
-      - FERRETDB_HANDLER=sqlite
+  mongo:
+    image: mongo
+    restart: always
     volumes:
-      - ./state:/state
+      - ./data:/data/db
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - 3005:3005
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro

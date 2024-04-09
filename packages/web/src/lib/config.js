@@ -1,6 +1,15 @@
 
-import Config from '../../../../config.yaml';
 import Package from '../../../../package.json';
+import { apiCall } from './api.js';
 
-export const config = Config;
+let loadedConfig;
+
+// load configuration
+export async function loadConfig () {
+    if (!loadedConfig) {
+        loadedConfig = await apiCall(fetch, 'config');
+    }
+    return loadedConfig
+}
+
 export const pkg = Package;

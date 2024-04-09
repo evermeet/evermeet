@@ -11,6 +11,14 @@ export function makeRoutes(app, api) {
         })
     })
 
+    app.get('/api/config', async (req, reply) => {
+        
+        reply.send({
+            domain: api.config.domain,
+            sitename: api.config.sitename
+        })
+    })
+
     app.get('/api/query/:id', async (req, reply) => {
         const { id } = req.params;
 

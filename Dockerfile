@@ -14,7 +14,6 @@ COPY package.json pnpm-*.yaml ecosystem.config.js Makefile config.yaml ./
 COPY packages ./packages
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store make install
 
-
 RUN ls -lah .
 RUN make build
 

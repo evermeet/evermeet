@@ -1,7 +1,7 @@
 <script>
     import { writable } from 'svelte/store';
     import { parse } from 'marked';
-    import { config } from '../lib/config.js';
+    import { config } from '$lib/stores';
 
     import Form from './Form.svelte';
 
@@ -68,7 +68,7 @@
     <div class="settings">
         <h3 id="basic" class="text-2xl mb-8 font-semibold">Basic Info</h3>
 
-        <Form {item} {config} schema={{
+        <Form {item} config={$config} schema={{
             type: 'object',
             properties: {
                 name: {

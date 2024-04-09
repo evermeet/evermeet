@@ -2,14 +2,15 @@
     import "../app.css";
     import { Ticket, Calendar, Sparkles, Fire, WrenchScrewdriver, Bell, MagnifyingGlass } from 'svelte-heros-v2';
     import { browser } from '$app/environment';
-    import { config, pkg } from '../lib/config.js';
+    import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
-    import { user } from '$lib/stores';
+    import { user, config } from '$lib/stores';
 
     import CurrentTime from "../components/CurrentTime.svelte";
 
     export let data;
     user.set(data.user);
+    config.set(data.config);
 
     const menu = [
         {
@@ -37,12 +38,12 @@
 </script>
 
 <svelte:head>
-    <title>{config.sitename || config.domain}</title> 
+    <title>{$config.sitename || $config.domain}</title> 
 </svelte:head>
 
 <div class="navbar px-6">
     <div class="navbar-start">
-        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center"><Fire /> {config.sitename || config.domain}</a></div>
+        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center"><Fire /> {$config.sitename || $config.domain}</a></div>
     </div>
     <div class="navbar-center max-w-[80rem] w-auto">
         {#if $user}

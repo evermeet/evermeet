@@ -1,4 +1,5 @@
 import { apiCall } from '$lib/api.js';
+import { loadConfig } from '$lib/config.js';
 
 export async function load({ fetch, cookies }) {
 
@@ -13,8 +14,11 @@ export async function load({ fetch, cookies }) {
         user = resp.user;
     }
 
+    const config = await loadConfig();
+
     return {
         sessionId,
         user,
+        config
     }
 }

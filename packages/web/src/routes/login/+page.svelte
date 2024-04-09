@@ -49,7 +49,7 @@
 
     <form class="mt-6" on:submit|preventDefault={submitLogin}>
         <div>
-            <label for="email" class="">Email</label>
+            <label for="email" class="">Handle / DID / Email</label>
         </div>
         <div class="mt-2">
             <input id="email" type="text" placeholder="you@example.org" class="input input-bordered {isProcessing ? 'input-disabled' : ''} w-full" bind:value={$email} />
@@ -57,7 +57,7 @@
         <div class="mt-4">
             <button class="btn btn-primary {!validEmail || isProcessing ? 'btn-disabled' : ''} w-full">
                 {#if !isProcessing}
-                    Continue with email
+                    Login
                 {:else}
                     <span class="loading loading-infinity loading-lg"></span>
                 {/if}

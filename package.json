@@ -3,6 +3,7 @@
     "version": "0.1.0-preview",
     "workspaces": [
         "./packages/api",
-        "./packages/web"
+        "./packages/web",
+        "./packages/did-plc-lib"
     ]
 }

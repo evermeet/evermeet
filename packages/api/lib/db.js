@@ -7,24 +7,26 @@ import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-cry
 import { parse } from 'yaml'
 import fs from 'node:fs'
 
-export async function initDatabase() {
+export async function initDatabase(api) {
 
     const encryptedStorage = wrappedKeyEncryptionCryptoJsStorage({
-        name: 'evermeet-test',
+        name: api.config.db.name,
         storage: getRxStorageMongoDB({
             /**
              * MongoDB connection string
              * @link https://www.mongodb.com/docs/manual/reference/connection-string/
              */
-            connection: 'mongodb://localhost:27017'
+            connection: api.config.db.connection
         })
     })
 
     const db = await createRxDatabase({
-        name: 'evermeet-test',
+        name: api.config.db.name,
         storage: encryptedStorage,
-        password: 'yeibae8ceX4japhukuyaegeiZ8pha6uR'
+        password: api.config.db.password
     });
+
+    console.log('database initialized')
 
     return db
 }

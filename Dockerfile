@@ -1,35 +1,24 @@
 
 FROM node:18-alpine
 
-#RUN mkdir -p /home/node/app/api/node_modules && mkdir -p /home/node/app/web/node_modules && chown -R node:node /home/node/app
-RUN npm install pm2 -g
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
-#USER node
-WORKDIR /home/node/app
-COPY config.yaml package.json ./
-
-# INSTALL API
-
-WORKDIR /home/node/app/packages/api
-COPY packages/api/package*.json ./
-RUN npm install
-COPY packages/api/ ./
-RUN ls -lah
-
-# INSTALL WEB
-
-WORKDIR /home/node/app/packages/web
-COPY packages/web/package*.json ./
-RUN npm install
-COPY packages/web/ ./
-RUN ls -lah
-RUN npm run build
+RUN apk add make
+RUN npm install pnpm -g
+RUN pnpm install pm2 -g
 
 WORKDIR /home/node/app
-COPY ecosystem.config.js ./
+COPY package.json pnpm-*.yaml ecosystem.config.js Makefile config.yaml ./
+
+COPY packages ./packages
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store make install
+
+
+RUN ls -lah .
+RUN make build
 
 EXPOSE 3000
 EXPOSE 3001
 
-#CMD [ "node", "app.js" ]
 CMD [ "pm2-runtime", "ecosystem.config.js" ]

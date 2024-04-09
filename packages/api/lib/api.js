@@ -1,6 +1,6 @@
 
-import { initDatabase, loadMockData } from '../lib/db.js'
-import { parse } from 'yaml'
+import { initDatabase, loadMockData } from './db.js'
+import { parse, stringify } from 'yaml'
 import fs from 'node:fs'
 
 import { makeRoutes } from './routes.js';
@@ -12,6 +12,8 @@ export class API {
     this.models = {}
     this.config = parse(fs.readFileSync('../../config.yaml', 'utf-8'))
     this.pkg = JSON.parse(fs.readFileSync('../../package.json', 'utf-8'))
+
+    console.log(stringify(this.config))
   }
 
   async init () {

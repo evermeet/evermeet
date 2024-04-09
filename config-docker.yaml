@@ -1,5 +1,5 @@
-domain: utxo.events
+domain: test.events
 db:
   name: evermeet-test
-  connection: 'mongodb://localhost:27017'
+  connection: 'mongodb://ferretdb:27017'
   password: yeibae8ceX4japhukuyaegeiZ8pha6uR

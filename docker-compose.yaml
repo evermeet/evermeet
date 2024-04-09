@@ -1,0 +1,17 @@
+services:
+  evermeet:
+    build: .
+    ports:
+      - 3030:3000
+      - 3031:3001
+    volumes:
+      - ./config-docker.yaml:/home/node/app/config.yaml
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb
+    restart: on-failure
+    ports:
+      - 27017
+    environment:
+      - FERRETDB_HANDLER=sqlite
+    volumes:
+      - ./state:/state

@@ -1,11 +1,11 @@
 
 <script>
     import { UserPlus } from 'svelte-heros-v2';
-    import { config, pkg } from '../../lib/config.js';
+    import { pkg } from '../../lib/config.js';
     import { apiCall } from '../../lib/api.js';
     import { writable } from 'svelte/store';
     import { goto } from '$app/navigation';
-    import { user } from '$lib/stores';
+    import { user, config } from '$lib/stores';
     import Cookies from 'js-cookie';
 
     const email = writable('');
@@ -44,7 +44,7 @@
 
 <div class="w-[26rem] m-auto my-24 itembox p-6 shadow-xl">
     <UserPlus size="50" />
-    <div class="text-2xl mt-4">Welcome to <span class="font-semibold font-mono">{config.sitename || config.domain}</span>!</div>
+    <div class="text-2xl mt-4">Welcome to <span class="font-semibold font-mono">{$config.sitename || $config.domain}</span>!</div>
     <div class="mt-2 text-neutral-content">Please sign in or sign up below.</div>
 
     <form class="mt-6" on:submit|preventDefault={submitLogin}>

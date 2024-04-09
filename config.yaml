@@ -1,4 +1,4 @@
-domain: utxo.events
+domain: evermeet.local
 db:
   name: evermeet-test
   connection: 'mongodb://localhost:27017'

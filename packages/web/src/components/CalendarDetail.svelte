@@ -1,7 +1,14 @@
 <script>
     import EventList from './EventList.svelte';
     import { parse } from 'marked';
+    import { user } from '$lib/stores';
+    import { page } from '$app/stores';
+    import { calendarSubscribe, calendarUnsubscribe } from '$lib/actions';
+    
     export let item;
+
+    $: subscribed = $user?.subscribedCalendars.find(sc => sc.ref === item.id || sc.ref === item.slug)
+    $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
 </script>
 
 <svelte:head>
@@ -12,7 +19,7 @@
     <div class="page-extra-wide relative -z-10">
         <div class="">
             <img
-                class="lg:rounded-2xl w-full object-cover" 
+                class="lg:rounded-2xl w-full object-cover max-h-[308px]" 
                 src={item.backdropImg} />
         </div>
     </div>
@@ -25,12 +32,32 @@
                 class="{item.personal ? "rounded-full" : "rounded-lg"} w-24 h-24 {item.backdropImg ? 'border border-neutral border-4' : ''}"
                 src={item.img} />
         </div>
-        <div>
-            <button class="btn btn-accent btn">Manage</button>
-        </div>
+            {#if $user}
+                <div>
+                    {#if managed}
+                        <a href="/manage/calendar/{item.id}" class="btn btn-accent">Manage</a>
+                    {:else}
+                        {#if subscribed}
+                            <button class="btn btn-neutral" on:click={calendarUnsubscribe(item.id)}>Subscribed</button>
+                        {:else}
+                            <button class="btn btn-secondary" on:click={calendarSubscribe(item.id)}>Subscribe</button>
+                        {/if}
+                    {/if}
+                </div>
+            {:else}
+                <div>
+                    <a href="/login?next={encodeURIComponent($page.url)}" class="btn btn-secondary">Subscribe</a>
+                </div>
+            {/if}
+
     </div>
     <h1 class="text-4xl font-medium {item.backdropImg ? '' : 'mt-6'}">{item.name}</h1>
-    <div class="mt-3 text-neutral-content">{@html parse(item.description)}</div>
+    {#if item._remote}
+        <div class="badge badge-neutral font-mono text-xs my-2">{item._remote}</div>
+    {/if}
+    {#if item.description}
+        <div class="mt-3 text-neutral-content">{@html parse(item.description)}</div>
+    {/if}
 </div>
 
 <div class="h-1 border border-neutral border-b-0 border-l-0 border-r-0 mt-8">

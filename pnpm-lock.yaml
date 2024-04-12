@@ -25,6 +25,9 @@ importers:
       fastify:
         specifier: ^4.26.2
         version: 4.26.2
+      migration-schema:
+        specifier: link:rxdb/plugins/migration-schema
+        version: link:rxdb/plugins/migration-schema
       rxdb:
         specifier: ^15.16.0
         version: 15.17.0(rxjs@7.8.1)
@@ -132,6 +135,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      flag-icons:
+        specifier: ^7.2.1
+        version: 7.2.1
       postcss:
         specifier: ^8.4.38
         version: 8.4.38
@@ -2657,6 +2663,10 @@ packages:
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
     dev: false
+
+  /flag-icons@7.2.1:
+    resolution: {integrity: sha512-EaU4XZmFt1BOilz9nMmJKjma5pOaNjzL7somOhadrrilollh4xj6aaXI2M1sd00VUfVWN0E25Q6xaW3SNt0k/Q==}
+    dev: true
 
   /flat-cache@4.0.1:
     resolution: {integrity: sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw==}

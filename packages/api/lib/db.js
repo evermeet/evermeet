@@ -1,23 +1,30 @@
 import { createRxDatabase, addRxPlugin } from 'rxdb';
 import { getRxStorageMongoDB } from 'rxdb/plugins/storage-mongodb';
 import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
-//import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
-//addRxPlugin(RxDBDevModePlugin);
+import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
+import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 
 import { parse } from 'yaml'
 import fs from 'node:fs'
 
 export async function initDatabase(api) {
 
+    addRxPlugin(RxDBMigrationPlugin);
+    addRxPlugin(RxDBDevModePlugin);
+    addRxPlugin(RxDBUpdatePlugin);
+
+    const mongoStorage = getRxStorageMongoDB({
+        /**
+         * MongoDB connection string
+         * @link https://www.mongodb.com/docs/manual/reference/connection-string/
+         */
+        connection: api.config.db.connection
+    })
+
     const encryptedStorage = wrappedKeyEncryptionCryptoJsStorage({
         name: api.config.db.name,
-        storage: getRxStorageMongoDB({
-            /**
-             * MongoDB connection string
-             * @link https://www.mongodb.com/docs/manual/reference/connection-string/
-             */
-            connection: api.config.db.connection
-        })
+        storage: mongoStorage
     })
 
     const db = await createRxDatabase({
@@ -25,6 +32,10 @@ export async function initDatabase(api) {
         storage: encryptedStorage,
         password: api.config.db.password
     });
+
+    //console.log(mongoStorage, db)
+    //await db.waitForLeadership()
+    //await (new Promise((resolve) => setTimeout(resolve, 5000)))
 
     console.log('database initialized')
 

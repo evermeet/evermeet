@@ -1,6 +1,9 @@
-- slug: tree
+- id: he5Chae4chae
+  slug: tree
   name: tree
   personal: true
+  managers:
+    - ref: did:plc:524tuhdhh3m7li5gycdn6boe
   subs: 5
   img: >-
     https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
@@ -16,8 +19,11 @@
   description: >-
     Research project & community about privacy in Web3 industry
     (web3privacy.info) All events: https://web3privacy.info/events
+  managers:
+    - ref: did:plc:524tuhdhh3m7li5gycdn6boe
 
-- slug: cryptocanal
+- id: die6loowahGe
+  slug: cryptocanal
   name: Crypto Canal
   subs: 100
   img: >-
@@ -34,14 +40,14 @@
     Onchain Brno 2024 (#OB24) is a federation of events around cryptocurrencies
     happening at the end of October 2024.
 
-- slug: gweicz
-  name: Gwei.cz Events
-  subs: 55
-  img: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/hu/d14312ae-da1e-4711-9821-1189e317f50f
-  description: >-
-    Komunita příznivců programovatelných peněz 🇨🇿🇸🇰 #Ethereum 🦇🔊 #DeFi
-    #web3 Community https://gwei.cz
+#- slug: gweicz
+#  name: Gwei.cz Events
+#  subs: 55
+#  img: >-
+#    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/hu/d14312ae-da1e-4711-9821-1189e317f50f
+#  description: >-
+#    Komunita příznivců programovatelných peněz 🇨🇿🇸🇰 #Ethereum 🦇🔊 #DeFi
+#    #web3 Community https://gwei.cz
 
 - slug: pbw23
   name: Prague Blockchain Week 2023
@@ -70,13 +76,13 @@
   description: >-
     Jsme neformální síť lokálních bitcoinových komunit. Propojujeme bitcoinery a pomáháme s adopcí bitcoinu.
 
-- id: b52cab85781d88
-  slug: dod
-  name: Department of Decentralization (DoD)
-  subs: 200
-  img: https://dod.ngo/wolpy.svg
-  description: |
-    Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
+#- id: b52cab85781d88
+#  slug: dod
+#  name: Department of Decentralization (DoD)
+#  subs: 200
+#  img: https://dod.ngo/wolpy.svg
+#  description: |
+#    Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
 
 - id: df5744efdd3368
   slug: ethbrno

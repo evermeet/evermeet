@@ -3,3 +3,8 @@ db:
   name: evermeet-test
   connection: 'mongodb://localhost:27017'
   password: yeibae8ceX4japhukuyaegeiZ8pha6uR
+options:
+  featuredCalendars:
+    - web3privacy
+    - dod:dev.evermeet.app
+    - gweicz:dev.evermeet.app

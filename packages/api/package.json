@@ -16,6 +16,7 @@
     "@fastify/http-proxy": "^9.5.0",
     "@fastify/middie": "^8.3.0",
     "fastify": "^4.26.2",
+    "migration-schema": "link:rxdb/plugins/migration-schema",
     "rxdb": "^15.16.0",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.1",

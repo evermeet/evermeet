@@ -12,7 +12,10 @@ await api.init()
 const app = Fastify({ logger: true })
 
 await app.register(middie)
-await app.register(cors)
+await app.register(cors, {
+  origin: 'http://localhost:5173',
+  credentials: true
+})
 
 app.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
     try {

@@ -4,6 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 export function makeRoutes(app, api) {
     const db = api.db;
 
+    app.addHook('onRequest', async (req, reply) => {
+        const [ authorized, user, error ] = await api.authorizeSession(req, reply)
+
+        req.authorized = authorized
+        req.user = user
+        req.authError = error
+    })
+
     app.get('/api', function (request, reply) {
         reply.send({
             app: api.pkg.name,
@@ -15,27 +23,17 @@ export function makeRoutes(app, api) {
         
         reply.send({
             domain: api.config.domain,
-            sitename: api.config.sitename
+            sitename: api.config.sitename,
+            options: api.config.options,
         })
     })
 
     app.get('/api/query/:id', async (req, reply) => {
         const { id } = req.params;
 
-        const calendar = await api.cols.calendars.findOne({ selector: { slug: id } }).exec()
-        if (calendar) {
-            return reply.send({
-                type: 'calendar',
-                item: await calendar.view()
-            })
-        }
-
-        const event = await api.cols.events.findOne({ selector: { slug: id } }).exec()
-        if (event) {
-            return reply.send({
-                type: 'event',
-                item: await event.view()
-            })
+        const res = await api.objectGet(id)
+        if (res) {
+            return reply.send(res)
         }
 
         return reply.code(404).send({ error: 'not-found' })
@@ -58,22 +56,75 @@ export function makeRoutes(app, api) {
     })
 
     app.get('/api/events', async (req, reply) => {
-        const cursor = await api.cols.events.find({}).exec()
-        reply.send({ events: cursor })
+        if (!req.user) {
+            return reply.code(401).send({ error: req.authError })
+        }
+        const user = req.user
+        const events = []
+        if (!user.events) {
+            return reply.send({ events })
+        }
+        for (const ev of user.events) {
+            const res = await api.objectGet(ev.ref, { events: false })
+            events.push(res.item)
+        }
+        reply.send({ events })
     })
 
     app.get('/api/explore', async (req, reply) => {
-        const cursor = await api.cols.calendars.find({
+        const calendarsQuery = await api.cols.calendars.find({
             selector: {
                 personal: { $ne: true }
             }
         }).exec()
-        reply.send({ calendars: cursor })
+        const calendars = []
+        if (calendarsQuery) {
+            for (const ci of calendarsQuery) {
+                calendars.push(await ci.view({ events: false }))
+            }
+        }
+
+        const featured = []
+        for (const fc of api.config.options.featuredCalendars) {
+            const found = await api.objectGet(fc);
+            if (found) {
+                featured.push(await found.item)
+            }
+        }
+
+        reply.send({ calendars, featured })
     })
 
     app.get('/api/calendars', async (req, reply) => {
-        const cursor = await api.cols.calendars.find({}).exec()
-        reply.send(cursor)
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
+        }
+        const user = req.user
+
+        const subscribed = []
+        if (user.subscribedCalendars) {
+            for (const c of user.subscribedCalendars) {
+                const obj = await api.objectGet(c.ref)
+                if (obj) {
+                    subscribed.push(obj.item)
+                }
+            }
+        }
+        const owned = []
+        if (user.personalCalendar) {
+            const personal = await api.objectGet(user.personalCalendar);
+            if (personal) {
+                owned.push(personal.item)
+            }
+        }
+        if (user.calendarsManage) {
+            for (const mi of user.calendarsManage) {
+                const obj = await api.objectGet(mi.ref)
+                owned.push(obj.item)
+            }
+        }
+
+        reply.send({ subscribed, owned })
     })
 
     app.get('/api/calendar/:id', async (req, reply) => {
@@ -116,29 +167,159 @@ export function makeRoutes(app, api) {
         }
         await api.cols.sessions.insert(session)
 
-        reply.send({
-            ok: true,
-            sessionId: session.id,
-            user
-        })
+        reply
+            .setCookie('evermeet-session-id', session.id, {
+                path: '/',
+                httpOnly: true,
+                maxAge: 31_556_926,
+                secure: true,
+                sameSite: 'Lax'
+            })
+            .send({
+                ok: true,
+                //sessionId: session.id,
+                user
+            })
     })
 
     app.get('/api/me', async (req, reply) => {
-        const sessionId = req.headers['evermeet-session-id'];
-        if (!sessionId) {
-            return reply.code(401).send({ error: 'no sessionId ("evermeet-session-id" header)'})
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
         }
-        const session = await api.cols.sessions.findOne({ selector: { id: sessionId }}).exec()
-        if (!session) {
-           return reply.code(401).send({ error: 'session not found'}) 
+
+        reply.send({
+            user: req.user
+        })
+    })
+
+    app.post('/api/me/calendarSubscribe', async (req, reply) => {
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
         }
-        const user = await api.cols.users.findOne(session.user).exec()
-        if (!user) {
-            return reply.code(401).send({ error: 'user not found '})
+        const user = req.user
+        // TODO check if calendar exists
+        const calendarId = req.body.id
+        if (!calendarId) {
+            return reply.code(401).send()
+        }
+        const calendar = await api.objectGet(calendarId)
+        if (!calendar) {
+            return reply.code(401).send({ error: 'calendar not exists' })
         }
         
+        const subscribedCalendars = (user.subscribedCalendars || []).concat([ { ref: calendarId, time: (new Date()).toISOString() } ])
+        await user.update({
+            $set: {
+                subscribedCalendars
+            }
+        })
+
         reply.send({
-            user
+            done: true,
+            subscribedCalendars
+        })
+    })
+
+    app.post('/api/me/calendarUnsubscribe', async (req, reply) => {
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
+        }
+        const user = req.user
+
+        const calendarId = req.body.id
+        if (!calendarId) {
+            return reply.code(401).send()
+        }
+
+        let subscribedCalendars = []
+        for (const sc of user.subscribedCalendars) {
+            if (sc.ref !== calendarId) {
+                subscribedCalendars.push(sc)
+            }
+        }        
+        await user.update({
+            $set: {
+                subscribedCalendars
+            }
+        })
+
+        reply.send({
+            done: true,
+            subscribedCalendars
+        })
+    })
+
+    app.post('/api/me/register', async (req, reply) => {
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
+        }
+        if (!req.body.id) {
+            return reply.code(400).send({ error: 'wrong argument' })
+        }
+        const user = req.user
+        const item = await api.cols.events.findOne({ selector: { id: req.body.id }}).exec()
+        if (!item) {
+            return reply.code(400).send({ error: 'wrong argument'})
+        }
+        if (user.events && user.events.find(e => e.ref === item.id)) {
+            return reply.code(400).send({ error: 'already registered' })
+        }
+
+        const time = (new Date()).toISOString()
+        const outEvent = await item.update({
+            $push: {
+                guestsNative: { ref: user.did, rel: 'joined', time }
+            }
+        })
+        const out = await user.update({
+            $push: {
+                events: { ref: item.id, rel: 'joined', time }
+            }
+        })
+              
+        return reply.send({
+            done: true,
+            event: await outEvent.view({ calendar: false }),
+            events: out.events
+        })
+    })
+
+    app.post('/api/me/unregister', async (req, reply) => {
+        if (!req.authorized) {
+            return reply.code(401).send({ error: req.authError })
+        }
+        if (!req.body.id) {
+            return reply.code(400).send({ error: 'wrong argument' })
+        }
+        const user = req.user
+        const item = await api.cols.events.findOne({ selector: { id: req.body.id }}).exec()
+        if (!item) {
+            return reply.code(400).send({ error: 'wrong argument'})
+        }
+
+        let outEvent;
+        const eventRegisterItem = item.guestsNative && item.guestsNative.find(e => e.ref === user.did)
+        if (eventRegisterItem) {
+            outEvent = await item.update({
+                $pull: {
+                    guestsNative: eventRegisterItem
+                }
+            })
+        }
+
+        const registerItem = user.events && user.events.find(e => e.ref === item.id)
+        if (!user.events || !registerItem) {
+            return reply.code(400).send({ error: 'not registered' })
+        }
+        const out = await user.update({
+            $pull: {
+                events: registerItem
+            }
+        })
+        return reply.send({
+            done: true,
+            event: await outEvent?.view({ calendar: false, events: false }),
+            events: out.events
         })
     })
 

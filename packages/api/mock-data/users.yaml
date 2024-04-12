@@ -1,4 +1,5 @@
 - id: eid2caej8Zei2eiZ
+  did: did:plc:524tuhdhh3m7li5gycdn6boe
   name: tree
   emails:
     - tree@tree.fail
@@ -7,3 +8,19 @@
     - b82dd4c54685d062a9b2ecd0d22c5fc000e3584394263a87d285f98008ef17c4
     - d3bf5c0b9823e497d5ffb969918d1c45810b5d1d69edf0a0f2601a6151e9caa9
   img: https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
+  personalCalendar: he5Chae4chae
+  subscribedCalendars:
+    - ref: die6loowahGe
+      time: 2024-01-01T20:44
+    - ref: gweicz:dev.evermeet.app
+      time: 2024-01-01T01:00
+  calendarsManage:
+    - ref: 2e9e2199afca02
+    - ref: gweicz:dev.evermeet.app
+  events:
+    - ref: 5d79e6cf6cba90
+      rel: joined
+    - ref: ethberlin4:dev.evermeet.app
+      rel: joined
+    - ref: monerokon2024
+      rel: invited

@@ -12,6 +12,10 @@
   guests:
     - name: jensei
     - name: Enrico
+  guestsNative:
+    - ref: did:plc:524tuhdhh3m7li5gycdn6boe
+      rel: joined
+      time: 2024-01-01T01:00
   hosts:
     - name: PD_CDG
       img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=24,height=24/avatars/4w/53843e16-874b-4666-92a2-2341fb5de057
@@ -62,6 +66,8 @@
   sync:
     - method: luma-r2l-v1:sync
       url: https://lu.ma/w3pn-meetup-ams1
+  registration:
+    enabled: true
 
 - slug: w3pn-m24ber
   name: W3PN Meetup @ ETHBerlin 4
@@ -73,31 +79,31 @@
   placeCity: Berlin
   calendarId: 2e9e2199afca02
 
-- slug: ethberlin4
-  name: ETHBerlin04
-  dateStart: 2024-05-24T12:00
-  dateEnd: 2024-05-26T12:00
-  placeName: TBD (Kreuzberg)
-  placeCountry: de
-  placeCity: Berlin
-  img: https://pbs.twimg.com/profile_images/1752740591899660288/xu9ex0n0_400x400.jpg
-  calendarId: b52cab85781d88
-  hosts:
-    - name: Afri
-      img: https://data.web3privacy.info/img/people/afri-schoedon.jpg
-    - name: franzi
-      img: https://pbs.twimg.com/profile_images/1775206823521320960/BT2954as_400x400.jpg
-  description: |
-    ETHBerlin is a hackathon, a cultural festival, an educational event, a platform for hacktivism, and a community initiative to push the decentralized ecosystem forward.
-
-    Loading ETHBERLIN<<04<<<<IDENTITY<<CRISIS<<: May 24-26, 2024, Berlin, Germany.
-
-    The situation is dire. We have been operating in crisis mode for years now. Established systems are failing, new and old imperialist powers are throwing continents into wars of attrition, global supply chains are collapsing, financial markets are tumbling, healthcare systems are falling apart, education is on a consistent downward spiral — the list goes on.
-
-    But there is hope: The soils to grow new ideas have never been more nutritious. It has never been more urgent to double down on new revolutionary concepts and ideas. It is high time to change the world.
-
-    For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
-  web: https://ethberlin.org/
+#- slug: ethberlin4
+#  name: ETHBerlin04
+#  dateStart: 2024-05-24T12:00
+#  dateEnd: 2024-05-26T12:00
+#  placeName: TBD (Kreuzberg)
+#  placeCountry: de
+#  placeCity: Berlin
+#  img: https://pbs.twimg.com/profile_images/1752740591899660288/xu9ex0n0_400x400.jpg
+#  calendarId: b52cab85781d88
+#  hosts:
+#    - name: Afri
+#      img: https://data.web3privacy.info/img/people/afri-schoedon.jpg
+#    - name: franzi
+#      img: https://pbs.twimg.com/profile_images/1775206823521320960/BT2954as_400x400.jpg
+#  description: |
+#    ETHBerlin is a hackathon, a cultural festival, an educational event, a platform for hacktivism, and a community initiative to push the decentralized ecosystem forward.
+#
+#    Loading ETHBERLIN<<04<<<<IDENTITY<<CRISIS<<: May 24-26, 2024, Berlin, Germany.
+#
+#    The situation is dire. We have been operating in crisis mode for years now. Established systems are failing, new and old imperialist powers are throwing continents into wars of attrition, global supply chains are collapsing, financial markets are tumbling, healthcare systems are falling apart, education is on a consistent downward spiral — the list goes on.
+#
+#    But there is hope: The soils to grow new ideas have never been more nutritious. It has never been more urgent to double down on new revolutionary concepts and ideas. It is high time to change the world.
+#
+#    For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
+#  web: https://ethberlin.org/
 
 - slug: w3pn-s24prg
   name: Web3Privacy Now Summit @ ETHPrague 2024
@@ -162,6 +168,8 @@
   hosts:
     - name: Tree
       img: https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
+  registration:
+    enabled: true
 
 - slug: beerfi23
   name: "Beerfi Prague - Web3 on-chain dev Meetup #23"
@@ -224,3 +232,5 @@
   img: https://pbs.twimg.com/profile_images/1754882391057850368/zlTXAKPT_400x400.jpg
   description: |
     Monero Konferenco (“MoneroKon”) is an annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems. Marking its fourth year, the upcoming 3-day event will be held once again at the renowned Paralelní Polis in the Czech Republic from 7th-9th of June 2024. Come participate in discussions and help us move privacy forward one conversation at a time.
+  registration:
+    enabled: true

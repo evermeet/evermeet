@@ -10,6 +10,7 @@
     const days = events.map(e => e.date)
 </script>
 
+{#if events.length > 0}
 <ul class="timeline timeline-vertical timeline-snap-icon">
     {#each days as day}
         <li class="">
@@ -34,6 +35,9 @@
         </li>
     {/each}
 </ul>
+{:else}
+    <div class="text-xl">No events :(</div>
+{/if}
 
 <style>
     .timeline-vertical:where(.timeline-snap-icon) > li {

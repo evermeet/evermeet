@@ -4,13 +4,18 @@
     import countries from 'i18n-iso-countries';
     import enLocale from 'i18n-iso-countries/langs/en.json';
     import { parse, parseInline } from 'marked';
-    import { user, config } from '$lib/stores';
+    import { user, config, eventDetail } from '$lib/stores';
+    import { register, unregister } from '$lib/actions';
+    import FlagIcon from './FlagIcon.svelte';
 
     countries.registerLocale(enLocale);
 
     export let item;
+    eventDetail.set(item);
 
+    $: item = $eventDetail;
     $: countryName = item.placeCountry ? countries.getName(item.placeCountry, 'en') : ''
+    $: userRegistered = $user && $user.events?.find(e => e.ref === item.id) ? true : false
 </script>
 
 <svelte:head>
@@ -71,12 +76,15 @@
             </div>
         {/if}
 
-        {#if item.guestCount}
+        {#if item.guestCountTotal}
             <div class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2">
-                <div class="font-mono text-sm">{item.guestCount} going</div>
+                <div class="font-mono text-sm">{item.guestCountTotal} going</div>
             </div>
             <div class="mt-4 mb-8 text-sm text-neutral-content">
-                {item.guests.map(g => g.name).slice(0,2).join(', ')} and {item.guestCount-2} others
+                {#if item.guests}
+                    {item.guests.map(g => g.name).slice(0,2).join(', ')} and {item.guestCountTotal} others
+                {:else}
+                {/if}
             </div>
         {/if}
 
@@ -84,8 +92,13 @@
             <a href="#contact">Contact the host</a>
         </div>
     </div>
-    <div>
-        <h1 class="text-5xl font-semibold font-mono mb-6">{item.name}</h1>
+    <div class="w-full">
+        <div class="mb-6">
+            <h1 class="text-5xl font-semibold font-mono">{item.name}</h1>
+            {#if item._remote}
+                <div class="badge badge-neutral font-mono text-xs mt-2">{item._remote}</div>
+            {/if}
+        </div>
         <div class="flex gap-4 items-center">
             <div class="w-10 h-10 border rounded-lg border-neutral">
                 <div class="text-center">
@@ -105,10 +118,37 @@
             <div>
                 <div class="font-mono text-lg">{item.placeName}</div>
                 {#if item.placeCity && countryName}
-                    <div class="text-sm text-neutral-content">{item.placeCity}, {countryName}</div>
+                    <div class="text-sm text-neutral-content flex gap-2 items-center"><div>{item.placeCity}, {countryName}</div> <FlagIcon country={item.placeCountry} size="w-3.5 h-3.5" /></div>
                 {/if}
             </div>
         </div>
+
+        {#if item.registration?.enabled}
+            <div class="mt-6 itembox no-padding w-full">
+                {#if !userRegistered}
+                    <div class="bg-neutral rounded-t-lg py-2 px-4 text-sm">Registration</div>
+                {/if}
+                <div class="py-4 px-4">
+                    {#if userRegistered}
+                        <div><img src={$user.img} alt={$user.name} class="w-10 rounded-full mb-2" /></div>
+                        <div class="text-xl font-semibold font-mono">You’re In</div>
+                        <div class="mt-1.5 text-neutral-content">A confirmation email has been sent to your email.</div>
+                        <div class="mt-4 text-sm text-neutral-content">No longer able to attend? Notify the host by <button class="underline text-accent opacity-75 hover:opacity-100" on:click={unregister(item.id)}>canceling your registration</button>.</div>
+                    {:else}
+                        <div class="mb-4">Welcome! To join the event, please register below.</div>
+                        {#if $user}
+                            <div class="flex gap-2 mt-4 items-center">
+                                <div><img src={$user.img} alt={$user.name} class="rounded-full w-5" /></div>
+                                <div class="font-semibold">{$user.name} <!--span class="font-mono text-xs badge badge-neutral inline-block">{$user.did}</span--></div>
+                            </div>
+                        {/if}
+                        <div class="mt-3">
+                            <button class="btn w-full text-lg btn-neutral" on:click={register(item.id)}>Register</button>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {/if}
 
         {#if item.description}
             <div class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2">

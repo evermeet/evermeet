@@ -8,7 +8,7 @@ RUN npm install pnpm -g
 RUN pnpm install pm2 -g
 
 WORKDIR /home/node/app
-COPY package.json pnpm-*.yaml ecosystem.config.js Makefile ./
+COPY package.json pnpm-*.yaml ecosystem.config.js ./
 
 COPY packages ./packages
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm run install-ci

@@ -1,0 +1,15 @@
+domain: evermeet.local
+sitename: null
+featuredCalendars: []
+api:
+  enabled: true
+  port: 3000
+  host: localhost
+  db:
+    name: evermeet-test
+    connection: mongodb://localhost:27017
+    password: putYourPasswordHere
+web:
+  enabled: true
+  port: 3001
+  host: localhost

@@ -5,5 +5,8 @@
         "./packages/api",
         "./packages/web",
         "./packages/did-plc-lib"
-    ]
+    ],
+    "dependencies": {
+        "lodash": "^4.17.21"
+    }
 }

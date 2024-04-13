@@ -1,8 +1,9 @@
 
-import { initDatabase, loadMockData } from './db.js'
 import { parse, stringify } from 'yaml'
+import _ from 'lodash'
 import fs from 'node:fs'
 
+import { initDatabase, loadMockData } from './db.js'
 import { makeRoutes } from './routes.js';
 import { makeCollections } from './collections.js';
 
@@ -10,10 +11,13 @@ export class API {
 
   constructor () {
     this.models = {}
-    this.config = parse(fs.readFileSync('../../config.yaml', 'utf-8'))
+    const defaults = parse(fs.readFileSync('../../config.defaults.yaml', 'utf-8'))
+    const localConfig = parse(fs.readFileSync('../../config.yaml', 'utf-8'))
+    this.config = _.defaultsDeep(localConfig, defaults)
     this.pkg = JSON.parse(fs.readFileSync('../../package.json', 'utf-8'))
 
     console.log(stringify(this.config))
+    console.log('ENV:', process.env.NODE_ENV)
   }
 
   async init () {
@@ -32,13 +36,12 @@ export class API {
     let res;
     try {
       const url = `https://${domain}/api/query/${id}`
-      console.log(url)
+      console.log('REMOTE:', url)
       res = await fetch(url)
       if (!res) {
         return null
       }
     } catch (e) {
-      console.log(e);
       return null
     }
     const json = await res.json()

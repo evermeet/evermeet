@@ -85,7 +85,7 @@ export function makeRoutes(app, api) {
         }
 
         const featured = []
-        for (const fc of api.config.options.featuredCalendars) {
+        for (const fc of api.config.featuredCalendars) {
             const found = await api.objectGet(fc);
             if (found) {
                 featured.push(await found.item)

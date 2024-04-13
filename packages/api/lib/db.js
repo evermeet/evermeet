@@ -11,7 +11,9 @@ import fs from 'node:fs'
 export async function initDatabase(api) {
 
     addRxPlugin(RxDBMigrationPlugin);
-    addRxPlugin(RxDBDevModePlugin);
+    if (process.env.NODE_ENV) {
+        addRxPlugin(RxDBDevModePlugin);
+    }
     addRxPlugin(RxDBUpdatePlugin);
 
     const mongoStorage = getRxStorageMongoDB({
@@ -19,18 +21,18 @@ export async function initDatabase(api) {
          * MongoDB connection string
          * @link https://www.mongodb.com/docs/manual/reference/connection-string/
          */
-        connection: api.config.db.connection
+        connection: api.config.api.db.connection
     })
 
     const encryptedStorage = wrappedKeyEncryptionCryptoJsStorage({
-        name: api.config.db.name,
+        name: api.config.api.db.name,
         storage: mongoStorage
     })
 
     const db = await createRxDatabase({
-        name: api.config.db.name,
+        name: api.config.api.db.name,
         storage: encryptedStorage,
-        password: api.config.db.password
+        password: api.config.api.db.password
     });
 
     //console.log(mongoStorage, db)

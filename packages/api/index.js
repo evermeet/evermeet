@@ -9,11 +9,14 @@ import { handler } from '../web/build/handler.js';
 const api = new API()
 await api.init()
 
-const app = Fastify({ logger: true })
+const app = Fastify({ logger: process.env.NODE_ENV === 'development' })
 
 await app.register(middie)
 await app.register(cors, {
-  origin: 'http://localhost:5173',
+  //origin: `http://localhost:${api.config.web.port},http://${api.config.web.host}:${api.config.web.port},https://${api.config.domain}`,
+  origin: process.env.NODE_ENV === 'development' 
+    ? `http://${api.config.web.host}:${api.config.web.port}`
+    : `https://${domain}`,
   credentials: true
 })
 
@@ -36,7 +39,7 @@ app.register(cookie, {
 
 api.makeRoutes(app)
 
-app.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
+app.listen({ port: api.config.api.port, host: api.config.api.host }, function (err, address) {
     if (err) {
         app.log.error(err)
         process.exit(1)

@@ -1,6 +1,17 @@
 {
     "name": "evermeet",
     "version": "0.1.0-preview",
+    "scripts": {
+        "start": "pnpm run dev",
+        "install-ci": "pnpm install --frozen-lockfile",
+        "dev": "NODE_ENV=development pm2 start ecosystem.config.js",
+        "dev-restart": "NODE_ENV=development pm2 restart ecosystem.config.js",
+        "dev-stop": "NODE_ENV=development pm2 delete ecosystem.config.js",
+        "dev-delete": "NODE_ENV=development pm2 delete ecosystem.config.js",
+        "build": "pnpm run -r build",
+        "docker": "sudo docker build --platform linux/amd64 -t evermeet/evermeet . --progress=plain",
+        "docker-run": "sudo docker run -p 3030:3000 treecz/evermeet"
+    },
     "workspaces": [
         "./packages/api",
         "./packages/web",

@@ -18,6 +18,7 @@
     "./packages/did-plc-lib"
   ],
   "dependencies": {
+    "@changesets/cli": "^2.27.1",
     "lodash": "^4.17.21",
     "pm2": "^5.3.1"
   },

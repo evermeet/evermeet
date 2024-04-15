@@ -4,8 +4,6 @@ import cors from '@fastify/cors'
 import cookie from '@fastify/cookie';
 import middie from '@fastify/middie';
 
-import { handler } from '../web/build/handler.js';
-
 const api = new API()
 await api.init()
 
@@ -16,7 +14,7 @@ await app.register(cors, {
   //origin: `http://localhost:${api.config.web.port},http://${api.config.web.host}:${api.config.web.port},https://${api.config.domain}`,
   origin: process.env.NODE_ENV === 'development' 
     ? `http://${api.config.web.host}:${api.config.web.port}`
-    : `https://${domain}`,
+    : `https://${api.config.domain}`,
   credentials: true
 })
 

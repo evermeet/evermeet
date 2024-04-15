@@ -1,8 +1,0 @@
-:3005 {
-    handle /api* {
-        reverse_proxy evermeet:3000
-    }    
-    handle {
-        reverse_proxy evermeet:3001
-    }
-}

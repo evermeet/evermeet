@@ -24,7 +24,7 @@ if (config.web.enabled) {
   if (process.env.NODE_ENV === 'development') {
     services.push({
       name: 'evermeet-web-dev',
-      script: './packages/web/node_modules/vite/bin/vite.js',
+      script: './node_modules/vite/bin/vite.js',
       args: `--host ${config.web.host} --port ${config.web.port} dev`,
       cwd: './packages/web',
       env: {

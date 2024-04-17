@@ -1,5 +1,7 @@
 <script>
     import "../app.css";
+    import "/node_modules/flag-icons/css/flag-icons.min.css";
+
     import { Ticket, Calendar, Sparkles, Fire, WrenchScrewdriver, Bell, MagnifyingGlass } from 'svelte-heros-v2';
     import { browser } from '$app/environment';
     import { pkg } from '../lib/config.js';

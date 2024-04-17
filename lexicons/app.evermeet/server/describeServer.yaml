@@ -1,0 +1,17 @@
+lexicon: 1
+defs:
+  main:
+    type: query
+    output:
+      encoding: application/json
+      schema:
+        type: object
+        required: ["did", "app", "version"]
+        properties:
+          did:
+            type: string
+            format: did
+          app:
+            type: string
+          version:
+            type: string

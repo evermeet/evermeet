@@ -9,6 +9,10 @@ api:
     name: evermeet-test
     connection: mongodb://localhost:27017
     password: putYourPasswordHere
+  runtime: bun
+  adapter: elysia
+  prefix: /xrpc
+  sessionName: evermeet-session-id
 web:
   enabled: true
   port: 3001

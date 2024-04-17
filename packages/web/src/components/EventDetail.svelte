@@ -118,7 +118,7 @@
             <div>
                 <div class="font-mono text-lg">{item.placeName}</div>
                 {#if item.placeCity && countryName}
-                    <div class="text-sm text-neutral-content flex gap-2 items-center"><div>{item.placeCity}, {countryName}</div> <FlagIcon country={item.placeCountry} size="w-3.5 h-3.5" /></div>
+                    <div class="text-sm text-neutral-content flex gap-2 items-center"><div>{item.placeCity}, {countryName}</div> <FlagIcon country={item.placeCountry} /></div>
                 {/if}
             </div>
         </div>

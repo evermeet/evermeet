@@ -12,6 +12,7 @@ if (config.api.enabled) {
     name: 'evermeet-api',
     script: './index.js',
     cwd: './packages/api',
+    interpreter: config.api.runtime,
     watch: process.env.NODE_ENV === 'development',
     env: {
       PORT: config.api.port,
@@ -46,5 +47,5 @@ if (config.web.enabled) {
     })   
   }
 }
-
+console.log(services)
 module.exports = services

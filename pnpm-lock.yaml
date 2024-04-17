@@ -20,6 +20,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@atproto/lexicon':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@elysiajs/swagger':
         specifier: ^1.0.3
         version: 1.0.3(elysia@1.0.13)
@@ -218,6 +221,20 @@ packages:
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       uint8arrays: 3.0.0
+    dev: false
+
+  /@atproto/lexicon@0.4.0:
+    resolution: {integrity: sha512-RvCBKdSI4M8qWm5uTNz1z3R2yIvIhmOsMuleOj8YR6BwRD+QbtUBy3l+xQ7iXf4M5fdfJFxaUNa6Ty0iRwdKqQ==}
+    dependencies:
+      '@atproto/common-web': 0.3.0
+      '@atproto/syntax': 0.3.0
+      iso-datestring-validator: 2.2.2
+      multiformats: 9.9.0
+      zod: 3.22.4
+    dev: false
+
+  /@atproto/syntax@0.3.0:
+    resolution: {integrity: sha512-Weq0ZBxffGHDXHl9U7BQc2BFJi/e23AL+k+i5+D9hUq/bzT4yjGsrCejkjq0xt82xXDjmhhvQSZ0LqxyZ5woxA==}
     dev: false
 
   /@babel/code-frame@7.24.2:
@@ -4272,6 +4289,10 @@ packages:
     resolution: {integrity: sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ==}
     engines: {node: '>=16'}
     dev: true
+
+  /iso-datestring-validator@2.2.2:
+    resolution: {integrity: sha512-yLEMkBbLZTlVQqOnQ4FiMujR6T4DEcCb1xizmvXS+OxuhwcbtynoosRzdMA69zZCShCNAbi+gJ71FxZBBXx1SA==}
+    dev: false
 
   /isomorphic-ws@5.0.0(ws@8.16.0):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}

@@ -8,20 +8,42 @@ import { Lexicons } from '@atproto/lexicon'
 import { initDatabase, loadMockData } from './db.js'
 import { makeRoutes } from './routes.js';
 import { makeCollections } from './collections.js';
+import { runtime, env } from './runtime.js';
 import endpoints from '../endpoints/index.js';
+import pkg from '../../../package.json' with { type: "json" };
+
+class AuthError extends Error {}
 
 export class Evermeet {
 
   constructor (opts) {
-    this.models = {}
+    this.runtime = runtime
+    this.env = env('NODE_ENV') || 'development'
     const defaults = parse(fs.readFileSync('../../config.defaults.yaml', 'utf-8'))
     const localConfig = parse(fs.readFileSync('../../config.yaml', 'utf-8'))
     this.config = _.defaultsDeep(localConfig, defaults)
-    this.pkg = JSON.parse(fs.readFileSync('../../package.json', 'utf-8'))
     this.initialized = false
-
-    console.log(stringify(this.config))
-    console.log('ENV:', process.env.NODE_ENV)
+    this.pkg = pkg
+    this.models = {}
+    this.authVerifier = {
+      accessUser: ({ user }) => {
+        if (!user) {
+          throw new Error('NotAuthorized')
+        }
+      },
+      accessAdmin: ({ user }) => {
+        if (!user) {
+          throw new Error('NotAuthorized')
+        }
+        /*if (!user.roles.includes('admin')) {
+          throw new Error('NotAuthorized')
+        }*/
+      }
+    }
+    
+    console.log(stringify({ RUNTIME: this.runtime }))
+    console.log(stringify({ CONFIG: this.config }))
+    console.log('ENV:', this.env)
   }
 
   async init () {
@@ -39,7 +61,15 @@ export class Evermeet {
       await this.adapter.init()
 
     } catch (e) {
-      console.error('@@@@@', e)
+      console.error(e)
+      this.exit()
+    }
+  }
+
+  exit () {
+    if (Deno) {
+      Deno.exit(1)
+    } else {
       process.exit(1)
     }
   }
@@ -86,12 +116,14 @@ export class Evermeet {
             continue;
           }
           let handler;
+          let auth;
           endpoints[ns][cat][cmd]({
             endpoint: (opts) => {
               if (typeof opts === 'function') {
                 handler = opts
               } else {
                 handler = opts.handler
+                auth = opts.auth
               }
             }
           }, {
@@ -100,7 +132,8 @@ export class Evermeet {
           const endpoint = {
             id,
             lex,
-            handler
+            handler,
+            auth,
           }
           struct[ns][cat][cmd] = endpoint
           list.push(endpoint)
@@ -114,15 +147,20 @@ export class Evermeet {
     return { list, struct }
   }
 
-  async request (id, { req, input, headers }) {
+  async request (id, { input, headers, session }) {
     const endpoint = this.endpoints.list.find(ep => ep.id === id)
     let out = {};
     try {
       // check input parameters
       this.lexicons.assertValidXrpcParams(id, input)
       // authorize session and basic context
-      const [ _, user, authError ] = await this.authorizeSession({ headers })
-      const base = { user, authError }
+      let authData = {};
+      if (endpoint.auth) {
+        const [ _, user, authError ] = await this.authorizeSession(session)
+        authData = { user, authError }
+        await endpoint.auth(authData)
+      }
+      const base = { ...authData }
       // run handler
       out = await endpoint.handler({ input, ...base })
       if (!out.error) {
@@ -130,7 +168,11 @@ export class Evermeet {
         const res = this.lexicons.assertValidXrpcOutput(id, out.body)
       }
       } catch(e) {
-        out = { error: e.constructor.name, message: e.message }
+        if (e.constructor.name !== 'Error') {
+          out = { error: e.constructor.name, message: e.message }
+        } else {
+          out = { error: e.message }
+        }
     }
     return out
   }
@@ -221,11 +263,11 @@ export class Evermeet {
     }
     const session = await this.cols.sessions.findOne({ selector: { id: sessionId }}).exec()
     if (!session) {
-       return [ false, null, 'session not found' ] 
+      throw new AuthError('InvalidSession')
     }
     const user = await this.cols.users.findOne(session.user).exec()
     if (!user) {
-        return [ false, null, 'user not found' ]
+      throw new AuthError('UserNotFound')
     }
     return [ true, user ]
   }

@@ -1,7 +1,7 @@
-import os from 'node:os' 
 
 export function describeServer (server, ctx) {
     server.endpoint(async ({ user }) => {
+        const runtime = ctx.api.runtime
         return {
             encoding: 'application/json',
             body: {
@@ -10,9 +10,9 @@ export function describeServer (server, ctx) {
                 version: ctx.api.pkg.version,
                 env: {
                     adapter: ctx.api.config.api.adapter,
-                    runtime: ctx.api.config.api.runtime,
-                    runtimeVersion: ctx.api.config.api.runtime == 'bun' ? Bun.version : process.version,
-                    arch: os.arch(),
+                    runtime: runtime.name,
+                    runtimeVersion: runtime.version,
+                    arch: runtime.arch,
                 },
             }
         }

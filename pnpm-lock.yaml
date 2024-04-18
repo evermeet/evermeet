@@ -23,6 +23,9 @@ importers:
       '@atproto/lexicon':
         specifier: ^0.4.0
         version: 0.4.0
+      '@bogeychan/elysia-logger':
+        specifier: ^0.0.21
+        version: 0.0.21(elysia@1.0.13)
       '@elysiajs/swagger':
         specifier: ^1.0.3
         version: 1.0.3(elysia@1.0.13)
@@ -44,6 +47,9 @@ importers:
       fastify:
         specifier: ^4.26.2
         version: 4.26.2
+      foundationdb:
+        specifier: ^2.0.1
+        version: 2.0.1
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -278,6 +284,15 @@ packages:
     resolution: {integrity: sha512-64AF1xY3OAkFHqOb9s4jpgk1Mm5vDZ4L3acHvAml+53nO1XbXLuDodsVpO4OIUsmemlUHMxNdYMNJmsvOwLrvQ==}
     dependencies:
       regenerator-runtime: 0.13.11
+    dev: false
+
+  /@bogeychan/elysia-logger@0.0.21(elysia@1.0.13):
+    resolution: {integrity: sha512-jVnDvoz6Y7SyS4JZFkBbBhJLx8hlqs6cEO4yWsPV4yH+8L8xGJeDAH8H75gsg8lqfPeLnsPNFq6GRUfuBHzLyg==}
+    peerDependencies:
+      elysia: '>= 1.0.9'
+    dependencies:
+      elysia: 1.0.13(@sinclair/typebox@0.32.20)
+      pino: 8.20.0
     dev: false
 
   /@cbor-extract/cbor-extract-darwin-arm64@2.2.0:
@@ -3519,6 +3534,10 @@ packages:
     resolution: {integrity: sha512-GDqVQezKzRABdeqflsgMr7ktzgF9CyS+p2oe0jJqUY6izSSbhPIQJDpoU4PtGcD7VPM9xh/dVrTu6z1nwgmEGw==}
     dev: false
 
+  /fdb-tuple@1.0.0:
+    resolution: {integrity: sha512-8jSvKPCYCgTpi9Pt87qlfTk6griyMx4Gk3Xv31Dp72Qp8b6XgIyFsMm8KzPmFJ9iJ8K4pGvRxvOS8D0XGnrkjw==}
+    dev: false
+
   /file-entry-cache@8.0.0:
     resolution: {integrity: sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ==}
     engines: {node: '>=16.0.0'}
@@ -3656,6 +3675,15 @@ packages:
   /forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /foundationdb@2.0.1:
+    resolution: {integrity: sha512-ZMmpAoEI88H8d4DWk6MzXf4Kw9pGaQrxNygVdz/7g+qwlMrjHvmxUQsQz1zG4176+B0YNY+ufgmcT40kEv/TnQ==}
+    engines: {node: '>=14.0.0'}
+    requiresBuild: true
+    dependencies:
+      fdb-tuple: 1.0.0
+      node-gyp-build: 4.8.0
     dev: false
 
   /fraction.js@4.3.7:
@@ -4822,6 +4850,11 @@ packages:
       detect-libc: 2.0.3
     dev: false
     optional: true
+
+  /node-gyp-build@4.8.0:
+    resolution: {integrity: sha512-u6fs2AEUljNho3EYTJNBfImO5QTo/J/1Etd+NVdCj7qWKUSN/bSLkZwhDv7I+w/MSC6qJ4cknepkAYykDdK8og==}
+    hasBin: true
+    dev: false
 
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}

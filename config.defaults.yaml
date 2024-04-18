@@ -6,6 +6,7 @@ api:
   port: 3000
   host: localhost
   db:
+    storage: mongodb
     name: evermeet-test
     connection: mongodb://localhost:27017
     password: putYourPasswordHere

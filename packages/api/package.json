@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/lexicon": "^0.4.0",
+    "@bogeychan/elysia-logger": "^0.0.21",
     "@elysiajs/swagger": "^1.0.3",
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.1",
@@ -19,6 +20,7 @@
     "@fastify/middie": "^8.3.0",
     "elysia": "^1.0.13",
     "fastify": "^4.26.2",
+    "foundationdb": "^2.0.1",
     "lodash": "^4.17.21",
     "rxdb": "^15.16.0",
     "rxjs": "^7.8.1",

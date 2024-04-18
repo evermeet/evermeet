@@ -1,4 +1,3 @@
-
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import cookie from '@fastify/cookie';
@@ -8,11 +7,11 @@ export default function ({ evermeet }) {
     let app;
     return {
         async init () {
-            app = Fastify({ logger: process.env.NODE_ENV === 'development' })
+            app = Fastify({ logger: evermeet.env === 'development' })
         
             await app.register(middie)
             await app.register(cors, {
-              origin: process.env.NODE_ENV === 'development' 
+              origin: evermeet.env === 'development' 
                 ? `http://${evermeet.config.web.host}:${evermeet.config.web.port}`
                 : `https://${evermeet.config.domain}`,
               credentials: true
@@ -56,7 +55,7 @@ export default function ({ evermeet }) {
             return app.listen({ port: evermeet.config.api.port, host: evermeet.config.api.host }, function (err, address) {
                 if (err) {
                     app.log.error(err)
-                    process.exit(1)
+                    evermeet.exit()
                 }
                 // Server is now listening on ${address}
             })

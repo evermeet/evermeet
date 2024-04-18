@@ -1,5 +1,5 @@
 
-export function resolveObject (server, ctx) {
+export function getProfile (server, ctx) {
     server.endpoint(async ({ input: { id } }) => {
         const obj = await ctx.api.objectGet(id)
         if (!obj) {

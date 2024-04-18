@@ -17,6 +17,7 @@ if (config.api.enabled) {
     env: {
       PORT: config.api.port,
       HOST: config.api.host,
+      DYLD_LIBRARY_PATH: '/usr/local/lib',
     }
   })
 }

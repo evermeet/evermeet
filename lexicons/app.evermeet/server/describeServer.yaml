@@ -2,6 +2,7 @@ lexicon: 1
 defs:
   main:
     type: query
+    description: Get information about this evermeet instance
     output:
       encoding: application/json
       schema:
@@ -11,7 +12,25 @@ defs:
           did:
             type: string
             format: did
+            example: did:web:evermeet.local
           app:
             type: string
+            example: "evermeet"
           version:
             type: string
+            example: "0.1.0"
+          env:
+            type: object
+            properties:
+              adapter:
+                type: string
+                example: elysia
+              runtime:
+                type: string
+                example: bun
+              runtimeVersion:
+                type: string
+                example: "1.1.3"
+              arch:
+                type: string
+                example: arm64

@@ -3,6 +3,11 @@
     import { parse } from 'marked';
     import { config } from '$lib/stores';
 
+    //import Lexical from './Lexical.svelte';
+    //import Lexical from 'svelte-lexical';
+    //import {RichTextComposer} from 'svelte-lexical';
+    //  import PlaygroundEditorTheme from '../themes/PlaygroundEditorTheme';
+
     import Form from './Form.svelte';
 
     export let item;
@@ -145,6 +150,8 @@
         ]} />
 
         <hr />
+
+        <!--RichTextComposer theme={PlaygroundEditorTheme} /-->
 
         <h3 id="hosts" class="text-2xl my-8 font-semibold">Hosts</h3>
 

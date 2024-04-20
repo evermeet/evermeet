@@ -5,11 +5,16 @@ export function makeRoutes(app, api) {
     const db = api.db;
 
     app.addHook('onRequest', async (req, reply) => {
-        const [ authorized, user, error ] = await api.authorizeSession(req, reply)
-
-        req.authorized = authorized
-        req.user = user
-        req.authError = error
+        let authorized, user, error;
+        try {
+            const cookie = api.adapterCtl.getCookie(req, api.config.api.sessionName)
+            const output = await api.authorizeSession(cookie)
+            req.authorized = output[0]
+            req.user = output[1]
+            req.error = output[2]
+        } catch (e) {
+            console.error(e, error)
+        }
     })
 
     app.get('/api', function (request, reply) {
@@ -96,7 +101,7 @@ export function makeRoutes(app, api) {
     })
 
     app.get('/api/calendars', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
         const user = req.user
@@ -183,7 +188,7 @@ export function makeRoutes(app, api) {
     })
 
     app.get('/api/me', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
 
@@ -193,7 +198,7 @@ export function makeRoutes(app, api) {
     })
 
     app.post('/api/me/calendarSubscribe', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
         const user = req.user
@@ -221,7 +226,7 @@ export function makeRoutes(app, api) {
     })
 
     app.post('/api/me/calendarUnsubscribe', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
         const user = req.user
@@ -250,7 +255,7 @@ export function makeRoutes(app, api) {
     })
 
     app.post('/api/me/register', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
         if (!req.body.id) {
@@ -285,7 +290,7 @@ export function makeRoutes(app, api) {
     })
 
     app.post('/api/me/unregister', async (req, reply) => {
-        if (!req.authorized) {
+        if (!req.user) {
             return reply.code(401).send({ error: req.authError })
         }
         if (!req.body.id) {

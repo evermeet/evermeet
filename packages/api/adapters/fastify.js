@@ -48,6 +48,11 @@ export default function ({ evermeet }) {
                 })
                 console.log(`[fastify] Route created: [${method.toUpperCase()}] ${url}`)
             }
+            for (const ih of evermeet.internalEndpoints()) {
+                const url = evermeet.config.api.prefix + '/' + ih.id
+                app.get(url, ih.handler)
+                console.log(`[fastify] Internal route created: [${ih.id}] ${url}`)
+            }
 
             return app
         },
@@ -55,11 +60,15 @@ export default function ({ evermeet }) {
             return app.listen({ port: evermeet.config.api.port, host: evermeet.config.api.host }, function (err, address) {
                 if (err) {
                     app.log.error(err)
+                    console.error(err)
                     evermeet.exit()
                 }
                 // Server is now listening on ${address}
             })
         },
+        getCookie (req, key) {
+            return req.cookies[key]
+        }
     }
 }
 

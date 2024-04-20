@@ -1,0 +1,8 @@
+domain: evermeet.local
+sitename: null
+api:
+  adapter: fastify
+  port: 1111
+  db:
+    storage: sqlite
+    name: ":memory:"

@@ -1,20 +1,20 @@
 domain: evermeet.local
 sitename: null
-featuredCalendars: []
 api:
   enabled: true
-  port: 3000
-  host: localhost
-  db:
-    storage: mongodb
-    name: evermeet-test
-    connection: mongodb://localhost:27017
-    password: putYourPasswordHere
   runtime: bun
   adapter: elysia
+  host: localhost
+  port: 3000
   prefix: /xrpc
+  db:
+    storage: sqlite
+    name: '../../data/evermeet.sqlite'
+    connection: mongodb://localhost:27017
+    password: putYourPasswordHere
   sessionName: evermeet-session-id
 web:
   enabled: true
   port: 3001
   host: localhost
+featuredCalendars: []

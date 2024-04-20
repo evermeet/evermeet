@@ -10,16 +10,15 @@ It's an open and libre replacement for centralized platforms like [Luma](https:/
 
 ## Planned Features
 
-- ⚙️ Event Management
-- 🎟️ Ticket Sales & Registration
-- 📅 Program Management
-- 🎤 Speaker Management
-- 👥 Attendee Management
-- 💳 Payment Processing (incl. crypto)
-- 📊 Analytics & Reporting
-- 📧 Email Communication
-- 🔄 Open-Source
-
+* ⚙️ Event Management
+* 🎟️ Ticket Sales & Registration
+* 📅 Program Management
+* 🎤 Speaker Management
+* 👥 Attendee Management
+* 💳 Payment Processing (incl. crypto)
+* 📊 Analytics & Reporting
+* 📧 Email Communication
+* 🔄 Open-Source
 
 ## Maintainers
 

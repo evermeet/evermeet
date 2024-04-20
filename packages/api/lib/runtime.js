@@ -24,3 +24,11 @@ export function env(key) {
     }
     return process.env[key]
 }
+
+export function exitRuntime() {
+    if (runtime.name === 'deno') {
+        Deno.exit(1)
+    } else {
+        process.exit(1)
+    }
+}

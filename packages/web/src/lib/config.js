@@ -1,13 +1,13 @@
 
 import Package from '../../../../package.json';
-import { apiCall } from './api.js';
+import { internalApiCall } from './api.js';
 
 let loadedConfig;
 
 // load configuration
 export async function loadConfig () {
     if (!loadedConfig) {
-        loadedConfig = await apiCall(fetch, 'config');
+        loadedConfig = await internalApiCall(fetch, '_config');
     }
     return loadedConfig
 }

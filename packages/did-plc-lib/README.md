@@ -1,6 +1,5 @@
 
-@did-plc/lib - DID PLC Typescript Client Library
-================================================
+# @did-plc/lib - DID PLC Typescript Client Library
 
 [![NPM](https://img.shields.io/npm/v/@did-plc/lib)](https://www.npmjs.com/package/@did-plc/lib)
 [![Github CI Status](https://github.com/did-method-plc/did-method-plc/actions/workflows/repo.yaml/badge.svg)](https://github.com/did-method-plc/did-method-plc/actions/workflows/repo.yaml)

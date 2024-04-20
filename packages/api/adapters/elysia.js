@@ -80,6 +80,11 @@ export default function ({ evermeet }) {
                 })
                 console.log(`[elysia] Route created: [${method.toUpperCase()}] ${evermeet.config.api.prefix}/${ep.id}`)
             }
+            for (const ih of evermeet.internalEndpoints()) {
+                const url = evermeet.config.api.prefix + '/' + ih.id
+                app.get(url, ih.handler)
+                console.log(`[elysia] Internal route created: [${ih.id}] ${url}`)
+            }
             return app
         },
         async start () {
@@ -87,6 +92,9 @@ export default function ({ evermeet }) {
                 hostname: evermeet.config.api.host,
                 port: evermeet.config.api.port
             })
+        },
+        getCookie (req, key) {
+            return req.cookie[key]?.value
         }
     }
 }

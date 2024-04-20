@@ -1,6 +1,6 @@
 
-import { apiCall } from '../../lib/api.js';
+import { xrpcCall } from '../../lib/api.js';
 
 export async function load({ params, fetch, parent }) {
-	return apiCall(fetch, 'explore');
+	return xrpcCall(fetch, 'app.evermeet.explore.getExplore');
 }

@@ -9,31 +9,30 @@ export const CalendarManager = new EntitySchema({
       type: 'string'
     },
     time: {
-        type: 'string',
-        nullable: true,
+      type: 'string',
+      nullable: true
     }
   }
 })
 
 export class Calendar {
-
   async view (opts = {}, ctx) {
     const json = wrap(this).toJSON()
     if (opts.events !== false) {
-        json.events = []
-        const events = await ctx.db.events.find({ calendarId: json._id })
-        for (const e of events) {
-            json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
-        }
+      json.events = []
+      const events = await ctx.db.events.find({ calendarId: json._id })
+      for (const e of events) {
+        json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
+      }
     }
-    return json;
+    return json
   }
 }
 
 export const schema = new EntitySchema({
   class: Calendar,
   name: 'Calendar',
-  //extends: 'CustomBaseEntity',
+  // extends: 'CustomBaseEntity',
   properties: {
     _id: {
       type: 'string',
@@ -42,37 +41,37 @@ export const schema = new EntitySchema({
       onCreate: () => ObjectId()
     },
     name: {
-        type: 'string'
+      type: 'string'
     },
     slug: {
-        type: 'string'
-    },  
+      type: 'string'
+    },
     personal: {
-        type: 'boolean',
-        nullable: true,
-        onCreate: () => false,
+      type: 'boolean',
+      nullable: true,
+      onCreate: () => false
     },
     subs: {
       type: 'number',
-      nullable: true,
+      nullable: true
     },
     img: {
       type: 'string',
-      nullable: true,
+      nullable: true
     },
     backdropImg: {
       type: 'string',
-      nullable: true,
+      nullable: true
     },
     description: {
       type: 'string',
-      nullable: true,
+      nullable: true
     },
     managers: {
       kind: 'embedded',
       entity: 'CalendarManager',
       onCreate: () => [],
       array: true
-    },
+    }
   }
-});
+})

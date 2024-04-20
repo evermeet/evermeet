@@ -6,9 +6,9 @@ import * as explore from './explore.js'
 import * as admin from './admin.js'
 
 export default {
-    server,
-    auth,
-    object,
-    explore,
-    admin,
+  server,
+  auth,
+  object,
+  explore,
+  admin
 }

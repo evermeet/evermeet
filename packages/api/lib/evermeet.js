@@ -154,7 +154,7 @@ export class Evermeet {
     let out = {};
     try {
       // check input parameters
-      this.lexicons.assertValidXrpcParams(id, input)
+      this.lexicons.assertValidXrpcInput(id, input)
       // authorize session and basic context
       let authData = {};
       if (endpoint.auth) {
@@ -248,7 +248,7 @@ export class Evermeet {
         if (found) {
           return {
             type: c,
-            item: await found.view(opts)
+            item: await found.view(opts, { db })
           }
         }
       }

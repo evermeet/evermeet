@@ -64,8 +64,8 @@
                 </li>
                 {#if $user}
                     <li><a href="/create">Create Event</a></li>
-                {:else if $page.url.pathname != '/explore'}
-                    <li><a href="/explore">Explore events ↗</a></li>
+                {:else if $page.url.pathname != '/'}
+                    <li><a href="/">Explore events ↗</a></li>
                 {/if}
             </ul>
         </div>

@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { logger } from "@bogeychan/elysia-logger"
+import { cors } from '@elysiajs/cors'
 
 export default function ({ evermeet }) {
     let app;
@@ -9,6 +10,12 @@ export default function ({ evermeet }) {
             app = new Elysia({
                 prefix: evermeet.config.api.prefix
             })
+                .use(cors({
+                    origin: evermeet.env === 'development' 
+                        ? `${evermeet.config.web.host}:${evermeet.config.web.port}`
+                        : evermeet.config.domain,
+                    credentials: true
+                }))
                 .use(swagger({ 
                     path: '/_swagger',
                     excludeStaticFile: false,
@@ -55,7 +62,7 @@ export default function ({ evermeet }) {
                 const method = ep.lex.defs.main.type === "procedure" ? 'post' : 'get'
 
                 app[method](ep.id, async ({ error, query, body, headers, cookie }) => {
-                    let out = {};   
+                    let out = {};
                     const input = ep.lex.defs.main.type === "procedure" ? body : query
                     const session = headers.authorization?.replace(/^Bearer /, "") || cookie[evermeet.config.api.sessionName].value
                     out = await evermeet.request(ep.id, { input, headers, session })
@@ -65,6 +72,7 @@ export default function ({ evermeet }) {
                     return out.body
                 }, {
                     query: t.Any(ep.lex.defs.main.parameters),
+                    body: t.Any(ep.lex.defs.main.input?.schema),
                     response: {
                         200: t.Any(ep.lex.defs.main.output.schema),
                         501: t.Object({
@@ -81,7 +89,7 @@ export default function ({ evermeet }) {
                 console.log(`[elysia] Route created: [${method.toUpperCase()}] ${evermeet.config.api.prefix}/${ep.id}`)
             }
             for (const ih of evermeet.internalEndpoints()) {
-                const url = evermeet.config.api.prefix + '/' + ih.id
+                const url = ih.id
                 app.get(url, ih.handler)
                 console.log(`[elysia] Internal route created: [${ih.id}] ${url}`)
             }

@@ -16,15 +16,16 @@ export const CalendarManager = new EntitySchema({
 })
 
 export class Calendar {
-  async view (opts = {}, { db = {} } = {}) {
+
+  async view (opts = {}, ctx) {
     const json = wrap(this).toJSON()
-    /*if (opts.events !== false) {
+    if (opts.events !== false) {
         json.events = []
-        const events = await api.cols.events.find({ selector: { calendarId: json.id }}).exec();
+        const events = await ctx.db.events.find({ calendarId: json._id })
         for (const e of events) {
-            json.events.push(await e.view(Object.assign(opts, { calendar: false })))
+            json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
         }
-    }*/
+    }
     return json;
   }
 }

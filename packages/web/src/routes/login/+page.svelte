@@ -2,7 +2,7 @@
 <script>
     import { UserPlus } from 'svelte-heros-v2';
     import { pkg } from '../../lib/config.js';
-    import { apiCall } from '../../lib/api.js';
+    import { xrpcCall } from '../../lib/api.js';
     import { writable } from 'svelte/store';
     import { goto } from '$app/navigation';
     import { user, config } from '$lib/stores';
@@ -21,15 +21,7 @@
             return false
         }
         isProcessing = true;
-        const resp = await apiCall(fetch, 'login', {
-            method: 'post',
-            body: JSON.stringify({
-                email: $email
-            }),
-            headers: {
-                'content-type': 'application/json'
-            },
-        })
+        const resp = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, { identifier: $email })
         isProcessing = false;
         if (!resp.user) {
             return false;

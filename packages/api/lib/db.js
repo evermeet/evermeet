@@ -12,7 +12,7 @@ export async function initDatabase(api, conf) {
         debug: api.env === 'development',
     });
 
-    await orm.schema.refreshDatabase();
+    await orm.schema.refreshDatabase()
 
     console.log('[Database] Storage initialized')
     return {
@@ -23,6 +23,8 @@ export async function initDatabase(api, conf) {
             return {
                 em,
                 calendars: em.getRepository('Calendar'),
+                events: em.getRepository('Event'),
+                users: em.getRepository('User'),
                 wrap,
             }
         }
@@ -35,6 +37,8 @@ export async function loadMockData (api) {
     const mockDir = './mock-data'
     const map = [
         ['calendars.yaml', 'Calendar'],
+        ['events.yaml', 'Event'],
+        ['users.yaml', 'User'],
     ]
 
     const em = db.em.fork()

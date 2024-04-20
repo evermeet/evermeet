@@ -1,83 +1,85 @@
 - id: 5d79e6cf6cba90
-  slug: w3pn-m24ams
   calendarId: 2e9e2199afca02
-  name: W3PN Meetup @ ETHDam 2024
-  dateStart: 2024-04-11T14:00
-  dateEnd: 2024-04-11T20:00
-  img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/7h/c460b46a-ff30-4192-a230-f51942673eab
-  placeName: Vrij Paleis
-  placeCountry: nl
-  placeCity: Amsterdam
-  guestCount: 54
-  guests:
-    - name: jensei
-    - name: Enrico
-  guestsNative:
-    - ref: did:plc:524tuhdhh3m7li5gycdn6boe
-      rel: joined
-      time: 2024-01-01T01:00
-  hosts:
-    - name: PD_CDG
-      img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=24,height=24/avatars/4w/53843e16-874b-4666-92a2-2341fb5de057
-  description: |
-    [**Web3Privacy Now**](https://web3privacy.info/) **presents a special privacy meetup fostering cypherpunk future.**
-    
-    ​Featuring privacy leaders, ZK researchers, security managers, human rights activists & others great people.
+  config:
+    slug: w3pn-m24ams
+    name: W3PN Meetup @ ETHDam 2024
+    dateStart: 2024-04-11T14:00
+    dateEnd: 2024-04-11T20:00
+    img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/7h/c460b46a-ff30-4192-a230-f51942673eab
+    placeName: Vrij Paleis
+    placeCountry: nl
+    placeCity: Amsterdam
+    guestCount: 54
+    guests:
+      - name: jensei
+      - name: Enrico
+    guestsNative:
+      - ref: did:plc:524tuhdhh3m7li5gycdn6boe
+        rel: joined
+        time: 2024-01-01T01:00
+    hosts:
+      - name: PD_CDG
+        img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=24,height=24/avatars/4w/53843e16-874b-4666-92a2-2341fb5de057
+    description: |
+      [**Web3Privacy Now**](https://web3privacy.info/) **presents a special privacy meetup fostering cypherpunk future.**
+      
+      ​Featuring privacy leaders, ZK researchers, security managers, human rights activists & others great people.
 
-    ![](https://images.lumacdn.com/editor-images/ld/a5afd65c-14ab-4aab-a9cb-1e3c3b407431)\
-    **Selected** **Speakers** ***[updating]***
+      ![](https://images.lumacdn.com/editor-images/ld/a5afd65c-14ab-4aab-a9cb-1e3c3b407431)\
+      **Selected** **Speakers** ***[updating]***
 
-    - [Kieran Mesquita](https://twitter.com/mesquka) | chief scientist [Railgun](https://www.railgun.org/)\
-    *The internet physical infrastructure problem - threats to P2P Networks*
+      - [Kieran Mesquita](https://twitter.com/mesquka) | chief scientist [Railgun](https://www.railgun.org/)\
+      *The internet physical infrastructure problem - threats to P2P Networks*
 
-    - [Sterlin Lujan](https://twitter.com/SterlinLujan) | core contributor [@Logos](https://twitter.com/Logos_network)\
-    *A Return to Cypherpunk Values*
+      - [Sterlin Lujan](https://twitter.com/SterlinLujan) | core contributor [@Logos](https://twitter.com/Logos_network)\
+      *A Return to Cypherpunk Values*
 
-    - [Moritz Boullenger](https://www.linkedin.com/in/moritzboullenger/) | co-founder [@fluidkey](https://twitter.com/fluidkey)\
-    *Your address is not your identity, better privacy & onchain UX with stealth addresses*
+      - [Moritz Boullenger](https://www.linkedin.com/in/moritzboullenger/) | co-founder [@fluidkey](https://twitter.com/fluidkey)\
+      *Your address is not your identity, better privacy & onchain UX with stealth addresses*
 
-    - [PG](https://twitter.com/PG_CDG) | core team [@web3privacy](https://twitter.com/web3privacy)\
-    *Quick overview of Web3Privacy Now activities and latest iterations*
+      - [PG](https://twitter.com/PG_CDG) | core team [@web3privacy](https://twitter.com/web3privacy)\
+      *Quick overview of Web3Privacy Now activities and latest iterations*
 
-    - [Jana Mordhorst](https://www.janamordhorst.com/about)\
-    *Thematic live drawing workshop* 🎨 🖌️
+      - [Jana Mordhorst](https://www.janamordhorst.com/about)\
+      *Thematic live drawing workshop* 🎨 🖌️
 
-    *Privacy summit in Prague 23' - Ameen Soleimani x Privacy Pools, Rachel-Rose O'Leary x DarkFi*
+      *Privacy summit in Prague 23' - Ameen Soleimani x Privacy Pools, Rachel-Rose O'Leary x DarkFi*
 
-    ![](https://images.lumacdn.com/editor-images/dy/4e196b9d-5ba5-445e-9695-ba2b0c3a1a75)
+      ![](https://images.lumacdn.com/editor-images/dy/4e196b9d-5ba5-445e-9695-ba2b0c3a1a75)
 
-    Our meetups serve as a fertile ground for people around the world to gather IRL, understand different perspectives and share the latest cryptographic tooling, practical privacy-preserving dApps, research and knowledge.
+      Our meetups serve as a fertile ground for people around the world to gather IRL, understand different perspectives and share the latest cryptographic tooling, practical privacy-preserving dApps, research and knowledge.
 
-    Ultimate common goal is to make practical steps further towards full-**stack privacy in the web3.**
+      Ultimate common goal is to make practical steps further towards full-**stack privacy in the web3.**
 
-    **Our previous events** - feel the vibe:)
+      **Our previous events** - feel the vibe:)
 
-    -   *Privacy Summit in Prague*: <https://prague.web3privacy.info>
+      -   *Privacy Summit in Prague*: <https://prague.web3privacy.info>
 
-    -   *Privacy Summit in Rome*: [link](https://mirror.xyz/0x0f1F3DAf416B74DB3DE55Eb4D7513a80F4841073/bzv735Bc1zak7Yi-NcxWavMQKgt2ANXQtpkrSp8Xg3o)
+      -   *Privacy Summit in Rome*: [link](https://mirror.xyz/0x0f1F3DAf416B74DB3DE55Eb4D7513a80F4841073/bzv735Bc1zak7Yi-NcxWavMQKgt2ANXQtpkrSp8Xg3o)
 
-    ![](https://images.lumacdn.com/editor-images/qo/0d9ea047-5f11-418d-b22e-1be30170a8bd)
+      ![](https://images.lumacdn.com/editor-images/qo/0d9ea047-5f11-418d-b22e-1be30170a8bd)
 
-    Follow Us: <http://twitter.com/web3privacy>
+      Follow Us: <http://twitter.com/web3privacy>
 
-    **What is** [**Web3privacy Now**](http://web3privacy.info)
+      **What is** [**Web3privacy Now**](http://web3privacy.info)
 
-    Leading privacy x web3 think-tank powered by Ethereum & Zcash foundation grants, supported in 2023 by 50 partners from Nym to Secret Network, responsible for the biggest privacy-enhancing DB at Git & accelerating privacy to support lives of 100M people.
-  sync:
-    - method: luma-r2l-v1:sync
-      url: https://lu.ma/w3pn-meetup-ams1
-  registration:
-    enabled: true
+      Leading privacy x web3 think-tank powered by Ethereum & Zcash foundation grants, supported in 2023 by 50 partners from Nym to Secret Network, responsible for the biggest privacy-enhancing DB at Git & accelerating privacy to support lives of 100M people.
+    sync:
+      - method: luma-r2l-v1:sync
+        url: https://lu.ma/w3pn-meetup-ams1
+    registration:
+      enabled: true
 
-- slug: w3pn-m24ber
-  name: W3PN Meetup @ ETHBerlin 4
-  dateStart: 2024-05-22T12:00
-  dateEnd: 2024-05-22T19:00
-  img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/cy/10b124c9-2200-4201-bed9-b7f1299ba9e6
-  placeName: c-base
-  placeCountry: de
-  placeCity: Berlin
-  calendarId: 2e9e2199afca02
+- calendarId: 2e9e2199afca02
+  config:
+    slug: w3pn-m24ber
+    name: W3PN Meetup @ ETHBerlin 4
+    dateStart: 2024-05-22T12:00
+    dateEnd: 2024-05-22T19:00
+    img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/cy/10b124c9-2200-4201-bed9-b7f1299ba9e6
+    placeName: c-base
+    placeCountry: de
+    placeCity: Berlin
 
 #- slug: ethberlin4
 #  name: ETHBerlin04
@@ -105,132 +107,136 @@
 #    For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
 #  web: https://ethberlin.org/
 
-- slug: w3pn-s24prg
-  name: Web3Privacy Now Summit @ ETHPrague 2024
-  dateStart: 2024-05-30T07:00
-  dateEnd: 2024-05-31T04:00
-  placeName: TBD
-  placeCity: Prague
-  placeCountry: cz
-  img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/we/c06a01fc-c70f-4775-b6eb-8e910f6ef3bc
-  calendarId: 2e9e2199afca02
-  hosts:
-    - name: Mykola
-      img: /avatar.jpeg
-    - name: PD_CDG
-      img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=24,height=24/avatars/4w/53843e16-874b-4666-92a2-2341fb5de057
-  description: |
-    We return to Prague after a highly successful 23' summit with speakers from Nym, Privacy Pools, HOPR, Secret Network, DarkFi, Circles UBI, Aragon ZK Research, Privacy & Scaling Explorations, Swarm, Factory DAO, Ethereum Foundation: recap <https://prague.web3privacy.info>
+- calendarId: 2e9e2199afca02
+  config:
+    slug: w3pn-s24prg
+    name: Web3Privacy Now Summit @ ETHPrague 2024
+    dateStart: 2024-05-30T07:00
+    dateEnd: 2024-05-31T04:00
+    placeName: TBD
+    placeCity: Prague
+    placeCountry: cz
+    img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/we/c06a01fc-c70f-4775-b6eb-8e910f6ef3bc
+    hosts:
+      - name: Mykola
+        img: /avatar.jpeg
+      - name: PD_CDG
+        img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=24,height=24/avatars/4w/53843e16-874b-4666-92a2-2341fb5de057
+    description: |
+      We return to Prague after a highly successful 23' summit with speakers from Nym, Privacy Pools, HOPR, Secret Network, DarkFi, Circles UBI, Aragon ZK Research, Privacy & Scaling Explorations, Swarm, Factory DAO, Ethereum Foundation: recap <https://prague.web3privacy.info>
 
-    ![](https://images.lumacdn.com/editor-images/kb/5b8b92e1-bbf4-4563-9f60-f887045864bf)
+      ![](https://images.lumacdn.com/editor-images/kb/5b8b92e1-bbf4-4563-9f60-f887045864bf)
 
-    *23' edition speakers*
+      *23' edition speakers*
 
-    ![](https://images.lumacdn.com/editor-images/nx/1c8d7354-05cd-4984-9ec9-e4ff58b16a93)
+      ![](https://images.lumacdn.com/editor-images/nx/1c8d7354-05cd-4984-9ec9-e4ff58b16a93)
 
-    The 2024 edition will become a key event for censorship resistance happening across the whole crypto industry. Core protocols & thinkers will present the latest tech & explain how everyone could become cypherpunk.
+      The 2024 edition will become a key event for censorship resistance happening across the whole crypto industry. Core protocols & thinkers will present the latest tech & explain how everyone could become cypherpunk.
 
-    #2 edition's MC is Michael Parenti\
-    [experienced crypto enthusiast, co-founder of [@ParallelePolis](https://twitter.com/ParallelePolis)]
+      #2 edition's MC is Michael Parenti\
+      [experienced crypto enthusiast, co-founder of [@ParallelePolis](https://twitter.com/ParallelePolis)]
 
-    ![](https://images.lumacdn.com/editor-images/w6/d9ca7a43-b7c6-43e8-8e39-f3f18aaf78d6)
+      ![](https://images.lumacdn.com/editor-images/w6/d9ca7a43-b7c6-43e8-8e39-f3f18aaf78d6)
 
-    ***Check the vibes***
+      ***Check the vibes***
 
-    ​feat Ameen Soleimani x Privacy Pools, Rachel-Rose O'Leary x DarkFi
+      ​feat Ameen Soleimani x Privacy Pools, Rachel-Rose O'Leary x DarkFi
 
-    ![](https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=800,height=723.1692677070829/editor-images/e1/2fe822a7-0765-4e2d-8d70-cf3e1bd48a54)
+      ![](https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=800,height=723.1692677070829/editor-images/e1/2fe822a7-0765-4e2d-8d70-cf3e1bd48a54)
 
-    ​Our Summit serves as the platform for people around the world to share the latest cryptographic tooling, practical privacy-preserving dApps, research findings and knowledge infrastructure. 100% focus on the practical value.
+      ​Our Summit serves as the platform for people around the world to share the latest cryptographic tooling, practical privacy-preserving dApps, research findings and knowledge infrastructure. 100% focus on the practical value.
 
-    ![](https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=800,height=656.0250391236307/editor-images/sb/e9833983-4659-4501-bcd8-0ac5ea98cc46)
+      ![](https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=800,height=656.0250391236307/editor-images/sb/e9833983-4659-4501-bcd8-0ac5ea98cc46)
 
-    ​Previous events
+      ​Previous events
 
-    -   ​*Privacy Summit in Prague*: <https://prague.web3privacy.info>
+      -   ​*Privacy Summit in Prague*: <https://prague.web3privacy.info>
 
-    -   ​*Privacy Summit in Rome*: [link](https://mirror.xyz/0x0f1F3DAf416B74DB3DE55Eb4D7513a80F4841073/bzv735Bc1zak7Yi-NcxWavMQKgt2ANXQtpkrSp8Xg3o)
+      -   ​*Privacy Summit in Rome*: [link](https://mirror.xyz/0x0f1F3DAf416B74DB3DE55Eb4D7513a80F4841073/bzv735Bc1zak7Yi-NcxWavMQKgt2ANXQtpkrSp8Xg3o)
 
-    More details TBA: feel free to check updates on Twitter: <https://twitter.com/web3privacy>\
-    <http://web3privacy.info>
+      More details TBA: feel free to check updates on Twitter: <https://twitter.com/web3privacy>\
+      <http://web3privacy.info>
 
-    This is pre-registration.
+      This is pre-registration.
 
-- slug: ethbrno3
-  name: ETHBrno 2024
-  dateStart: 2024-10-25T12:00
-  dateEnd: 2024-10-27T15:00
-  placeName: TBD
-  placeCity: Brno
-  placeCountry: cz
-  img: https://pbs.twimg.com/profile_images/1758254611276656640/pYhIGUiT_400x400.jpg
-  calendarId: df5744efdd3368
-  hosts:
-    - name: Tree
-      img: https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
-  registration:
-    enabled: true
+- calendarId: df5744efdd3368
+  config:
+    slug: ethbrno3
+    name: ETHBrno 2024
+    dateStart: 2024-10-25T12:00
+    dateEnd: 2024-10-27T15:00
+    placeName: TBD
+    placeCity: Brno
+    placeCountry: cz
+    img: https://pbs.twimg.com/profile_images/1758254611276656640/pYhIGUiT_400x400.jpg
+    hosts:
+      - name: Tree
+        img: https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
+    registration:
+      enabled: true
 
-- slug: beerfi23
-  name: "Beerfi Prague - Web3 on-chain dev Meetup #23"
-  calendarId: 134025681d743f0
-  dateStart: 2024-03-26T18:00
-  dateEnd: 2024-03-26T21:00
-  placeName: Cafe DECADA
-  placeCountry: cz
-  placeCity: Prague
-  img: https://secure.meetupstatic.com/photos/event/4/2/2/c/600_519856940.webp?w=750
-  hosts:
-    - name: Ethan C.
-      img: https://secure-content.meetupstatic.com/images/classic-member/311405349/45x45.jpg
-  links:
-    meetup: https://www.meetup.com/web3-on-chain-dev-meetup-group/events/299867008/
-  guestCount: 8
-  guests:
-    - name: Albina
-      img: https://secure.meetupstatic.com/photos/member/d/e/c/5/thumb_318957029.jpeg
-    - name: Petr
-      img: https://secure.meetupstatic.com/photos/member/e/2/a/e/thumb_297478030.jpeg
-  description: |
-    Once a month on the last Tuesday, we bring together contract programmers in Web3. Whether you are a Web2 developer interested to learn more or a senior in the Web3 sphere, our meetup is for you!
+- calendarId: 134025681d743f0
+  config:
+    slug: beerfi23
+    name: "Beerfi Prague - Web3 on-chain dev Meetup #23"
+    dateStart: 2024-03-26T18:00
+    dateEnd: 2024-03-26T21:00
+    placeName: Cafe DECADA
+    placeCountry: cz
+    placeCity: Prague
+    img: https://secure.meetupstatic.com/photos/event/4/2/2/c/600_519856940.webp?w=750
+    hosts:
+      - name: Ethan C.
+        img: https://secure-content.meetupstatic.com/images/classic-member/311405349/45x45.jpg
+    links:
+      meetup: https://www.meetup.com/web3-on-chain-dev-meetup-group/events/299867008/
+    guestCount: 8
+    guests:
+      - name: Albina
+        img: https://secure.meetupstatic.com/photos/member/d/e/c/5/thumb_318957029.jpeg
+      - name: Petr
+        img: https://secure.meetupstatic.com/photos/member/e/2/a/e/thumb_297478030.jpeg
+    description: |
+      Once a month on the last Tuesday, we bring together contract programmers in Web3. Whether you are a Web2 developer interested to learn more or a senior in the Web3 sphere, our meetup is for you!
 
-    Enjoy a nice cold lager and get ready to blow your mind on what's possible in blockchain.
+      Enjoy a nice cold lager and get ready to blow your mind on what's possible in blockchain.
 
-    Make sure to check out our sponsor, AgorApp!
+      Make sure to check out our sponsor, AgorApp!
 
-    **AgorApp provides an interactive coding environment to learn Web3 programming on different chains & protocols. Right now you can take courses & challenges to learn Solidity (Ethereum), Motoko (Internet Computer) Ethereum Swarm & Lisk with more coming! You can check it out at: <https://agorapp.dev/>**
+      **AgorApp provides an interactive coding environment to learn Web3 programming on different chains & protocols. Right now you can take courses & challenges to learn Solidity (Ethereum), Motoko (Internet Computer) Ethereum Swarm & Lisk with more coming! You can check it out at: <https://agorapp.dev/>**
 
-    Last meetup we focused on NEAR smart contract development & how to make on-chain matchmaking for on-chain games.
+      Last meetup we focused on NEAR smart contract development & how to make on-chain matchmaking for on-chain games.
 
-    Our upcoming meetup will be again hosted at **Decada - a crypto-friendly cafe bar** with an inviting atmosphere and friendly staff. Decada's commitment to innovation makes it the perfect venue for gathering like-minded developers. They are happy to invite us to join them for an evening of fresh perspectives, vibrant discussions, and good company at Decada.
+      Our upcoming meetup will be again hosted at **Decada - a crypto-friendly cafe bar** with an inviting atmosphere and friendly staff. Decada's commitment to innovation makes it the perfect venue for gathering like-minded developers. They are happy to invite us to join them for an evening of fresh perspectives, vibrant discussions, and good company at Decada.
 
-    ## Agenda
+      ## Agenda
 
-    1.  Introduction Radek - 15 minutes
-    2.  Remote Talk - Jordan - Building Secure Replicated JavaScript Servers using Azle (Internet Computer)
-    3.  Campfire - Radek - Optimism blobbing post-Dencun
-    4.  Lightning talks. - 5 minutes each
+      1.  Introduction Radek - 15 minutes
+      2.  Remote Talk - Jordan - Building Secure Replicated JavaScript Servers using Azle (Internet Computer)
+      3.  Campfire - Radek - Optimism blobbing post-Dencun
+      4.  Lightning talks. - 5 minutes each
 
-    Have something to share like a project or protocol in Web3? You get the floor for 5 minutes. Please signup here: <https://app.skiff.com/docs/13f184c2-b297-4c4d-852a-5a0228bf8a64#7a9Wjn7FyRxvZtko3pA0BlMULconqnVMKkMD2PYVSDY=>
+      Have something to share like a project or protocol in Web3? You get the floor for 5 minutes. Please signup here: <https://app.skiff.com/docs/13f184c2-b297-4c4d-852a-5a0228bf8a64#7a9Wjn7FyRxvZtko3pA0BlMULconqnVMKkMD2PYVSDY=>
 
-    The meetup is focused on contract development. Very tech stuff - down to the byte code. Not frontends and JS Frameworks - there are other meetups for those.
+      The meetup is focused on contract development. Very tech stuff - down to the byte code. Not frontends and JS Frameworks - there are other meetups for those.
 
-    Example topics will be comparison of proxies, their gas, size, ect. Other talks will be about cross chain / layer calls, blind signing, security, clever hacks, and more. Regarding contracts level - any smart contracts, i.e. not limited to EVM based.
+      Example topics will be comparison of proxies, their gas, size, ect. Other talks will be about cross chain / layer calls, blind signing, security, clever hacks, and more. Regarding contracts level - any smart contracts, i.e. not limited to EVM based.
 
-    Have questions or want to share something cool with us? Join our community group on Telegram to get updates or to share knowledge: <https://t.me/+eA4eMYlEo-k2ZGVk>
+      Have questions or want to share something cool with us? Join our community group on Telegram to get updates or to share knowledge: <https://t.me/+eA4eMYlEo-k2ZGVk>
 
-    We look forward to seeing you all Tuesday, March 26th
+      We look forward to seeing you all Tuesday, March 26th
 
-- slug: monerokon2024
-  name: MoneroKon 2024
-  calendarId: aiTah6Ax8ayihe
-  dateStart: 2024-06-07T10:00
-  dateEnd: 2024-06-09T15:00
-  placeCity: Prague
-  placeCountry: cz
-  placeName: Paralelní Polis
-  img: https://pbs.twimg.com/profile_images/1754882391057850368/zlTXAKPT_400x400.jpg
-  description: |
-    Monero Konferenco (“MoneroKon”) is an annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems. Marking its fourth year, the upcoming 3-day event will be held once again at the renowned Paralelní Polis in the Czech Republic from 7th-9th of June 2024. Come participate in discussions and help us move privacy forward one conversation at a time.
-  registration:
-    enabled: true
+- calendarId: aiTah6Ax8ayihe
+  config:
+    slug: monerokon2024
+    name: MoneroKon 2024
+    dateStart: 2024-06-07T10:00
+    dateEnd: 2024-06-09T15:00
+    placeCity: Prague
+    placeCountry: cz
+    placeName: Paralelní Polis
+    img: https://pbs.twimg.com/profile_images/1754882391057850368/zlTXAKPT_400x400.jpg
+    description: |
+      Monero Konferenco (“MoneroKon”) is an annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems. Marking its fourth year, the upcoming 3-day event will be held once again at the renowned Paralelní Polis in the Czech Republic from 7th-9th of June 2024. Come participate in discussions and help us move privacy forward one conversation at a time.
+    registration:
+      enabled: true

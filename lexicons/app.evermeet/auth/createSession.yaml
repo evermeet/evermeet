@@ -8,40 +8,34 @@ defs:
       schema:
         type: object
         required:
-        - identifier
-        - password
+          - identifier
+          - password
         properties:
           identifier:
             type: string
-            description: Handle or other identifier supported by the server for the
+            description: Username or other identifier supported by the server for the
               authenticating user.
+            example: my-username
           password:
             type: string
+            example: my-password
     output:
       encoding: application/json
       schema:
         type: object
         required:
         - accessJwt
-        - refreshJwt
-        - handle
+        #- refreshJwt
         - did
         properties:
           accessJwt:
             type: string
           refreshJwt:
             type: string
-          handle:
+          username:
             type: string
-            format: handle
           did:
             type: string
             format: did
-          didDoc:
-            type: unknown
-          email:
-            type: string
-          emailConfirmed:
-            type: boolean
     errors:
     - name: AccountTakedown

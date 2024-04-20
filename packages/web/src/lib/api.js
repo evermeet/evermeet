@@ -31,6 +31,7 @@ export async function xrpcCall(fetch, ...args) {
         const lexicons = await internalApiCall(fetch, '_lexicons')
         xrpcClient.addLexicons(lexicons)
     }
+    console.log(args)
     const resp = await xrpcClient.service(apiHost + "/xrpc").call(...args)
     return resp.data
 }

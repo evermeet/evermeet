@@ -25,7 +25,7 @@ export class Calendar {
         json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
       }
     }
-    json.baseUrl = `/${json.handle.replace('.'+ctx.api.config.domain, '')}`
+    json.baseUrl = `/${json.handle.replace('.' + ctx.api.config.domain, '')}`
     json.url = `https://${ctx.api.config.domain}${json.baseUrl}`
     json.handleUrl = json.handle
     return json
@@ -50,11 +50,11 @@ export const schema = new EntitySchema({
       type: 'string',
       format: 'handle',
       nullable: true,
-      unique: true,
+      unique: true
     },
     slug: {
       type: 'string',
-      nullable: true,
+      nullable: true
     },
     personal: {
       type: 'boolean',

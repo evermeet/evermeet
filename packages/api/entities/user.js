@@ -2,12 +2,12 @@ import { EntitySchema, wrap } from '@mikro-orm/core'
 import { ObjectId } from '../lib/db.js'
 
 class User {
-  async view() {
+  async view () {
     const json = wrap(this).toJSON()
     return {
       handle: json.handle,
       did: json.did,
-      createdOn: json.createdOn,
+      createdOn: json.createdOn
     }
   }
 }
@@ -43,12 +43,12 @@ export const schema = new EntitySchema({
     signingKey: {
       type: 'string',
       nullable: true,
-      lazy: true,
+      lazy: true
     },
     rotationKey: {
       type: 'string',
       nullable: true,
-      lazy: true,
+      lazy: true
     },
     createdOn: {
       type: 'string',

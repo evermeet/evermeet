@@ -5,16 +5,16 @@ import { DidJwk } from '@web5/dids'
 import { Secp256k1Keypair } from '@atproto/crypto'
 import * as plc from '../../../did-plc-lib'
 
-function base64ToBytes(base64) {
-  const binString = atob(base64);
-  return Uint8Array.from(binString, (m) => m.codePointAt(0));
+function base64ToBytes (base64) {
+  const binString = atob(base64)
+  return Uint8Array.from(binString, (m) => m.codePointAt(0))
 }
 
-function bytesToBase64(bytes) {
+function bytesToBase64 (bytes) {
   const binString = Array.from(bytes, (byte) =>
-    String.fromCodePoint(byte),
-  ).join("");
-  return btoa(binString);
+    String.fromCodePoint(byte)
+  ).join('')
+  return btoa(binString)
 }
 
 function createSessionToken (user, ctx) {
@@ -32,17 +32,17 @@ export async function generateDid (server, ctx) {
       return { error: 'HandleNotAvailable' }
     }
 
-    let pdid, done;
-    while(!done) {
-      let signingKey = await Secp256k1Keypair.create({ exportable: true })
-      let rotationKey = await Secp256k1Keypair.create({ exportable: true })
-      
+    let pdid, done
+    while (!done) {
+      const signingKey = await Secp256k1Keypair.create({ exportable: true })
+      const rotationKey = await Secp256k1Keypair.create({ exportable: true })
+
       pdid = await plcClient.createDidLocal({
         signingKey: signingKey.did(),
         handle,
         pds: `https://${ctx.api.config.domain}`,
         rotationKeys: [rotationKey.did()],
-        signer: rotationKey,
+        signer: rotationKey
       })
       try {
         await plcClient.getDocument(pdid.did)
@@ -78,10 +78,10 @@ export async function createAccount (server, ctx) {
     const passwordHash = await argon2.hash(password)
 
     // create DID
-    //const didJwk = await DidJwk.create()
+    // const didJwk = await DidJwk.create()
 
-    let signingKey = await Secp256k1Keypair.create({ exportable: true })
-    let rotationKey = await Secp256k1Keypair.create({ exportable: true })
+    const signingKey = await Secp256k1Keypair.create({ exportable: true })
+    const rotationKey = await Secp256k1Keypair.create({ exportable: true })
 
     const plcClient = new plc.Client(ctx.api.config.plcServer)
     const did = await plcClient.createDid({
@@ -89,17 +89,17 @@ export async function createAccount (server, ctx) {
       handle,
       pds: `https://${ctx.api.config.domain}`,
       rotationKeys: [rotationKey.did()],
-      signer: rotationKey,
+      signer: rotationKey
     })
 
     // create user object
     const user = await db.users.create({
       handle,
       did,
-      //portableDid: await did.export(),
+      // portableDid: await did.export(),
       password: passwordHash,
       signingKey: bytesToBase64(await signingKey.export()),
-      rotationKey: bytesToBase64(await rotationKey.export()),
+      rotationKey: bytesToBase64(await rotationKey.export())
     })
 
     // save user to database

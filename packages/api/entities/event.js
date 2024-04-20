@@ -52,7 +52,7 @@ export class Event {
 
     const calendar = await ctx.db.calendars.findOne({ _id: this.calendarId })
     json.calendar = await calendar.view({ events: false }, ctx)
-  
+
     json.baseUrl = json.calendar.baseUrl + '/' + json.slug
     json.url = json.calendar.url + '/' + json.slug
     json.handleUrl = json.calendar.handle + '/' + json.slug

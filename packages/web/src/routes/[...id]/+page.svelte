@@ -7,10 +7,10 @@
 
 {#if data.type === 'event'}
     <div class="page-wide">
-        <EventDetail item={data.item} />
+        <EventDetail item={data.item} id={data.item.id} />
     </div>
 {/if}
 
 {#if data.type === 'calendar'}
-    <CalendarDetail item={data.item} />
+    <CalendarDetail item={data.item} id={data.item.id} />
 {/if}

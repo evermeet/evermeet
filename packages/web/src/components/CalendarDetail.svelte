@@ -4,6 +4,9 @@
     import { user } from '$lib/stores';
     import { page } from '$app/stores';
     import { calendarSubscribe, calendarUnsubscribe } from '$lib/actions';
+    import { config } from '$lib/stores';
+    import { CheckCircle, LockClosed } from 'svelte-heros-v2';
+    import HandleBadge from './HandleBadge.svelte';
     
     export let item;
 
@@ -52,9 +55,8 @@
 
     </div>
     <h1 class="text-4xl font-medium {item.backdropImg ? '' : 'mt-6'}">{item.name}</h1>
-    {#if item._remote}
-        <div class="badge badge-neutral font-mono text-xs my-2">{item._remote}</div>
-    {/if}
+    <HandleBadge {item} />
+
     {#if item.description}
         <div class="mt-3 text-neutral-content">{@html parse(item.description)}</div>
     {/if}

@@ -27,7 +27,7 @@ export default function ({ evermeet }) {
             info: {
               title: 'evermeet HTTP API (XRPC)',
               version: evermeet.pkg.version,
-              description: 'More info: https://docs.evermeet.app/developers/xrpc'
+              description: 'More info: https://docs.evermeet.app/specs/xrpc'
             },
             paths: {
               '/xrpc/_swagger': {
@@ -69,8 +69,8 @@ export default function ({ evermeet }) {
           }
           return out.body
         }, {
-          query: t.Any(ep.lex.defs.main.parameters),
-          body: t.Any(ep.lex.defs.main.input?.schema),
+          query: ep.lex.defs.main.type === 'query' ? t.Any(ep.lex.defs.main.parameters) : null,
+          body: ep.lex.defs.main.type === 'procedure' ? t.Any(ep.lex.defs.main.input?.schema) : null,
           response: {
             200: t.Any(ep.lex.defs.main.output.schema),
             501: t.Object({

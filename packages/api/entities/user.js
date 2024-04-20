@@ -1,8 +1,20 @@
 import { EntitySchema, wrap } from '@mikro-orm/core'
 import { ObjectId } from '../lib/db.js'
 
+class User {
+  async view() {
+    const json = wrap(this).toJSON()
+    return {
+      handle: json.handle,
+      did: json.did,
+      createdOn: json.createdOn,
+    }
+  }
+}
+
 export const schema = new EntitySchema({
   name: 'User',
+  class: User,
   properties: {
     _id: {
       type: 'string',
@@ -10,7 +22,7 @@ export const schema = new EntitySchema({
       primary: true,
       onCreate: () => ObjectId()
     },
-    username: {
+    handle: {
       type: 'string',
       unique: true
     },
@@ -21,10 +33,27 @@ export const schema = new EntitySchema({
       type: 'string'
     },
     name: {
-      type: 'string'
+      type: 'string',
+      nullable: true
     },
     email: {
-      type: 'string'
+      type: 'string',
+      nullable: true
+    },
+    signingKey: {
+      type: 'string',
+      nullable: true,
+      lazy: true,
+    },
+    rotationKey: {
+      type: 'string',
+      nullable: true,
+      lazy: true,
+    },
+    createdOn: {
+      type: 'string',
+      format: 'date-time',
+      onCreate: () => (new Date()).toISOString()
     }
   }
 })

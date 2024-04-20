@@ -1,7 +1,7 @@
 - id: 5d79e6cf6cba90
   calendarId: 2e9e2199afca02
   config:
-    slug: w3pn-m24ams
+    slug: m24ams
     name: W3PN Meetup @ ETHDam 2024
     dateStart: 2024-04-11T14:00
     dateEnd: 2024-04-11T20:00
@@ -161,7 +161,7 @@
 
 - calendarId: df5744efdd3368
   config:
-    slug: ethbrno3
+    slug: 3
     name: ETHBrno 2024
     dateStart: 2024-10-25T12:00
     dateEnd: 2024-10-27T15:00
@@ -228,7 +228,7 @@
 
 - calendarId: aiTah6Ax8ayihe
   config:
-    slug: monerokon2024
+    slug: 2024
     name: MoneroKon 2024
     dateStart: 2024-06-07T10:00
     dateEnd: 2024-06-09T15:00

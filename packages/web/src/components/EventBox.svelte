@@ -2,11 +2,12 @@
     import { format } from 'date-fns'
     import { MapPin, Users } from 'svelte-heros-v2';
     import FlagIcon from './FlagIcon.svelte';
+    import { config } from '$lib/stores';
 
     export let item;
 </script>
 
-<a href="/{item.slug}">
+<a href={item.baseUrl}>
     <div class="mb-3 itembox itembox-hover flex gap-8">
         <div class="grow">
             <div class="text-neutral-content">{format(item.dateStart, "HH:mm")}</div>

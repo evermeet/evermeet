@@ -1,5 +1,5 @@
 <script>
-    import { MapPin } from 'svelte-heros-v2';
+    import { MapPin, CheckCircle } from 'svelte-heros-v2';
     import { format } from 'date-fns';
     import countries from 'i18n-iso-countries';
     import enLocale from 'i18n-iso-countries/langs/en.json';
@@ -7,11 +7,14 @@
     import { user, config, eventDetail } from '$lib/stores';
     import { register, unregister } from '$lib/actions';
     import FlagIcon from './FlagIcon.svelte';
+    import HandleBadge from './HandleBadge.svelte';
 
     countries.registerLocale(enLocale);
 
     export let item;
     eventDetail.set(item);
+
+    console.log(item.url)
 
     $: item = $eventDetail;
     $: countryName = item.placeCountry ? countries.getName(item.placeCountry, 'en') : ''
@@ -22,7 +25,7 @@
     <title>{item.name} | {$config.sitename || $config.domain}</title> 
 </svelte:head>
 
-<div class="flex gap-8">
+<div data-id="#{item.handle}" class="flex gap-8">
     <div class="w-[330px]">
         <div class="w-[330px]">
             <img
@@ -47,7 +50,7 @@
                     </div>
                     <div>
                         <div class="text-sm">Presented by</div>
-                        <div class="font-medium"><a href="/{item.calendar.slug}">{item.calendar.name}</a></div>
+                        <div class="font-medium"><a href="{item.calendar.baseUrl}">{item.calendar.name}</a></div>
                     </div>
                 </div>
                 {#if item.calendar.description}
@@ -95,9 +98,7 @@
     <div class="w-full">
         <div class="mb-6">
             <h1 class="text-5xl font-semibold font-mono">{item.name}</h1>
-            {#if item._remote}
-                <div class="badge badge-neutral font-mono text-xs mt-2">{item._remote}</div>
-            {/if}
+            <HandleBadge {item} />
         </div>
         <div class="flex gap-4 items-center">
             <div class="w-10 h-10 border rounded-lg border-neutral">

@@ -51,10 +51,11 @@ export class Event {
     }
 
     const calendar = await ctx.db.calendars.findOne({ _id: this.calendarId })
-    if (calendar && opts.calendar !== false) {
-      json.calendar = await calendar.view({ events: false }, ctx)
-    }
-
+    json.calendar = await calendar.view({ events: false }, ctx)
+  
+    json.baseUrl = json.calendar.baseUrl + '/' + json.slug
+    json.url = json.calendar.url + '/' + json.slug
+    json.handleUrl = json.calendar.handle + '/' + json.slug
     // json.guestCountNative = (json.guestsNative || []).length
     // json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)
     return json
@@ -76,6 +77,7 @@ export const schema = new EntitySchema({
     },
     slug: {
       type: 'string',
+      unique: true,
       onCreate: obj => obj.config.slug,
       onUpdate: obj => obj.config.slug
     },

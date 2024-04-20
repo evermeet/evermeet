@@ -97,6 +97,19 @@ export class Client {
     return did
   }
 
+  async createDidLocal(opts: {
+    signingKey: string
+    handle: string
+    pds: string
+    rotationKeys: string[]
+    signer: Keypair
+  }): Promise<any> {
+    const op = await atprotoOp({ ...opts, prev: null })
+    const did = await didForCreateOp(op)
+    //await this.sendOperation(did, op)
+    return { did, op }
+  }
+
   async ensureLastOp(did) {
     const lastOp = await this.getLastOp(did)
     if (check.is(lastOp, t.def.tombstone)) {

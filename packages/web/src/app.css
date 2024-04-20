@@ -58,7 +58,7 @@
     }
 
     .popup-menu {
-        @apply z-[1] shadow bg-base-300 rounded-lg py-1.5;
+        @apply z-[1] bg-base-300 rounded-lg py-1.5;
     }
     .popup-menu li {
         @apply rounded-lg mx-1.5 data-[highlighted]:bg-base-content/10;

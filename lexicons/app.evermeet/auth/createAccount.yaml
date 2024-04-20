@@ -2,36 +2,28 @@ lexicon: 1
 defs:
   main:
     type: procedure
-    description: Create an authentication session.
+    description: Create an account.
     input:
       encoding: application/json
       schema:
         type: object
-        required:
-          - identifier
-          - password
+        required: ["handle"]
         properties:
-          identifier:
+          handle:
             type: string
-            description: Username or other identifier supported by the server for the
-              authenticating user.
-            example: my-username
+            format: handle
+            description: Requested handle for the account.
+            example: my-handle.evermeet.local
           password:
             type: string
+            description: Initial account password. May need to meet instance-specific password strength requirements.
             example: my-password
+            minLength: 5
     output:
       encoding: application/json
       schema:
         type: object
-        required:
-        - accessJwt
-        #- refreshJwt
-        - did
         properties:
-          accessJwt:
-            type: string
-          refreshJwt:
-            type: string
           handle:
             type: string
             format: handle
@@ -39,4 +31,7 @@ defs:
             type: string
             format: did
     errors:
-    - name: AccountTakedown
+    - name: InvalidHandle
+    - name: InvalidPassword
+    - name: HandleNotAvailable
+    - name: UnsupportedDomain

@@ -21,6 +21,7 @@ defs:
             enum:
               - event
               - calendar
+              - user
           item:
             type: object
     errors:

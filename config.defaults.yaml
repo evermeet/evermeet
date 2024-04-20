@@ -1,5 +1,8 @@
 domain: evermeet.local
+availableUserDomains:
+  - .evermeet.local
 sitename: null
+plcServer: https://dev-plc.evermeet.app
 api:
   enabled: true
   runtime: bun
@@ -13,6 +16,7 @@ api:
     connection: mongodb://localhost:27017
     password: putYourPasswordHere
   sessionName: evermeet-session-id
+  jwtSecret: Xai9Xahjeisiegeipheogu
 web:
   enabled: true
   port: 3001

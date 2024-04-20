@@ -11,7 +11,7 @@
     $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
 </script>
 
-<a href="/{c.slug}">
+<a href={c.baseUrl}>
     <div class="itembox itembox-hover h-full">
         <div class="flex">
             <div class="w-12 h-12 mb-2 grow">

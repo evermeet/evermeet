@@ -32119,41 +32119,35 @@ var require_browser = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js
+// ../../node_modules/.pnpm/has-flag@3.0.0/node_modules/has-flag/index.js
 var require_has_flag = __commonJS({
-  "../../node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js"(exports2, module2) {
+  "../../node_modules/.pnpm/has-flag@3.0.0/node_modules/has-flag/index.js"(exports2, module2) {
     "use strict";
-    module2.exports = (flag, argv = process.argv) => {
+    module2.exports = (flag, argv) => {
+      argv = argv || process.argv;
       const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+      const pos = argv.indexOf(prefix + flag);
+      const terminatorPos = argv.indexOf("--");
+      return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
     };
   }
 });
 
-// ../../node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js
+// ../../node_modules/.pnpm/supports-color@5.5.0/node_modules/supports-color/index.js
 var require_supports_color = __commonJS({
-  "../../node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js"(exports2, module2) {
+  "../../node_modules/.pnpm/supports-color@5.5.0/node_modules/supports-color/index.js"(exports2, module2) {
     "use strict";
     var os = require("os");
-    var tty = require("tty");
     var hasFlag = require_has_flag();
-    var { env } = process;
+    var env = process.env;
     var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false")) {
+      forceColor = false;
     } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
+      forceColor = true;
     }
     if ("FORCE_COLOR" in env) {
-      if (env.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-      }
+      forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
     }
     function translateLevel(level) {
       if (level === 0) {
@@ -32166,8 +32160,8 @@ var require_supports_color = __commonJS({
         has16m: level >= 3
       };
     }
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
+    function supportsColor(stream4) {
+      if (forceColor === false) {
         return 0;
       }
       if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
@@ -32176,22 +32170,19 @@ var require_supports_color = __commonJS({
       if (hasFlag("color=256")) {
         return 2;
       }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
+      if (stream4 && !stream4.isTTY && forceColor !== true) {
         return 0;
       }
-      const min = forceColor || 0;
-      if (env.TERM === "dumb") {
-        return min;
-      }
+      const min = forceColor ? 1 : 0;
       if (process.platform === "win32") {
         const osRelease = os.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+        if (Number(process.versions.node.split(".")[0]) >= 8 && Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
           return Number(osRelease[2]) >= 14931 ? 3 : 2;
         }
         return 1;
       }
       if ("CI" in env) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
           return 1;
         }
         return min;
@@ -32220,16 +32211,19 @@ var require_supports_color = __commonJS({
       if ("COLORTERM" in env) {
         return 1;
       }
+      if (env.TERM === "dumb") {
+        return min;
+      }
       return min;
     }
     function getSupportLevel(stream4) {
-      const level = supportsColor(stream4, stream4 && stream4.isTTY);
+      const level = supportsColor(stream4);
       return translateLevel(level);
     }
     module2.exports = {
       supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+      stdout: getSupportLevel(process.stdout),
+      stderr: getSupportLevel(process.stderr)
     };
   }
 });
@@ -32419,9 +32413,9 @@ var require_src = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/follow-redirects@1.15.6/node_modules/follow-redirects/debug.js
+// ../../node_modules/.pnpm/follow-redirects@1.15.6_debug@4.3.4/node_modules/follow-redirects/debug.js
 var require_debug = __commonJS({
-  "../../node_modules/.pnpm/follow-redirects@1.15.6/node_modules/follow-redirects/debug.js"(exports2, module2) {
+  "../../node_modules/.pnpm/follow-redirects@1.15.6_debug@4.3.4/node_modules/follow-redirects/debug.js"(exports2, module2) {
     var debug;
     module2.exports = function() {
       if (!debug) {
@@ -32439,9 +32433,9 @@ var require_debug = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/follow-redirects@1.15.6/node_modules/follow-redirects/index.js
+// ../../node_modules/.pnpm/follow-redirects@1.15.6_debug@4.3.4/node_modules/follow-redirects/index.js
 var require_follow_redirects = __commonJS({
-  "../../node_modules/.pnpm/follow-redirects@1.15.6/node_modules/follow-redirects/index.js"(exports2, module2) {
+  "../../node_modules/.pnpm/follow-redirects@1.15.6_debug@4.3.4/node_modules/follow-redirects/index.js"(exports2, module2) {
     var url2 = require("url");
     var URL2 = url2.URL;
     var http2 = require("http");
@@ -45667,6 +45661,11 @@ var Client = class {
     const did = await didForCreateOp(op);
     await this.sendOperation(did, op);
     return did;
+  }
+  async createDidLocal(opts) {
+    const op = await atprotoOp({ ...opts, prev: null });
+    const did = await didForCreateOp(op);
+    return { did, op };
   }
   async ensureLastOp(did) {
     const lastOp = await this.getLastOp(did);

@@ -154,18 +154,21 @@ export class Evermeet {
     let out = {};
     try {
       // check input parameters
-      this.lexicons.assertValidXrpcInput(id, input)
+      const lex = this.lexicons.get(id)
+      if (lex.defs.main.type === 'procedure') {
+        this.lexicons.assertValidXrpcInput(id, input)
+      } else {
+        this.lexicons.assertValidXrpcParams(id, input)
+      }
       // authorize session and basic context
       let authData = {};
+      const db = this.db.getContext()
       if (endpoint.auth) {
-        const [ _, user, authError ] = await this.authorizeSession(session)
+        const [ _, user, authError ] = await this.authorizeSession(session, { db })
         authData = { user, authError }
         await endpoint.auth(authData)
       }
-      const base = {
-        db: this.db.getContext(),
-        ...authData,
-       }
+      const base = { db, ...authData }
       // run handler
       out = await endpoint.handler({ input, ...base })
       if (!out.error) {
@@ -203,19 +206,17 @@ export class Evermeet {
     return json
   }
 
-  async authorizeSession (sessionId) {
-
-    return [ false, null ]
+  async authorizeSession (sessionId, { db }) {
 
     const sessionName = this.config.api.sessionName
     if (!sessionId) {
       return [ false, null, `no sessionId ("${sessionName}" header)` ]
     }
-    const session = await this.cols.sessions.findOne({ selector: { id: sessionId }}).exec()
+    const session = await db.sessions.findOne({ token: sessionId })
     if (!session) {
       throw new AuthError('InvalidSession')
     }
-    const user = await this.cols.users.findOne(session.user).exec()
+    const user = await db.users.findOne({ _id: session.userId })
     if (!user) {
       throw new AuthError('UserNotFound')
     }
@@ -223,7 +224,8 @@ export class Evermeet {
   }
 
   async objectGet (db, id, opts={}) {
-    let item = null;
+    id = id.toLowerCase()
+    let item = null;    
     if (id.includes(':')) {
       const [ rid, domain ] = id.split(':')
       const res = await this.fetchRemoteInstance(domain, rid)
@@ -242,13 +244,31 @@ export class Evermeet {
         }
       }
     } else {
-      const cols = { calendar: 'calendars', event: 'events' }
+
+      // if have `/` we know its event
+      if (id.match(/\//)) {
+        const [ calendarId, eventId ] = id.split('/')
+        const calendar = await db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
+        if (calendar) {
+          const found = await db.events.findOne({ slug: eventId })
+          if (found) {
+            return {
+              type: 'event',
+              item: await found.view(opts, { db, api: this })
+            }
+          }
+        }
+      }
+
+      // otherwise its calendar...
+      const cols = { calendar: 'calendars', user: 'users' }
       for (const c of Object.keys(cols)) {
-        const found = await db[cols[c]].findOne({ $or: [ { slug: id }, { _id: id } ] })
+        const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { _id: id } ] })
         if (found) {
+          console.log(c)
           return {
             type: c,
-            item: await found.view(opts, { db })
+            item: await found.view(opts, { db, api: this })
           }
         }
       }

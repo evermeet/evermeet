@@ -25,6 +25,7 @@ export async function initDatabase (api, conf) {
         calendars: em.getRepository('Calendar'),
         events: em.getRepository('Event'),
         users: em.getRepository('User'),
+        sessions: em.getRepository('Session'),
         wrap
       }
     }
@@ -38,7 +39,8 @@ export async function loadMockData (api) {
   const map = [
     ['calendars.yaml', 'Calendar'],
     ['events.yaml', 'Event'],
-    ['users.yaml', 'User']
+    ['users.yaml', 'User'],
+    ['sessions.yaml', 'Session']
   ]
 
   const em = db.em.fork()
@@ -47,8 +49,10 @@ export async function loadMockData (api) {
     const items = await loadYaml(join(mockDir, fn))
     const repo = em.getRepository(entityName)
     for (const item of items) {
-      item._id = item.id
-      delete item.id
+      if (item.id) {
+        item._id = item.id
+        delete item.id
+      }
       const x = repo.create(item)
       em.persist(x)
     }

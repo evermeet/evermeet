@@ -1,0 +1,16 @@
+lexicon: 1
+defs:
+  main:
+    type: query
+    description: Get information about the current auth session. Requires auth.
+    output:
+      encoing: application/json
+      schema:
+        type: object
+        properties:
+          handle:
+            type: string
+            format: handle
+          did:
+            type: string
+            format: did

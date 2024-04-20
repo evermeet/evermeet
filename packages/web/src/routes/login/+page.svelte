@@ -1,55 +1,93 @@
 
 <script>
-    import { UserPlus } from 'svelte-heros-v2';
+    import { User } from 'svelte-heros-v2';
     import { pkg } from '../../lib/config.js';
     import { xrpcCall } from '../../lib/api.js';
     import { writable } from 'svelte/store';
     import { goto } from '$app/navigation';
     import { user, config } from '$lib/stores';
-    import Cookies from 'js-cookie';
+    import InstanceSelector from '../../components/InstanceSelector.svelte';
 
-    const email = writable('');
-    let validEmail = false;
+    const credentials = writable({ visibility: 'public' })
+    const instance = writable($config.domain)
     let isProcessing = false;
+    $: localInstance = $instance === $config.domain
+    $: showPassword = localInstance && $credentials.identifier?.length >= 3
+    $: validCredentials = $credentials.identifier && (!localInstance || (localInstance && $credentials.password?.length >= 3))
 
-    email.subscribe((x) => {
-        validEmail = Boolean(x.match(/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i));
+    credentials.subscribe((x) => {
+        const domain = x.identifier ? x.identifier?.split('.').slice(1).join('.').toLowerCase() : null
+        if (domain) {
+            if (instances.find(i => i.domain === domain)) {
+                instance.set(domain)
+                credentials.update(c => {
+                    c.identifier = c.identifier.split('.').slice(0,1).join('.')
+                    return c
+                })
+            } else {
+                instance.set('Other Instance')
+            }
+        }
     })
 
     async function submitLogin() {
-        if (!validEmail) {
+        if (!validCredentials) {
             return false
         }
         isProcessing = true;
-        const resp = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, { identifier: $email })
+        let session;
+        try {
+            session = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, $credentials)
+        } catch (e) {}
+
         isProcessing = false;
-        if (!resp.user) {
+        if (!session.username) {
             return false;
         }
 
         //Cookies.set('evermeet-session-id', resp.sessionId)
-        user.set(resp.user)
+        user.set(session)
         goto('/events');
     }
+
+    const instances = [
+        { domain: $config.domain, local: true },
+        { domain: 'utxo.events' },
+        { domain: 'events.gwei.cz' },
+        { domain: 'jednadvacet.org'},
+        { domain: 'dev.evermeet.app' },
+        { domain: 'Other Instance' },
+    ]
 
 </script>
 
 <div class="w-[26rem] m-auto my-24 itembox p-6 shadow-xl">
-    <UserPlus size="50" />
-    <div class="text-2xl mt-4">Welcome to <span class="font-semibold font-mono">{$config.sitename || $config.domain}</span>!</div>
-    <div class="mt-2 text-neutral-content">Please sign in or sign up below.</div>
+    <User size="50" />
+    <div class="text-2xl mt-4">Welcome!</div>
+    <div class="mt-2 text-neutral-content">Please sign in below or <a href="/register" class="underline hover:no-underline">sign up</a>.</div>
 
     <form class="mt-6" on:submit|preventDefault={submitLogin}>
-        <div>
-            <label for="email" class="">Handle / DID / Email</label>
+
+        <div class="flex items-center">
+            <label for="identifier" class="grow">Handle / DID</label>
+            <div>
+                <InstanceSelector {instances} bind={instance} />
+            </div>
         </div>
-        <div class="mt-2">
-            <input id="email" type="text" placeholder="you@example.org" class="input input-bordered {isProcessing ? 'input-disabled' : ''} w-full" bind:value={$email} />
+        <div class="mt-2 mb-2 relative">
+            <input id="identifier" type="text" placeholder="your-handle{$instance === 'Other Instance' ? '.my-instance.com' : ''}" class="input input-bordered {isProcessing ? 'input-disabled' : ''} w-full" bind:value={$credentials.identifier} />
+            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 text-sm">{$instance === 'Other Instance' ? '' : '.' + $instance}</span>
         </div>
+        {#if showPassword}
+            <label for="password" class="">Password</label>
+            <div class="mt-2">
+                <input id="password" type="password" placeholder="Password" class="input input-bordered {isProcessing ? 'input-disabled' : ''} w-full" bind:value={$credentials.password} />
+            </div>
+        {/if}
         <div class="mt-4">
-            <button class="btn btn-primary {!validEmail || isProcessing ? 'btn-disabled' : ''} w-full">
+            <button class="btn btn-primary {!validCredentials || isProcessing ? 'btn-disabled' : ''} w-full">
                 {#if !isProcessing}
-                    Login
+                    Login {#if $instance != $config.domain}<span class="font-mono">on {$instance}</span>{/if}
                 {:else}
                     <span class="loading loading-infinity loading-lg"></span>
                 {/if}

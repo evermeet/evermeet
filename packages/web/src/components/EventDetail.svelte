@@ -98,7 +98,7 @@
     <div class="w-full">
         <div class="mb-6">
             <h1 class="text-5xl font-semibold font-mono">{item.name}</h1>
-            <HandleBadge {item} />
+            <HandleBadge {item} size="small" type="event" />
         </div>
         <div class="flex gap-4 items-center">
             <div class="w-10 h-10 border rounded-lg border-neutral">

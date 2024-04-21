@@ -226,7 +226,7 @@ export class Evermeet {
   async objectGet (db, id, opts={}) {
     id = id.toLowerCase()
     let item = null;    
-    if (id.includes(':')) {
+    /*(if (id.includes(':')) {
       const [ rid, domain ] = id.split(':')
       const res = await this.fetchRemoteInstance(domain, rid)
       if (res) {
@@ -243,33 +243,32 @@ export class Evermeet {
           item: Object.assign({ _remote: domain }, res.item, { slug: res.item.slug + ':' + domain, id: res.item.id + ':' + domain })
         }
       }
-    } else {
+    } else {*/
 
       // if have `/` we know its event
-      if (id.match(/\//)) {
-        const [ calendarId, eventId ] = id.split('/')
-        const calendar = await db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
-        if (calendar) {
-          const found = await db.events.findOne({ slug: eventId })
-          if (found) {
-            return {
-              type: 'event',
-              item: await found.view(opts, { db, api: this })
-            }
+    if (id.match(/\//)) {
+      const [ calendarId, eventId ] = id.split('/')
+      const calendar = await db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
+      if (calendar) {
+        const found = await db.events.findOne({ slug: eventId })
+        if (found) {
+          return {
+            type: 'event',
+            item: await found.view(opts, { db, api: this })
           }
         }
       }
+    }
 
-      // otherwise its calendar...
-      const cols = { calendar: 'calendars', user: 'users' }
-      for (const c of Object.keys(cols)) {
-        const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { _id: id } ] })
-        if (found) {
-          console.log(c)
-          return {
-            type: c,
-            item: await found.view(opts, { db, api: this })
-          }
+    // otherwise its calendar...
+    const cols = { calendar: 'calendars', user: 'users' }
+    for (const c of Object.keys(cols)) {
+      const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { _id: id }, { did: id } ] })
+      if (found) {
+        console.log(c)
+        return {
+          type: c,
+          item: await found.view(opts, { db, api: this })
         }
       }
     }
@@ -302,6 +301,7 @@ export class Evermeet {
             domain: c.domain,
             sitename: c.sitename,
             options: c.options,
+            plcServer: c.plcServer,
           }
         }
       }

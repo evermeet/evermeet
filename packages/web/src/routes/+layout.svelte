@@ -45,7 +45,7 @@
 
 <div class="navbar px-6">
     <div class="navbar-start">
-        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center"><Fire /> {$config.sitename || $config.domain}</a></div>
+        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center opacity-75 hover:opacity-100"><Fire /> {$config.sitename || $config.domain}</a></div>
     </div>
     <div class="navbar-center max-w-[80rem] w-auto">
         {#if $user}

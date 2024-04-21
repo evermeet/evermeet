@@ -86,7 +86,8 @@
 #    Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
 
 - id: df5744efdd3368
-  handle: ethbrno.cz
+  did: did:plc:h4c53spyxe6wab5j7jonafju
+  handle: ethbrno.eth
   name: ETHBrno
   subs: 0
   img: https://pbs.twimg.com/profile_images/1758254611276656640/pYhIGUiT_400x400.jpg

@@ -25,6 +25,7 @@
     "@mikro-orm/mongodb": "^6.2.1",
     "@mikro-orm/sqlite": "^6.2.1",
     "@web5/dids": "^1.0.0",
+    "ajv": "^8.12.0",
     "argon2": "^0.40.1",
     "elysia": "^1.0.13",
     "fastify": "^4.26.2",

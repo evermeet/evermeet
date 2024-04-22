@@ -1,7 +1,7 @@
 domain: evermeet.local
 availableUserDomains:
   - .evermeet.local
-sitename: null
+sitename: ''
 plcServer: https://dev-plc.evermeet.app
 api:
   enabled: true

@@ -1,52 +1,57 @@
 import { Lexicons } from '@atproto/lexicon'
-import xrpc from '@atproto/xrpc'
+import * as xrpc from '@atproto/xrpc'
 
 import pkg from '../../../package.json' with { type: "json" };
 import endpoints from '../endpoints/index.js';
 
-import { loadYaml, defaultsDeep, stringify, readdirSync, join } from './utils.js'
+import { loadYaml, loadYamlDir, loadYamlDirList, stringify, readdirSync, join } from './utils.js'
 import { runtime, exitRuntime, env } from './runtime.js';
 import { initDatabase, loadMockData } from './db.js'
+import { authVerifier } from './auth.js';
+import { loadConfig } from './config.js';
 
 export class Evermeet {
-
+  
   constructor (opts = { configFile: '../../config.yaml' }) {
+    this.paths = {
+      lexicons: '../../lexicons',
+      entities: './entities',
+      schema: './schema',
+      mockData: './mock-data',
+      configDefaults: '../../config.defaults.yaml',
+      // `adapters` need be relative to script because its dynamic import
+      adapters: '../adapters/',
+    }
+    this.initialized = false
     this.runtime = runtime
     this.env = env('NODE_ENV') || 'development'
-    const defaults = loadYaml('../../config.defaults.yaml')
-    const localConfig = loadYaml(opts.configFile)
-    this.config = defaultsDeep(localConfig, defaults)
-    this.initialized = false
+    this.schema = loadYamlDir(this.paths.schema)
+    this.config = loadConfig(opts.configFile, this.paths.configDefaults, this.schema.config)
     this.pkg = pkg
-    this.models = {}
-    this.authVerifier = {
-      accessUser: ({ user }) => {
-        if (!user) {
-          throw new Error('NotAuthorized')
-        }
-      },
-      accessAdmin: ({ user }) => {
-        if (!user) {
-          throw new Error('NotAuthorized')
-        }
-        /*if (!user.roles.includes('admin')) {
-          throw new Error('NotAuthorized')
-        }*/
-      }
+    this.authVerifier = authVerifier
+
+    // check if runtime if config is correct
+    if (runtime.name !== this.config.api.runtime) {
+      throw new Error(`Wrong runtime! in config: ${this.config.api.runtime}, current: ${runtime.name}`)
     }
     
     console.log(stringify({ RUNTIME: this.runtime }))
-    console.log(stringify({ CONFIG: this.config }))
     console.log('ENV:', this.env)
   }
 
   async init () {
     try {
-      this.lexicons = await this.loadLexicons()
+      // initialize lexicons
+      this.lexicons = new Lexicons()
+      for (const { id, data } of loadYamlDirList(this.paths.lexicons)) {
+        this.lexicons.add({ id, ...data })
+      }
 
+      // initialize database
       this.db = await initDatabase(this, this.config.api.db)
 
-      this.xrpc = xrpc.default || xrpc
+      // construct XPRC client and add lexicons
+      this.xrpc = new xrpc.Client()
       for (const lex of this.lexicons.docs) {
         this.xrpc.addLexicon(lex[1])
       }
@@ -59,7 +64,7 @@ export class Evermeet {
       await loadMockData(this)
 
       // load http adapter
-      this.adapterMake = (await import("../adapters/" + this.config.api.adapter + ".js")).default
+      this.adapterMake = (await import(this.paths.adapters + this.config.api.adapter + ".js")).default
       this.adapterCtl = await this.adapterMake({ evermeet: this })
       this.adapter = await this.adapterCtl.init()
 
@@ -72,36 +77,18 @@ export class Evermeet {
     }
   }
 
-  exit () {
-    return exitRuntime()
-  }
-
   async start () {
     if (!this.initialized) {
       await this.init()
     }
     await this.adapterCtl.start()
     console.log(`[${this.config.api.adapter}] HTTP adapter started at: ${this.config.api.host}:${this.config.api.port}`)
+
+    console.log('@evermeet/api started')
   }
 
-  async loadLexicons() {
-    const lexicons = new Lexicons()
-    const lexiconDir = '../../lexicons';
-    for (const ns of readdirSync(lexiconDir)) {
-      for (const cat of readdirSync(join(lexiconDir, ns))) {
-        for (const lex of readdirSync(join(lexiconDir, ns, cat))) {
-          const defFn = join(lexiconDir, ns, cat, lex)
-          const def = loadYaml(defFn)
-          if (def) {
-            const id = [ns, cat, lex.replace(/\.yaml$/, '')].join('.')
-            const x = { id, ...def }
-            lexicons.add(x)
-            console.log(`Lexicon loaded: ${id}`)
-          }
-        }
-      }
-    }
-    return lexicons
+  exit () {
+    return exitRuntime()
   }
 
   async compileXrpcEndpoints(_ep) {

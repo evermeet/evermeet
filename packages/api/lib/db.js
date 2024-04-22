@@ -8,7 +8,7 @@ export async function initDatabase (api, conf) {
 
   const orm = await MikroORM.init({
     dbName: conf.name,
-    entities: ['./entities'],
+    entities: [api.paths.entities],
     debug: api.env === 'development'
   })
 
@@ -35,7 +35,6 @@ export async function initDatabase (api, conf) {
 export async function loadMockData (api) {
   const db = api.db
 
-  const mockDir = './mock-data'
   const map = [
     ['calendars.yaml', 'Calendar'],
     ['events.yaml', 'Event'],
@@ -46,7 +45,7 @@ export async function loadMockData (api) {
   const em = db.em.fork()
 
   for (const [fn, entityName] of map) {
-    const items = await loadYaml(join(mockDir, fn))
+    const items = await loadYaml(join(api.paths.mockData, fn))
     const repo = em.getRepository(entityName)
     for (const item of items) {
       if (item.id) {

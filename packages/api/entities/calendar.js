@@ -55,7 +55,7 @@ export const schema = new EntitySchema({
     did: {
       type: 'string',
       unique: true,
-      nullable: true,
+      nullable: true
     },
     slug: {
       type: 'string',

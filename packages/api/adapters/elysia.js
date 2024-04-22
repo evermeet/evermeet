@@ -7,6 +7,12 @@ export default function ({ evermeet }) {
   let app
   return {
     async init () {
+      // check environment
+      if (evermeet.runtime.name !== 'bun') {
+        throw new Error(`Elysia: Only works with Bun runtime (current=${evermeet.runtime.name})`)
+      }
+
+      // start adapter
       app = new Elysia({
         prefix: evermeet.config.api.prefix
       })

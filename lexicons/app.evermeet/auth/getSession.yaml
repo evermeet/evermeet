@@ -4,7 +4,7 @@ defs:
     type: query
     description: Get information about the current auth session. Requires auth.
     output:
-      encoing: application/json
+      encoding: application/json
       schema:
         type: object
         properties:

@@ -7,10 +7,11 @@
     import { config } from '$lib/stores';
     import { CheckCircle, LockClosed } from 'svelte-heros-v2';
     import HandleBadge from './HandleBadge.svelte';
+    import CalendarAvatar from './CalendarAvatar.svelte';
     
     export let item;
 
-    $: subscribed = $user?.subscribedCalendars.find(sc => sc.ref === item.id || sc.ref === item.slug)
+    $: subscribed = $user?.calendarSubscriptions?.find(sc => sc.ref === item.did)
     $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
 </script>
 
@@ -30,10 +31,10 @@
 
 <div class="page-wide {item.backdropImg ? "-mt-12" : ""} z-1">
     <div class="flex items-end mb-2">
-        <div class="w-24 h-24 {item.backdropImg ? 'mb-6' : 'mt-10'} grow">
-            <img
-                class="{item.personal ? "rounded-full" : "rounded-lg"} w-24 h-24 {item.backdropImg ? 'border border-neutral border-4' : ''}"
-                src={item.img} />
+        <div class="{item.backdropImg ? 'mb-6' : 'mt-10'} grow">
+            <div class="rounded-lg overflow-hidden {item.backdropImg ? 'w-24 h-24 border border-neutral/75 border-4' : 'w-20 h-20'}">
+                <CalendarAvatar calendar={item} size="88" />
+            </div>
         </div>
             {#if $user}
                 <div>

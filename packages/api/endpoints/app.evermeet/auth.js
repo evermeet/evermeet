@@ -63,15 +63,15 @@ export async function createAccount (server, ctx) {
   server.endpoint(async ({ input: { handle, password }, db }) => {
     const domain = handle.split('.').slice(1).join('.').toLowerCase()
 
+    // check if its available domain on this instance
+    if (!ctx.api.config.availableUserDomains.includes('.' + domain)) {
+      return { error: 'UnsupportedDomain' }
+    }
+
     // check if handle is avaiblable
     const exists = await db.users.findOne({ handle })
     if (exists) {
       return { error: 'HandleNotAvailable' }
-    }
-
-    // check if its available domain on this instance
-    if (!ctx.api.config.availableUserDomains.includes('.' + domain)) {
-      return { error: 'UnsupportedDomain' }
     }
 
     // TODO additional password check
@@ -164,8 +164,9 @@ export function createSession (server, ctx) {
       body: {
         accessJwt: token,
         // refreshJwt: 'xxx',
-        username: user.username,
-        did: user.did
+        handle: user.handle,
+        did: user.did,
+        user: db.wrap(user).toJSON()
       }
     }
   })
@@ -177,8 +178,11 @@ export async function getSession (server, ctx) {
     handler: async ({ db, user }) => {
       return {
         body: {
-          username: user.username,
-          did: user.did
+          // accessJwt: session.token,
+          // refreshJwt: 'xxx',
+          handle: user.handle,
+          did: user.did,
+          user: db.wrap(user).toJSON()
         }
       }
     }

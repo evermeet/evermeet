@@ -11,6 +11,7 @@
 
 - id: 2e9e2199afca02
   handle: events.web3privacy.info
+  did: did:plc:jxj3fiv6sapedgpz36umxsew
   name: Web3Privacy Now Events
   subs: 256
   img: >-

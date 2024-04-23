@@ -1,11 +1,13 @@
 
 <script>
     import { User } from 'svelte-heros-v2';
-    import { pkg } from '../../lib/config.js';
-    import { xrpcCall } from '../../lib/api.js';
+    import Cookies from 'js-cookie'
     import { writable } from 'svelte/store';
     import { goto } from '$app/navigation';
-    import { user, config } from '$lib/stores';
+
+    import { pkg } from '../../lib/config.js';
+    import { xrpcCall } from '../../lib/api.js';
+    import { user, config, session } from '$lib/stores';
     import InstanceSelector from '../../components/InstanceSelector.svelte';
 
     const credentials = writable({ visibility: 'public' })
@@ -35,19 +37,27 @@
             return false
         }
         isProcessing = true;
-        let session;
+        let s;
+        const ident = $credentials.identifier
+        const normalizedQuery = {
+            identifier: ident.match(/\./) ? ident : (ident + '.' + $config.domain),
+            password: $credentials.password,
+        }
         try {
-            session = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, $credentials)
+            s = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, normalizedQuery)
         } catch (e) {}
 
         isProcessing = false;
-        if (!session.username) {
+        if (!s.did) {
             return false;
         }
 
-        //Cookies.set('evermeet-session-id', resp.sessionId)
-        user.set(session)
+        Cookies.set('evermeet-session-id', s.accessJwt)
+        session.set(s)
+
         goto('/events');
+
+        return {}
     }
 
     const instances = [

@@ -1,8 +1,21 @@
-import { browser } from '$app/environment'; 
-import { env } from '$env/dynamic/public';
+import { browser } from '$app/environment'
+import { env } from '$env/dynamic/public'
 import { Client } from '@atproto/xrpc'
+import { session as origSession } from '$lib/stores'
 
 let xrpcClient;
+let session;
+
+origSession.subscribe(cs => {
+    session = cs
+})
+
+async function createXrpcClient (fetch) {
+    const client = new Client()
+    const lexicons = await internalApiCall(fetch, '_lexicons')
+    client.addLexicons(lexicons)
+    return client
+}
 
 export async function apiCall (fetch, path, opts = {}, data=false) {
     const apiHost = env[browser ? "VITE_BACKEND_URL_PUBLIC" : "VITE_BACKEND_URL"] || ""
@@ -24,14 +37,18 @@ export async function internalApiCall(fetch, id) {
     return resp.json()
 }
 
-export async function xrpcCall(fetch, ...args) {
+export async function xrpcCall(fetch, id, params, data, opts={}) {
     const apiHost = env[browser ? "VITE_BACKEND_URL_PUBLIC" : "VITE_BACKEND_URL"] || ""
     if (!xrpcClient) {
-        xrpcClient = new Client()
-        const lexicons = await internalApiCall(fetch, '_lexicons')
-        xrpcClient.addLexicons(lexicons)
+        xrpcClient = await createXrpcClient(fetch)
     }
-    console.log(args)
-    const resp = await xrpcClient.service(apiHost + "/xrpc").call(...args)
+    const headers = {}
+    if (opts.token) {
+        headers.authorization = 'Bearer ' + opts.token
+    } else if (session?.accessJwt) {
+        headers.authorization = 'Bearer ' + session.accessJwt
+    }
+
+    const resp = await xrpcClient.service(apiHost + "/xrpc").call(id, params, data, { headers, ...opts })
     return resp.data
 }

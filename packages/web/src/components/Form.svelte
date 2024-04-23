@@ -7,6 +7,13 @@
     export let item;
     export let config;
 
+    if (config.schema) {
+        schema = config.schema
+    }
+    if (config.layout) {
+        layout = config.layout
+    }
+
     function submitForm() {
         alert(JSON.stringify($formData))
     }
@@ -19,6 +26,9 @@
             const opt = schema.properties[item]
             opt.column = item
             return opt
+        }
+        if (item.column) {
+            Object.assign(item, schema.properties[item.column])
         }
         return item
     }
@@ -49,9 +59,7 @@
         {/if}
     {/each}
 
-    {#if isChanged}
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-    {/if}
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary" class:btn-disabled={!isChanged}>{config.submitButton || 'Save'}</button>
+    </div>
 </form>

@@ -1,15 +1,28 @@
-import { apiCall } from '$lib/api.js';
+import { xrpcCall } from '$lib/api.js';
 import { loadConfig } from '$lib/config.js';
 
 export async function load({ fetch, cookies }) {
 
-    let loggedIn = false;
-    if (cookies.get('evermeet-session-id')) {
-        //loggedIn = await apiCall(fetch, 'me');
-    }
     const config = await loadConfig();
+    let session = false;
+    const sessionId = cookies.get('evermeet-session-id')
+    if (sessionId) {
+
+        console.log(sessionId)
+        try {
+            session = await xrpcCall(fetch, 'app.evermeet.auth.getSession', null, null, {
+                headers: {
+                    authorization: 'Bearer ' + sessionId
+                }
+            });
+            session.accessJwt = sessionId
+        } catch (e) {
+            console.error(e)
+        }
+
+    }
     return {
-        user: loggedIn?.user,
+        session,
         config
     }
 }

@@ -3,6 +3,8 @@ import { writable } from "svelte/store";
 
 export const config = writable({});
 
-export const user = writable(false);
+export const user = writable(null);
 
-export const eventDetail = writable(false);
+export const session = writable(null);
+
+export const eventDetail = writable(null);

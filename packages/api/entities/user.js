@@ -12,6 +12,20 @@ class User {
   }
 }
 
+export const EventConfig = new EntitySchema({
+  name: 'UserCalendarSubscription',
+  embeddable: true,
+  properties: {
+    ref: {
+      type: 'string'
+    },
+    t: {
+      type: 'string',
+      format: 'date-time'
+    }
+  }
+})
+
 export const schema = new EntitySchema({
   name: 'User',
   class: User,
@@ -49,6 +63,12 @@ export const schema = new EntitySchema({
       type: 'string',
       nullable: true,
       lazy: true
+    },
+    calendarSubscriptions: {
+      kind: 'embedded',
+      entity: 'UserCalendarSubscription',
+      onCreate: () => [],
+      array: true
     },
     createdOn: {
       type: 'string',

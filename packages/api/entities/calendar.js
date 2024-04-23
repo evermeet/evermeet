@@ -8,7 +8,7 @@ export const CalendarManager = new EntitySchema({
     ref: {
       type: 'string'
     },
-    time: {
+    t: {
       type: 'string',
       nullable: true
     }
@@ -25,7 +25,7 @@ export class Calendar {
         json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
       }
     }
-    json.baseUrl = `/${json.handle.replace('.' + ctx.api.config.domain, '')}`
+    json.baseUrl = `/${json.handle?.replace('.' + ctx.api.config.domain, '') || json._id}`
     json.url = `https://${ctx.api.config.domain}${json.baseUrl}`
     json.handleUrl = json.handle
     return json
@@ -51,6 +51,11 @@ export const schema = new EntitySchema({
       format: 'handle',
       nullable: true,
       unique: true
+    },
+    visibility: {
+      type: 'string',
+      enum: ['public', 'unlisted', 'private'],
+      nullable: true
     },
     did: {
       type: 'string',
@@ -82,11 +87,27 @@ export const schema = new EntitySchema({
       type: 'string',
       nullable: true
     },
+    managersArray: {
+      type: 'array',
+      nullable: true,
+      onCreate: obj => (obj.managers || []).map(m => m.ref),
+      onUpdate: obj => (obj.managers || []).map(m => m.ref)
+    },
     managers: {
       kind: 'embedded',
       entity: 'CalendarManager',
       onCreate: () => [],
       array: true
+    },
+    signingKey: {
+      type: 'string',
+      nullable: true,
+      lazy: true
+    },
+    rotationKey: {
+      type: 'string',
+      nullable: true,
+      lazy: true
     }
   }
 })

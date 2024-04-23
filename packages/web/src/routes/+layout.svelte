@@ -6,12 +6,17 @@
     import { browser } from '$app/environment';
     import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
-    import { user, config } from '$lib/stores';
+    import { user, session, config } from '$lib/stores';
 
     import CurrentTime from "../components/CurrentTime.svelte";
+    import UserMenu from "../components/UserMenu.svelte";
 
     export let data;
-    user.set(data.user);
+
+    session.subscribe((s) => {
+        user.set(s?.user)
+    })
+    session.set(data.session)
     config.set(data.config);
 
     const menu = [
@@ -27,7 +32,7 @@
         },
         {
             title: 'Explore',
-            url: '/explore',
+            url: '/',
             ico: Sparkles
         },
         /*{
@@ -51,7 +56,7 @@
         {#if $user}
             <ul class="menu menu-horizontal w-full gap-1">
                 {#each menu as mi}
-                    <li><a href={mi.url} class="{$page.url.pathname.match(new RegExp("^"+mi.url)) ? 'active' : ''}"><svelte:component this={mi.ico} /> {mi.title}</a></li>
+                    <li><a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''}"><svelte:component this={mi.ico} /> {mi.title}</a></li>
                 {/each}
             </ul>
         {/if}
@@ -76,17 +81,7 @@
                 </div>
                 <div class="w-8 h-8 rounded-full aspect-square border border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center"><Bell size="20" /></div>
             </div>
-            <div class="dropdown dropdown-end dropdown-hover">
-                <div tabindex="0" class="">
-                    <img src={$user.img} class="w-8 h-8 rounded-full aspect-square border border-[0.3em] border-transparent hover:border-neutral cursor-pointer" />
-                </div>
-                <ul tabindex="0" class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box w-44">
-                    <li><a href="/me">My profile</a></li>
-                    <li><a href="/admin">Administration</a></li>
-                    <li><a href="/me/settings">Settings</a></li>
-                    <li><a href="/logout">Sign Out</a></li>
-                </ul>
-            </div>
+            <UserMenu />
         {:else}
             <a class="btn btn-sm btn-accent" href="/login?next={encodeURIComponent($page.url.pathname)}">Login</a>
         {/if}

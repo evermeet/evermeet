@@ -1,0 +1,35 @@
+lexicon: 1
+defs:
+  main:
+    type: procedure
+    description: Create a Calendar.
+    input:
+      encoding: application/json
+      schema:
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            example: My Calendar
+          handle:
+            type: string
+            format: handle
+            example: calendar-handle.evermeet.local
+          visibility:
+            type: string
+            enum:
+              - public
+              - unlisted
+              - private
+          description:
+            type: string
+    output:
+      encoding: application/json
+      schema:
+        type: object
+    errors:
+      - name: HandleNotAvailable
+      - name: UnsupportedDomain
+      - name: PrivateCannotHaveHandle

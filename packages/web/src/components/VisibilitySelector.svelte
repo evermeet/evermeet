@@ -4,11 +4,17 @@
   import { fade } from 'svelte/transition';
 
   export let bind;
+  export let type = 'event';
 
   const states = {
     public: { title: 'Public', text: 'Visible to everyone, show on your calendar.', ico: GlobeAlt },
     unlisted: { title: 'Unlisted', text: 'Only people with the link can register.', ico: CubeTransparent },
-    private: { title: 'Private', text: 'Only you and calendar managers will see this event.', ico: LockClosed },
+    private: { title: 'Private', text: 'Only you and managers will see this event.', ico: LockClosed },
+  }
+  if (type === 'calendar') {
+    states.public.text = 'Visible to everyone.'
+    states.unlisted.text = 'Only people with the link see the calendar.'
+    states.private.text = 'Only you and calendar managers will see this calendar.'
   }
   const {
     elements: { trigger, menu, option, group, groupLabel, label },
@@ -50,14 +56,14 @@
     >
       {#each Object.keys(states) as state}
         <li use:melt={$option({ value: state, label: states[state].title })}>
-          <div class="item">
-            <div class="flex gap-4 items-center">
+          <div class="item w-full">
+            <div class="flex gap-4 items-center w-full">
               <div>
                 <svelte:component this={states[state].ico} class="w-5" />
               </div>
-              <div>
+              <div class="grow">
                 <div>{states[state].title}</div>
-                <div class="text-neutral-content text-sm">{states[state].text}</div>
+                <div class="text-neutral-content/50 text-sm">{states[state].text}</div>
               </div>
               <div>
                 <CheckCircle variation="solid" class="size-4 {$isSelected(state) ? 'block' : 'hidden'}" />

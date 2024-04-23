@@ -14,7 +14,13 @@
 
 <div class="page-wide">
     <h1 class="heading1">Calendars</h1>
-    <h2 class="heading2">My Calendars</h2>
+
+    <div class="flex items-center">
+        <h2 class="heading2 grow">My Calendars</h2>
+        <div>
+            <a href="/create-calendar"><button class="btn btn-sm btn-neutral">+ Create Calendar</button></a>
+        </div>
+    </div>
 
     <div class="mt-6 grid grid-cols-3 gap-3">
         {#each owned as c}
@@ -25,7 +31,7 @@
     <div class="mt-8 mb-6 w-full h-1 border border-neutral border-l-0 border-r-0 border-b-0">  
     </div>
 
-    <h2 class="heading2">Subscribed Calendars</h2>
+    <h2 class="heading2 grow">Subscribed Calendars</h2>
 
     <div class="mt-6">
         {#each subscribed as c}
@@ -40,18 +46,16 @@
                     {#if c._remote}
                         <div class="badge badge-neutral font-mono text-xs my-2">{c._remote}</div>
                     {/if}
-                    <a href="/{c.slug}" class="btn btn-sm mt-4 btn-neutral">View calendar →</a>
+                    <a href="{c.baseUrl}" class="btn btn-sm mt-4 btn-neutral">View calendar →</a>
                 </div>
                 <div class="">
                     <div class="text-neutral-content text-sm">Upcoming Events</div>
-                    <div class="mt-4">
-                        <div class="font-medium">W3PN Meetup @ ETHDam 2024</div>
-                        <div class="text-sm mt-1 text-neutral-content">Thu, Apr 11, 6:00 PM</div>
-                    </div>
-                    <div class="mt-4">
-                        <div class="font-medium">W3PN Meetup @ ETHDam 2024</div>
-                        <div class="text-sm mt-1 text-neutral-content">Thu, Apr 11, 6:00 PM</div>
-                    </div>
+                    {#each c.events.slice(0,2) as e}
+                        <div class="mt-4">
+                            <div class="font-medium hover:underline"><a href={e.baseUrl}>{e.name}</a></div>
+                            <div class="text-sm mt-1 text-neutral-content">{e.dateStart}</div>
+                        </div>
+                    {/each}
                 </div>
             </div>
         {/each}

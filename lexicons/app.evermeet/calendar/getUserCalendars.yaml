@@ -1,0 +1,8 @@
+lexicon: 1
+defs:
+  main:
+    type: query
+    output:
+      encoding: application/json
+      schema:
+        type: object

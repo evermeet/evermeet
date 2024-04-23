@@ -1,7 +1,10 @@
 <script>
-    import ManagePage from './ManagePage.svelte';
+    import ManagePage from './ManagePage.svelte'
+    import { user } from '$lib/stores'
 
     export let selectedTab;
+
+    $: u = $user
 </script>
 
 <ManagePage {selectedTab}
@@ -14,7 +17,10 @@
     >
 
     {#if !selectedTab}
-        test
+        
+        <div>Handle: {u.handle}</div>
+        <div>DID: {u.did}</div>
+
     {/if}
 
 </ManagePage>

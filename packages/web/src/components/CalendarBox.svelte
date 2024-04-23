@@ -1,13 +1,14 @@
 <script>
     import { user } from '$lib/stores'
     import { calendarSubscribe, calendarUnsubscribe } from '$lib/actions';
+    import CalendarAvatar from './CalendarAvatar.svelte';
 
     export let item;
     export let preview;
 
     const c = item;
 
-    $: subscribed = $user?.subscribedCalendars.find(sc => sc.ref === c.id || sc.ref === c.slug)
+    $: subscribed = $user?.subscribedCalendars?.find(sc => sc.ref === c.id || sc.ref === c.slug)
     $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
 </script>
 
@@ -15,11 +16,9 @@
     <div class="itembox itembox-hover h-full">
         <div class="flex">
             <div class="w-12 h-12 mb-2 grow">
-                <img
-                    class="{c.personal ? "rounded-full" : "rounded-lg"} w-12 h-12"
-                    src={c.img} />
+                <CalendarAvatar calendar={item} size="48" />
             </div>
-            {#if $user && !c.personal && !managed && !$user.calendarsManage.find(cm => cm.ref === item.id || cm.ref === item.slug )}
+            {#if $user && !c.personal && !managed && !$user.calendarSubscriptions?.find(cm => cm.ref === item.did )}
                 {#if subscribed}
                     <button class="btn btn-sm" on:click|preventDefault={calendarUnsubscribe(c.id)}>Subscribed</button>
                 {:else}

@@ -16,12 +16,7 @@ export default function ({ evermeet }) {
       app = new Elysia({
         prefix: evermeet.config.api.prefix
       })
-        .use(cors({
-          origin: evermeet.env === 'development'
-            ? `${evermeet.config.web.host}:${evermeet.config.web.port}`
-            : evermeet.config.domain,
-          credentials: true
-        }))
+        .use(cors())
         .use(swagger({
           path: '/_swagger',
           excludeStaticFile: false,
@@ -48,21 +43,8 @@ export default function ({ evermeet }) {
           }
         }))
         .use(logger({ level: process.env.NODE_ENV === 'development' ? 'debug' : 'error' }))
-      /* .get('/xrpc', () => ({ xrpc: true }), {
-                    response: t.Object({
-                        xrpc: t.Boolean()
-                    })
-                }) */
-
-      /* console.log(t.Object({
-                    xrpc: t.Boolean()
-                })) */
 
       for (const ep of evermeet.endpoints.list) {
-        // console.log(t.Any(ep.lex.defs.main.output.schema, { description: ep.lex.defs.main.description }))
-
-        // console.log(ep.lex.defs.main.output.schema)
-        // const url = evermeet.config.api.prefix + '/' + ep.id
         const method = ep.lex.defs.main.type === 'procedure' ? 'post' : 'get'
 
         app[method](ep.id, async ({ error, query, body, headers, cookie }) => {
@@ -72,6 +54,11 @@ export default function ({ evermeet }) {
           out = await evermeet.request(ep.id, { input, headers, session })
           if (out.error) {
             return error(501, { error: out.error, message: out.message })
+          }
+          if (out.cookies) {
+            for (const cd of out.cookies) {
+              cookie[cd.key].set({ ...cd.config })
+            }
           }
           return out.body
         }, {

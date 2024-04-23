@@ -6,12 +6,14 @@
     const countriesAll = countries.getNames("en", {select: "official"});
 
     export let row;
-    export let config;
+    export let config = {};
     export let formData;
 </script>
 
 <div>
-    <label for={row.title}>{row.title}</label>
+    {#if row.title}
+        <label for={row.title}>{row.title}</label>
+    {/if}
     {#if row.view === 'slug'}
         <div class="join">
             <input value="{config.domain}/" class="input input-disabled w-32" />
@@ -19,7 +21,7 @@
         </div>
     {/if}
     {#if row.view === 'country'}
-        <select id={row.title} class="select select-bordered w-full max-w-xs" value={$formData[row.column]}>
+        <select id={row.title} class="select {config.bordered && 'select-bordered'} w-full max-w-xs" value={$formData[row.column]}>
             <option value="">(not specified)</option>
             {#each Object.keys(countriesAll) as country}
                 <option value={country.toLowerCase()}>{countriesAll[country]}</option>
@@ -33,6 +35,6 @@
         <input id={row.title} type="text" class="input input-bordered input-disabled w-96" value={row.value} />
     {/if}
     {#if row.type === 'string' && !row.view}
-        <input id={row.title} type="text" placeholder={row.placeholder} class="input input-bordered w-full" bind:value={$formData[row.column]} />
+        <input id={row.title} type="text" placeholder={row.placeholder} class="input {config.bordered && 'input-bordered'} {row.class} w-full" bind:value={$formData[row.column]} />
     {/if}
 </div>

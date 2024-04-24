@@ -1,46 +1,54 @@
 - id: he5Chae4chae
-  slug: personal
+  did: did:web:tree.fail
   handle: tree.evermeet.local
-  name: tree
   personal: true
   managers:
     - ref: did:plc:524tuhdhh3m7li5gycdn6boe
-  subs: 5
-  img: >-
-    https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
+  config:
+    name: tree
+    slug: personal
+    subs: 5
+    img: >-
+      https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
 
 - id: 2e9e2199afca02
   handle: events.web3privacy.info
   did: did:plc:jxj3fiv6sapedgpz36umxsew
-  name: Web3Privacy Now Events
-  subs: 256
-  img: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/97/99ef3056-7787-4e83-9247-fca4d4fa948d
-  backdropImg: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=1250,height=357.14285714285717/calendar-cover-images/1r/27ff1509-4999-46b5-8a3c-2042e6be293f
-  description: >-
-    Research project & community about privacy in Web3 industry
-    (web3privacy.info) All events: https://web3privacy.info/events
   managers:
-    - ref: did:plc:524tuhdhh3m7li5gycdn6boe
+  - ref: did:plc:524tuhdhh3m7li5gycdn6boe
+  config:
+    name: Web3Privacy Now Events
+    subs: 256
+    img: >-
+      https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/97/99ef3056-7787-4e83-9247-fca4d4fa948d
+    backdropImg: >-
+      https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=1250,height=357.14285714285717/calendar-cover-images/1r/27ff1509-4999-46b5-8a3c-2042e6be293f
+    description: >-
+      Research project & community about privacy in Web3 industry
+      (web3privacy.info) All events: https://web3privacy.info/events
+    avatarBlob: bafkreidd3q2vcudqm6i45iuwf4t7e45o25nvtngpn4z7cduadd27fmh5uq
 
 - id: die6loowahGe
+  did: did:web:cryptocanal.org
   handle: cryptocanal.evermeet.local
-  name: Crypto Canal
-  subs: 100
-  img: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/06/3525a47b-5647-4de8-bf97-a7c524a2ae9c
-  backdropImg: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=1250,height=357.14285714285717/calendar-cover-images/6t/feb1976c-37ae-4100-8d1b-db2ddcfe409a
-  description: We organise ETHDam and monthly meetups in Amsterdam, Rotterdam and Zurich 🦦
+  config:
+    name: Crypto Canal
+    subs: 100
+    img: >-
+      https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/06/3525a47b-5647-4de8-bf97-a7c524a2ae9c
+    backdropImg: >-
+      https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=1250,height=357.14285714285717/calendar-cover-images/6t/feb1976c-37ae-4100-8d1b-db2ddcfe409a
+    description: We organise ETHDam and monthly meetups in Amsterdam, Rotterdam and Zurich 🦦
 
 - handle: ob24.evermeet.local
-  name: Onchain Brno 2024
-  subs: 10
-  img: https://onchainbrno.com/ob24-logo.png
-  description: >-
-    Onchain Brno 2024 (#OB24) is a federation of events around cryptocurrencies
-    happening at the end of October 2024.
+  did: did:web:onchainbrno.com
+  config:
+    name: Onchain Brno 2024
+    subs: 10
+    img: https://onchainbrno.com/ob24-logo.png
+    description: >-
+      Onchain Brno 2024 (#OB24) is a federation of events around cryptocurrencies
+      happening at the end of October 2024.
 
 #- slug: gweicz
 #  name: Gwei.cz Events
@@ -52,31 +60,37 @@
 #    #web3 Community https://gwei.cz
 
 - handle: pbw23.evermeet.local
-  name: Prague Blockchain Week 2023
-  subs: 268
-  img: >-
-    https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/m8/e30334f0-1c10-4122-90eb-9349b7ed19f4
-  description: >-
-    Decentralized gathering for cryptocurrency enthusiasts and related topics.
-    It includes events like conferences, hackathons, workshops, meetups, and
-    parties from Jun 2 - 11.
+  did: did:web:prgblockweek.com
+  config:
+    name: Prague Blockchain Week 2023
+    subs: 268
+    img: >-
+      https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/m8/e30334f0-1c10-4122-90eb-9349b7ed19f4
+    description: >-
+      Decentralized gathering for cryptocurrency enthusiasts and related topics.
+      It includes events like conferences, hackathons, workshops, meetups, and
+      parties from Jun 2 - 11.
 
 - id: 134025681d743f0
+  did: did:web:beerfi.gwei.cz
   handle: beerfi.evermeet.local
-  name: BeerFi Prague
-  subs: 144
-  img: https://secure.meetupstatic.com/photos/event/6/9/4/1/clean_505286945.webp
-  description: >-
-    Every Tuesday on the last week of the month, we bring together programmers
-    in Web3. Whether you are a Web2 developer interested to learn more or a
-    senior in the Web3 sphere, our meetup is for you!
+  config:
+    name: BeerFi Prague
+    subs: 144
+    img: https://secure.meetupstatic.com/photos/event/6/9/4/1/clean_505286945.webp
+    description: >-
+      Every Tuesday on the last week of the month, we bring together programmers
+      in Web3. Whether you are a Web2 developer interested to learn more or a
+      senior in the Web3 sphere, our meetup is for you!
 
 - handle: jednadvacet.org
-  name: Jednadvacet.org
-  subs: 1450
-  img: https://jednadvacet.org/wp-content/uploads/2023/08/cropped-Snimek-obrazovky-2023-08-02-v-6.58.57-2-192x192.png
-  description: >-
-    Jsme neformální síť lokálních bitcoinových komunit. Propojujeme bitcoinery a pomáháme s adopcí bitcoinu.
+  did: did:web:jednadvacet.org
+  config:
+    name: Jednadvacet.org
+    subs: 1450
+    img: https://jednadvacet.org/wp-content/uploads/2023/08/cropped-Snimek-obrazovky-2023-08-02-v-6.58.57-2-192x192.png
+    description: >-
+      Jsme neformální síť lokálních bitcoinových komunit. Propojujeme bitcoinery a pomáháme s adopcí bitcoinu.
 
 #- id: b52cab85781d88
 #  slug: dod
@@ -89,36 +103,45 @@
 - id: df5744efdd3368
   did: did:plc:h4c53spyxe6wab5j7jonafju
   handle: ethbrno.eth
-  name: ETHBrno
-  subs: 0
-  img: https://pbs.twimg.com/profile_images/1758254611276656640/pYhIGUiT_400x400.jpg
-  description: Privacy Lunarpunk Hackathon in Brno, Czech Republic
+  config:
+    name: ETHBrno
+    subs: 0
+    avatarBlob: bafkreibap44yfum56ndyb7ruqs67fc5jaw2wmvjwvffuvuqy3jlbrwtcii
+    description: Privacy Lunarpunk Hackathon in Brno, Czech Republic
 
 - handle: paralelnipolis.evermeet.local
-  name: Paralelní Polis
-  subs: 0
-  img: https://pbs.twimg.com/profile_images/1308765770726477827/Uj_9AfI-_400x400.jpg
-  description: |
-    art - science - technology ▲ independent of state ▲ @institutecrypto, Coworking, A/V studio ▲ @pizzadayprague ▲ HCPP ► http://hcpp.cz
+  did: did:web:paralelnipolis.cz
+  config:
+    name: Paralelní Polis
+    subs: 0
+    img: https://pbs.twimg.com/profile_images/1308765770726477827/Uj_9AfI-_400x400.jpg
+    description: |
+      art - science - technology ▲ independent of state ▲ @institutecrypto, Coworking, A/V studio ▲ @pizzadayprague ▲ HCPP ► http://hcpp.cz
 
 - handle: utxoprague.evermeet.local
-  name: UTXO Prague
-  subs: 134
-  img: https://pbs.twimg.com/profile_images/1626363942502125569/XJ23w0wL_400x400.jpg
-  description: |
-    Otevřená kryptoměnová konference. Propojujeme komunity. 💚💜
+  did: did:web:utxo.cz
+  config:
+    name: UTXO Prague
+    subs: 134
+    img: https://pbs.twimg.com/profile_images/1626363942502125569/XJ23w0wL_400x400.jpg
+    description: |
+      Otevřená kryptoměnová konference. Propojujeme komunity. 💚💜
 
 - id: aiTah6Ax8ayihe
   handle: monerokon.org
-  name: MoneroKon
-  subs: 133
-  img: https://avatars.githubusercontent.com/u/107953504?s=200&v=4
-  description: |
-    Annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems.
+  did: did:web:monerokon.org
+  config:
+    name: MoneroKon
+    subs: 133
+    avatarBlob: bafkreidx2633uzsua2cevwu66hsvmvtu7e25hgaueb3iu5bjgcsnsja7iy
+    description: |
+      Annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems.
 
 - handle: holkyvkryptu.evermeet.local
-  name: Holky v kryptu
-  subs: 0
-  img: https://pbs.twimg.com/profile_images/1354399247312027651/RvZdIMHe_400x400.jpg
-  description: |
-    Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague
+  did: did:web:holkyvkryptu.cz
+  config:
+    name: Holky v kryptu
+    subs: 0
+    img: https://pbs.twimg.com/profile_images/1354399247312027651/RvZdIMHe_400x400.jpg
+    description: |
+      Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague

@@ -4,7 +4,7 @@
     import CalendarAvatar from './CalendarAvatar.svelte';
 
     export let item;
-    export let preview;
+    export let preview = null;
 
     const c = item;
 

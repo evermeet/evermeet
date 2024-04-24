@@ -6,9 +6,11 @@ import endpoints from '../endpoints/index.js';
 
 import { loadYaml, loadYamlDir, loadYamlDirList, stringify, readdirSync, join } from './utils.js'
 import { runtime, exitRuntime, env } from './runtime.js';
-import { initDatabase, loadMockData } from './db.js'
+import { initDatabase } from './db.js'
+import { loadMockData } from './mock.js';
 import { authVerifier } from './auth.js';
 import { loadConfig } from './config.js';
+import { BlobStore } from './blobstore.js';
 
 export class Evermeet {
   
@@ -49,6 +51,9 @@ export class Evermeet {
 
       // initialize database
       this.db = await initDatabase(this, this.config.api.db)
+
+      // init blobStore
+      this.blobStore = new BlobStore(this)
 
       // construct XPRC client and add lexicons
       this.xrpc = new xrpc.Client()
@@ -136,7 +141,7 @@ export class Evermeet {
     return { list, struct }
   }
 
-  async request (id, { input, headers, session }) {
+  async request (id, { input, encoding, headers, session }) {
     const endpoint = this.endpoints.list.find(ep => ep.id === id)
     let out = {};
     try {
@@ -155,9 +160,8 @@ export class Evermeet {
         authData = { user, authError }
         await endpoint.auth(authData)
       }
-      const base = { db, ...authData }
       // run handler
-      out = await endpoint.handler({ input, ...base })
+      out = await endpoint.handler({ input, encoding, ...authData, db })
       if (!out.error) {
         // if not error - validate output
         const res = this.lexicons.assertValidXrpcOutput(id, out.body)
@@ -203,7 +207,7 @@ export class Evermeet {
     if (!session) {
       throw new AuthError('InvalidSession')
     }
-    const user = await db.users.findOne({ _id: session.userId })
+    const user = await db.users.findOne({ id: session.userId })
     if (!user) {
       throw new AuthError('UserNotFound')
     }
@@ -250,7 +254,7 @@ export class Evermeet {
     // otherwise its calendar...
     const cols = { calendar: 'calendars', user: 'users' }
     for (const c of Object.keys(cols)) {
-      const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { _id: id }, { did: id } ] })
+      const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { id }, { did: id } ] })
       if (found) {
         console.log(c)
         return {

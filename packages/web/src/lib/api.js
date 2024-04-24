@@ -44,11 +44,17 @@ export async function xrpcCall(fetch, id, params, data, opts={}) {
     }
     const headers = {}
     if (opts.token) {
-        headers.authorization = 'Bearer ' + opts.token
+        headers.Authorization = 'Bearer ' + opts.token
     } else if (session?.accessJwt) {
-        headers.authorization = 'Bearer ' + session.accessJwt
+        headers.Authorization = 'Bearer ' + session.accessJwt
     }
-
+    if (opts.mimeType) {
+        headers['Content-Type'] = opts.mimeType
+    }
     const resp = await xrpcClient.service(apiHost + "/xrpc").call(id, params, data, { headers, ...opts })
     return resp.data
+}
+
+export async function blobUpload(fetch, { body, mimeType }) {
+    return xrpcCall(fetch, 'app.evermeet.object.uploadBlob', null, body, { mimeType })
 }

@@ -40,7 +40,8 @@ export default function ({ evermeet }) {
         app[method](url, async (req, reply) => {
           let out = {}
           const input = ep.lex.defs.main.type === 'procedure' ? req.body : req.query
-          out = await evermeet.request(ep.id, { input, headers: req.headers, session: req.cookies[evermeet.config.api.sessionName] })
+          const encoding = req.headers['content-type'] || 'application/json'
+          out = await evermeet.request(ep.id, { input, encoding, headers: req.headers, session: req.cookies[evermeet.config.api.sessionName] })
           if (out.error) {
             return reply.code(501).send({ error: out.error, message: out.message })
           }

@@ -1,5 +1,4 @@
 import { EntitySchema, wrap } from '@mikro-orm/core'
-import { ObjectId } from '../lib/db.js'
 
 export const CalendarManager = new EntitySchema({
   name: 'CalendarManager',
@@ -15,64 +14,23 @@ export const CalendarManager = new EntitySchema({
   }
 })
 
-export class Calendar {
-  async view (opts = {}, ctx) {
-    const json = wrap(this).toJSON()
-    if (opts.events !== false) {
-      json.events = []
-      const events = await ctx.db.events.find({ calendarId: json._id })
-      for (const e of events) {
-        json.events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
-      }
-    }
-    json.baseUrl = `/${json.handle?.replace('.' + ctx.api.config.domain, '') || json._id}`
-    json.url = `https://${ctx.api.config.domain}${json.baseUrl}`
-    json.handleUrl = json.handle
-    return json
-  }
-}
-
-export const schema = new EntitySchema({
-  class: Calendar,
-  name: 'Calendar',
-  // extends: 'CustomBaseEntity',
+export const CalendarConfig = new EntitySchema({
+  name: 'CalendarConfig',
+  embeddable: true,
   properties: {
-    _id: {
-      type: 'string',
-      maxLength: 32,
-      primary: true,
-      onCreate: () => ObjectId()
-    },
     name: {
       type: 'string'
-    },
-    handle: {
-      type: 'string',
-      format: 'handle',
-      nullable: true,
-      unique: true
-    },
-    visibility: {
-      type: 'string',
-      enum: ['public', 'unlisted', 'private'],
-      nullable: true
-    },
-    did: {
-      type: 'string',
-      unique: true,
-      nullable: true
     },
     slug: {
       type: 'string',
       nullable: true
     },
-    personal: {
-      type: 'boolean',
-      nullable: true,
-      onCreate: () => false
-    },
     subs: {
       type: 'number',
+      nullable: true
+    },
+    avatarBlob: {
+      type: 'string',
       nullable: true
     },
     img: {
@@ -86,6 +44,58 @@ export const schema = new EntitySchema({
     description: {
       type: 'string',
       nullable: true
+    }
+  }
+})
+
+export class Calendar {
+  async view (opts = {}, ctx) {
+    const c = wrap(this).toJSON()
+
+    let events
+    if (opts.events !== false) {
+      events = []
+      for (const e of await ctx.db.events.find({ calendarId: c.id })) {
+        events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
+      }
+    }
+    const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
+    const url = `https://${ctx.api.config.domain}${c.baseUrl}`
+    const handleUrl = c.handle
+
+    return {
+      id: c.id,
+      did: c.did,
+      handle: c.handle,
+      visibility: c.visibility,
+      personal: c.personal,
+      ...c.config,
+      events,
+      baseUrl,
+      url,
+      handleUrl
+    }
+  }
+}
+
+export const schema = new EntitySchema({
+  class: Calendar,
+  name: 'Calendar',
+  extends: 'BaseDidEntity',
+  properties: {
+    visibility: {
+      type: 'string',
+      enum: ['public', 'unlisted', 'private'],
+      onCreate: (obj) => obj.visibility || 'public'
+    },
+    personal: {
+      type: 'boolean',
+      nullable: true,
+      onCreate: () => false
+    },
+    config: {
+      kind: 'embedded',
+      entity: 'CalendarConfig'
     },
     managersArray: {
       type: 'array',
@@ -98,16 +108,6 @@ export const schema = new EntitySchema({
       entity: 'CalendarManager',
       onCreate: () => [],
       array: true
-    },
-    signingKey: {
-      type: 'string',
-      nullable: true,
-      lazy: true
-    },
-    rotationKey: {
-      type: 'string',
-      nullable: true,
-      lazy: true
     }
   }
 })

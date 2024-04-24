@@ -5,6 +5,7 @@
 
   export let bind;
   export let type = 'event';
+  export let disabled = false;
 
   const states = {
     public: { title: 'Public', text: 'Visible to everyone, show on your calendar.', ico: GlobeAlt },
@@ -27,6 +28,7 @@
       fitViewport: true,
     },
     defaultSelected: { value: $bind, label: states[$bind].title },
+    disabled
   });
 
   selected.subscribe((x) => {

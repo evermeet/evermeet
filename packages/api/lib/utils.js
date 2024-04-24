@@ -2,9 +2,27 @@ import { parse, stringify } from 'yaml'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import _ from 'lodash'
+import { WASMagic } from "wasmagic";
+const magic = await WASMagic.create();
+
+export function detect (buffer) {
+  return magic.detect(buffer)
+}
+
+export function loadFile (fn, enc = 'utf-8') {
+  return readFileSync(fn, enc)
+}
 
 export function loadYaml (fn) {
-  return parse(readFileSync(fn, 'utf-8'))
+  return parse(loadFile(fn, 'utf-8'))
+}
+
+export function loadFileWithInfo (fn, enc) {
+  const stat = statSync(fn)
+  return {
+    size: stat.size,
+    data: loadFile(fn, enc)
+  }
 }
 
 export function loadYamlDir (dir) {

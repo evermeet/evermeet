@@ -25,6 +25,12 @@ defs:
               - private
           description:
             type: string
+          avatar:
+            type: object
+            required: [ "$cid" ]
+            properties:
+              $cid:
+                type: string
     output:
       encoding: application/json
       schema:

@@ -9,6 +9,11 @@
     import { xrpcCall } from '../../lib/api.js';
     import { user, config, session } from '$lib/stores';
     import InstanceSelector from '../../components/InstanceSelector.svelte';
+    import { onMount } from 'svelte';
+
+    onMount(() => {
+        document.querySelector("#identifier").focus()
+    })
 
     const credentials = writable({ visibility: 'public' })
     const instance = writable($config.domain)

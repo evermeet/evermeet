@@ -156,7 +156,7 @@ export function createSession (server, ctx) {
     const token = createSessionToken(user, ctx)
 
     // create session
-    const session = await db.sessions.create({ userId: user._id, token })
+    const session = await db.sessions.create({ userId: user.id, token })
     db.em.persist(session).flush()
 
     return {

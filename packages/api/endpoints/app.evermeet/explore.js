@@ -1,7 +1,10 @@
 
 export function getExplore (server, ctx) {
   server.endpoint(async ({ db }) => {
-    const calendars = await db.calendars.find({ personal: { $ne: true } })
+    const calendars = await db.calendars.find({
+      personal: { $ne: true },
+      visibility: 'public'
+    })
     const featured = []
 
     return {

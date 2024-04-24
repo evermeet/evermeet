@@ -48,5 +48,17 @@ if (config.web.enabled) {
     })   
   }
 }
+
+services.push({
+  name: 'evermeet-img-server',
+  script: './index.js',
+  cwd: './packages/img-server',
+  interpreter: config.api.runtime,
+  watch: process.env.NODE_ENV === 'development',
+  env: {
+    PORT: 3002
+  }
+})
+
 console.log(services)
 module.exports = services

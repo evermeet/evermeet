@@ -24,6 +24,7 @@
     "@mikro-orm/core": "^6.2.1",
     "@mikro-orm/mongodb": "^6.2.1",
     "@mikro-orm/sqlite": "^6.2.1",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@web5/dids": "^1.0.0",
     "ajv": "^8.12.0",
     "argon2": "^0.40.1",
@@ -32,9 +33,11 @@
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "multiformats": "^9.6.4",
     "npm": "^10.5.2",
     "uint8arrays": "3.0.0",
     "uuid": "^9.0.1",
+    "wasmagic": "^1.0.1",
     "yaml": "^2.4.1"
   },
   "devDependencies": {

@@ -8,6 +8,7 @@
     import { register, unregister } from '$lib/actions';
     import FlagIcon from './FlagIcon.svelte';
     import HandleBadge from './HandleBadge.svelte';
+    import CalendarAvatar from './CalendarAvatar.svelte';
 
     countries.registerLocale(enLocale);
 
@@ -46,7 +47,7 @@
             <div class="mt-6">
                 <div class="flex gap-4 items-center">
                     <div class="w-10 h-10 aspect-square">
-                        <img class="w-10 h-10 aspect-square rounded-lg" src={item.calendar.img} />
+                        <CalendarAvatar calendar={item.calendar} size="40" />
                     </div>
                     <div>
                         <div class="text-sm">Presented by</div>

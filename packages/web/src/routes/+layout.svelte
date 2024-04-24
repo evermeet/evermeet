@@ -10,6 +10,7 @@
 
     import CurrentTime from "../components/CurrentTime.svelte";
     import UserMenu from "../components/UserMenu.svelte";
+    import SearchDialog from "../components/SearchDialog.svelte";
 
     export let data;
 
@@ -56,7 +57,12 @@
         {#if $user}
             <ul class="menu menu-horizontal w-full gap-1">
                 {#each menu as mi}
-                    <li><a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''}"><svelte:component this={mi.ico} /> {mi.title}</a></li>
+                    <li>
+                        <a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''}">
+                            <svelte:component this={mi.ico} tabindex="-1" class="outline-none" />
+                            {mi.title}
+                        </a>
+                    </li>
                 {/each}
             </ul>
         {/if}
@@ -74,13 +80,11 @@
                 {/if}
             </ul>
         </div>
-        {#if $user}
             <div class="mr-2 flex text-neutral-content gap-1">
-                <div class="tooltip tooltip-bottom" data-tip="Search ⎯ ⌘K">
-                    <div class="w-8 h-8 rounded-full aspect-square border border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center"><MagnifyingGlass size="20" /></div>
-                </div>
+                <SearchDialog />
                 <div class="w-8 h-8 rounded-full aspect-square border border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center"><Bell size="20" /></div>
             </div>
+        {#if $user}
             <UserMenu />
         {:else}
             <a class="btn btn-sm btn-accent" href="/login?next={encodeURIComponent($page.url.pathname)}">Login</a>

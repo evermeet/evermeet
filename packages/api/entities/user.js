@@ -29,13 +29,8 @@ export const EventConfig = new EntitySchema({
 export const schema = new EntitySchema({
   name: 'User',
   class: User,
+  extends: 'BaseEntity',
   properties: {
-    _id: {
-      type: 'string',
-      maxLength: 32,
-      primary: true,
-      onCreate: () => ObjectId()
-    },
     handle: {
       type: 'string',
       unique: true

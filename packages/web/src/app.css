@@ -53,8 +53,14 @@
     .heading1 {
         @apply text-3xl font-semibold mb-6;
     }
+    .heading1.no-margin {
+        @apply mb-0;
+    }
     .heading2 {
         @apply text-xl font-semibold mb-3;
+    }
+    .heading2.no-margin {
+        @apply mb-0;
     }
 
     .popup-menu {

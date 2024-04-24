@@ -1,7 +1,9 @@
 <script>
+    import { config } from '$lib/stores';
+
     import EventDetail from '../../components/EventDetail.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
-    import { config } from '$lib/stores';
+    import CalendarAvatar from '../../components/CalendarAvatar.svelte';
 
     export let data;
     const { subscribed, owned } = data.calendars;
@@ -16,7 +18,7 @@
     <h1 class="heading1">Calendars</h1>
 
     <div class="flex items-center">
-        <h2 class="heading2 grow">My Calendars</h2>
+        <div class="grow"><h2 class="heading2 no-margin">My Calendars</h2></div>
         <div>
             <a href="/create-calendar"><button class="btn btn-sm btn-neutral">+ Create Calendar</button></a>
         </div>
@@ -38,9 +40,7 @@
             <div class="mb-3 itembox flex gap-8">
                 <div class="w-[12rem]">
                     <div class="w-12 h-12 mb-2">
-                        <img
-                            class="{c.personal ? "rounded-full" : "rounded-lg"}"
-                            src={c.img} />
+                        <CalendarAvatar calendar={c} size="48" />
                     </div>
                     <div class="text-lg font-medium">{c.name}</div>
                     {#if c._remote}

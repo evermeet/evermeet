@@ -1,6 +1,6 @@
 
 import { createDid } from '../../lib/did.js'
-import { ObjectId } from '../../lib/db.js'
+import { createId } from '../../lib/db.js'
 
 export function createCalendar (server, ctx) {
   server.endpoint({
@@ -21,18 +21,28 @@ export function createCalendar (server, ctx) {
         return { error: 'PrivateCannotHaveHandle' }
       }
 
+      // update blobs
+      let avatarBlob
+      if (input.avatarBlob) {
+        console.log(input)
+        const blob = await db.blobs.findOne({ cid: input.avatarBlob.$cid })
+        if (!blob) {
+          return { error: 'InvalidAvatarBlob' }
+        }
+        avatarBlob = blob.cid
+      }
+
       // setup initial managers
       const managers = [{ ref: user.did, t: new Date() }]
 
       // get DID
-      const id = ObjectId()
       const didData = await createDid(input.handle || id, ctx)
 
       // construct calendar
       const calendar = db.calendars.create({
-        _id: id,
         ...input,
         ...didData,
+        avatarBlob,
         managers
       })
       await db.em.persist(calendar).flush()

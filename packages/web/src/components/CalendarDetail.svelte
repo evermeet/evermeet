@@ -32,9 +32,7 @@
 <div class="page-wide {item.backdropImg ? "-mt-12" : ""} z-1">
     <div class="flex items-end mb-2">
         <div class="{item.backdropImg ? 'mb-6' : 'mt-10'} grow">
-            <div class="rounded-lg overflow-hidden {item.backdropImg ? 'w-24 h-24 border border-neutral/75 border-4' : 'w-20 h-20'}">
-                <CalendarAvatar calendar={item} size="88" />
-            </div>
+            <CalendarAvatar calendar={item} size="88" className="{item.backdropImg ? 'border-neutral/50 border-4' : ''}" />
         </div>
             {#if $user}
                 <div>
@@ -70,6 +68,6 @@
     <h2 class="text-2xl font-medium mt-6">Events</h2>
 
     <div class="mt-6">
-        <EventList events={item.events || []} />
+        <EventList events={item.events} />
     </div>
 </div>

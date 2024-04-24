@@ -1,5 +1,5 @@
 import { wrap } from '@mikro-orm/core'
-import { loadYaml, join } from './utils.js'
+import { createId as cuid2 } from '@paralleldrive/cuid2'
 
 export async function initDatabase (api, conf) {
   console.log(`[Database] Loadind storage: ${conf.storage}`)
@@ -26,37 +26,15 @@ export async function initDatabase (api, conf) {
         events: em.getRepository('Event'),
         users: em.getRepository('User'),
         sessions: em.getRepository('Session'),
+        blobs: em.getRepository('Blob'),
         wrap
       }
     }
   }
 }
 
-export async function loadMockData (api) {
-  const db = api.db
-
-  const map = [
-    ['calendars.yaml', 'Calendar'],
-    ['events.yaml', 'Event'],
-    ['users.yaml', 'User'],
-    ['sessions.yaml', 'Session']
-  ]
-
-  const em = db.em.fork()
-
-  for (const [fn, entityName] of map) {
-    const items = await loadYaml(join(api.paths.mockData, fn))
-    const repo = em.getRepository(entityName)
-    for (const item of items) {
-      if (item.id) {
-        item._id = item.id
-        delete item.id
-      }
-      const x = repo.create(item)
-      em.persist(x)
-    }
-  }
-  await em.flush()
+export function createId () {
+  return cuid2()
 }
 
 export function ObjectId () {
@@ -64,4 +42,4 @@ export function ObjectId () {
   return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function () {
     return (Math.random() * 16 | 0).toString(16)
   }).toLowerCase()
-};
+}

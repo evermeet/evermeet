@@ -3,11 +3,15 @@
     import EventBox from './EventBox.svelte';
     export let events;
 
-    for (const e of events) {
-        e.date = format(new Date(e.dateStart), "yyyy-MM-dd")
+
+    function enhanced (arr) {
+        for (const e of arr) {
+            e.date = format(new Date(e.dateStart), "yyyy-MM-dd")
+        }
+        return arr
     }
 
-    const days = events.map(e => e.date)
+    $: days = enhanced(events).map(e => e.date)
 </script>
 
 {#if events.length > 0}

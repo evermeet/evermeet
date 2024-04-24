@@ -47,11 +47,18 @@ export default function ({ evermeet }) {
       for (const ep of evermeet.endpoints.list) {
         const method = ep.lex.defs.main.type === 'procedure' ? 'post' : 'get'
 
-        app[method](ep.id, async ({ error, query, body, headers, cookie }) => {
+        app[method](ep.id, async ({ error, query, body, headers, cookie, request, set }) => {
           let out = {}
-          const input = ep.lex.defs.main.type === 'procedure' ? body : query
+          let input = ep.lex.defs.main.type === 'procedure' ? body : query
+          const encoding = headers['content-type'] || 'application/json'
+
+          if (input === undefined && ep.lex.defs.main.type === 'procedure' && ep.lex.defs.main.input.encoding === '*/*') {
+            // decode binary data
+            input = await request.arrayBuffer()
+          }
+
           const session = headers.authorization?.replace(/^Bearer /, '') || cookie[evermeet.config.api.sessionName].value
-          out = await evermeet.request(ep.id, { input, headers, session })
+          out = await evermeet.request(ep.id, { input, encoding, headers, session })
           if (out.error) {
             return error(501, { error: out.error, message: out.message })
           }
@@ -59,6 +66,12 @@ export default function ({ evermeet }) {
             for (const cd of out.cookies) {
               cookie[cd.key].set({ ...cd.config })
             }
+          }
+          if (out.encoding && out.encoding !== 'application/json') {
+            set.headers['content-type'] = out.encoding
+
+            console.log(typeof (out.body))
+            return new Buffer(out.body)
           }
           return out.body
         }, {

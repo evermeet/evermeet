@@ -6,7 +6,7 @@
 
 <div class="page-wide">
     <div class="flex items-center">
-        <h1 class="heading1 grow">Events</h1>
+        <h1 class="heading1 no-margin grow">Events</h1>
         <label class="flex cursor-pointer gap-2">
             <span class="label-text">Upcoming</span> 
             <input type="checkbox" value="synthwave" class="toggle theme-controller"/>

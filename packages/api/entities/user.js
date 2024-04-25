@@ -9,13 +9,15 @@ class User {
       did: u.did,
       handle: u.handle,
       name: u.name,
+      description: u.description,
+      avatarBlob: u.avatarBlob,
       calendarSubscriptions: u.calendarSubscriptions,
       createdOn: u.createdOn
     }
   }
 }
 
-export const EventConfig = new EntitySchema({
+export const UserCalendarSubscription = new EntitySchema({
   name: 'UserCalendarSubscription',
   embeddable: true,
   properties: {
@@ -49,6 +51,14 @@ export const schema = new EntitySchema({
       nullable: true
     },
     email: {
+      type: 'string',
+      nullable: true
+    },
+    description: {
+      type: 'string',
+      nullable: true
+    },
+    avatarBlob: {
       type: 'string',
       nullable: true
     },

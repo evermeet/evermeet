@@ -39,7 +39,7 @@
         @apply border-2 border-t-0 border-l-0 border-r-0 text-base-content;
     }
 
-    .form > div {
+    .form > div:not(:last-child) {
         @apply mb-4;
     }
     .form label {
@@ -74,5 +74,9 @@
     }
     .popup-menu li .item {
         @apply px-[1rem] py-[0.5rem] cursor-pointer;
+    }
+
+    .manage-heading1 {
+        @apply text-2xl font-semibold mt-8 mb-4;
     }
 }

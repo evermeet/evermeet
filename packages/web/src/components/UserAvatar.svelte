@@ -1,11 +1,16 @@
 <script>
     import Avatar from 'svelte-boring-avatars';
+    import { imgBlobUrl } from '$lib/api';
+
     export let user;
     export let size = 25;
+    export let data = null;
+
+    $: src = data || (user.avatarBlob && imgBlobUrl(user.did, user.avatarBlob, size)) || user.img
 </script>
 
-{#if user.img}
-    <img alt={user.handle} src={user.img} class="rounded-full aspect-square" style="width: {size}px; height: {size}px;" />
+{#if src}
+    <img alt={user.handle} src={src} class="rounded-full aspect-square" style="width: {size}px; height: {size}px;" />
 {:else}
     <div class="rounded-full">
         <Avatar

@@ -188,3 +188,35 @@ export async function getSession (server, ctx) {
     }
   })
 }
+
+export async function updateAccount (server, { api: { authVerifier } }) {
+  server.endpoint({
+    auth: authVerifier.accessUser,
+    handler: async (ctx) => {
+      const { user, input, db } = ctx
+
+      if (input.profile) {
+        // update blobs
+        let avatar
+        if (input.profile.avatar) {
+          const blob = await db.blobs.findOne({ cid: input.profile.avatar.$cid })
+          if (!blob) {
+            return { error: 'InvalidAvatarBlob' }
+          }
+          avatar = blob.cid
+        }
+        console.log(avatar)
+        user.name = input.profile.name
+        user.description = input.profile.description
+        user.avatarBlob = avatar
+      }
+
+      await db.em.flush()
+      return {
+        body: {
+          user: await user.view(ctx)
+        }
+      }
+    }
+  })
+}

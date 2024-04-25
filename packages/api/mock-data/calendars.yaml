@@ -147,7 +147,7 @@
     description: |
       Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague
   
-- handle: ethereum.org
+- handle: ethereum.evermeet.local
   did: did:web:ethereum.org
   config:
     name: Ethereum Foundation

@@ -1,0 +1,27 @@
+lexicon: 1
+defs:
+  main:
+    type: procedure
+    input:
+      encoding: application/json
+      schema:
+        type: object
+        properties:
+          profile:
+            type: object
+            required: ["name"]
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              avatar:
+                type: object
+                required: [ "$cid" ]
+                properties:
+                  $cid:
+                    type: string
+    output:
+      encoding: application/json
+      schema:
+        type: object

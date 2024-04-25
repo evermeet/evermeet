@@ -6,6 +6,7 @@
     export let layout;
     export let item;
     export let config;
+    export let onSubmit = async (d) => { alert(JSON.stringify(d)); return false; };
 
     if (config.schema) {
         schema = config.schema
@@ -14,8 +15,11 @@
         layout = config.layout
     }
 
-    function submitForm() {
-        alert(JSON.stringify($formData))
+    async function submitForm() {
+        const resp = await onSubmit($formData)
+        if (resp) {
+            isChanged = false
+        }
     }
 
     const orig = JSON.stringify(item)
@@ -59,7 +63,7 @@
         {/if}
     {/each}
 
-    <div class="mt-4">
+    <div class="mt-4 border-t border-neutral/20 pt-4">
         <button type="submit" class="btn btn-primary" class:btn-disabled={!isChanged}>{config.submitButton || 'Save'}</button>
     </div>
 </form>

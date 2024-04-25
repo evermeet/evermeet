@@ -2,6 +2,7 @@
   did: did:plc:524tuhdhh3m7li5gycdn6boe
   handle: tree.evermeet.local
   name: tree
+  description: XXX
   email: tree@tree.fail
   password: $argon2id$v=19$m=65536,t=3,p=4$E7XLZC1KU7wAPQeEyIT2rQ$QtVT8vioHsxsTd3Dys+jwizfeowQ5lDjhmbcuYvz0ic
   emails:

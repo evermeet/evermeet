@@ -8,35 +8,38 @@
     import { CheckCircle, LockClosed } from 'svelte-heros-v2';
     import HandleBadge from './HandleBadge.svelte';
     import CalendarAvatar from './CalendarAvatar.svelte';
+    import { imgBlobUrl } from '$lib/api';
     
     export let item;
 
     $: subscribed = $user?.calendarSubscriptions?.find(sc => sc.ref === item.did)
     $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
+    $: backdropImg = (item.headerBlob && imgBlobUrl(item.did, item.headerBlob, 1000)) || item.backdropImg
 </script>
 
 <svelte:head>
     <title>{item.name}</title> 
 </svelte:head>
 
-{#if item.backdropImg}
-    <div class="page-extra-wide relative -z-10">
+{#if backdropImg}
+    <div class="page-extra-wide relative">
         <div class="">
             <img
-                class="lg:rounded-2xl w-full object-cover max-h-[308px]" 
-                src={item.backdropImg} />
+                alt={item.name}
+                class="lg:rounded-2xl w-full object-cover max-h-[308px] aspect-[3.5/1] bg-base-300" 
+                src={backdropImg} />
         </div>
     </div>
 {/if}
 
-<div class="page-wide {item.backdropImg ? "-mt-12" : ""} z-1">
+<div class="page-wide {backdropImg ? "-mt-12" : ""} z-0">
     <div class="flex items-end mb-2">
-        <div class="{item.backdropImg ? 'mb-6' : 'mt-10'} grow">
-            <CalendarAvatar calendar={item} size="88" className="{item.backdropImg ? 'border-neutral/50 border-4' : ''}" />
+        <div class="{backdropImg ? 'mb-6' : 'mt-10'} grow z-10">
+            <CalendarAvatar calendar={item} size="88" className="{backdropImg ? 'border-neutral/50 border-4' : ''}" />
         </div>
             {#if $user}
                 <div>
-                    {#if managed}
+                    {#if item.$userContext?.isManager}
                         <a href="/manage/calendar/{item.id}" class="btn btn-accent">Manage</a>
                     {:else}
                         {#if subscribed}
@@ -57,7 +60,7 @@
     <HandleBadge {item} />
 
     {#if item.description}
-        <div class="mt-3 text-neutral-content">{@html parse(item.description)}</div>
+        <div class="mt-3 text-base-content/75">{@html parse(item.description)}</div>
     {/if}
 </div>
 

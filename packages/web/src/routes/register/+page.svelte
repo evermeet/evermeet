@@ -66,8 +66,8 @@
 <div class="w-[28rem] m-auto my-24 itembox p-6 shadow-xl">
     <UserPlus size="50" />
     <div class="text-2xl mt-4">Create Personal Identity</div>
-    <div class="mt-2 text-neutral-content">Here you can register new user account on <span class="font-mono">{$config.domain}</span>.</div>
-    <div class="mt-2 text-neutral-content opacity-50">If you already have account, you can <a href="/login" class="underline hover:no-underline">sign in</a>.</div>
+    <div class="mt-2 text-base-content/75">Here you can register new user account on <span class="font-mono">{$config.domain}</span>.</div>
+    <div class="mt-2 text-base-content/75 opacity-50">If you already have account, you can <a href="/login" class="underline hover:no-underline">sign in</a>.</div>
 
 
     <form class="mt-6" on:submit|preventDefault={submitRegistration}>
@@ -81,7 +81,7 @@
         <div class="mt-2 mb-2">
             <input id="username" type="text" placeholder="your-cool-{customDomainMode ? 'domain.com' : 'handle'}" class="input input-bordered {isProcessing ? 'input-disabled' : ''} w-full" bind:value={$registerData.handle} />
         </div>
-        <div class="text-neutral-content flex gap-3 items-center">
+        <div class="text-base-content/75 flex gap-3 items-center">
             <div class="grow">
                 <div>Your handle will be</div>
             </div>
@@ -90,9 +90,9 @@
         <div class="text-accent text-lg font-semibold mt-1 mb-3">@{$registerData.handle || '%'}{#if !customDomainMode}.{$config.domain}{/if}</div>
 
         {#if customDomainMode}
-            <div class="py-3 px-4 itembox border-primary/10 bg-primary/5 mb-4 text-sm text-neutral-content grid grid-cols-1 gap-3">
+            <div class="py-3 px-4 itembox border-primary/10 bg-primary/5 mb-4 text-sm text-base-content/75 grid grid-cols-1 gap-3">
                 <div class="text-lg">5-min DNS verification ✨</div>
-                <div class="text-neutral-content">Add the following DNS record to your domain as <span class="inline-block py-0.5 px-1.5 bg-base-300 rounded font-mono">_evermeet.{$registerData.handle || '%'}</span> subdomain:</div>
+                <div class="text-base-content/75">Add the following DNS record to your domain as <span class="inline-block py-0.5 px-1.5 bg-base-300 rounded font-mono">_evermeet.{$registerData.handle || '%'}</span> subdomain:</div>
                 <div class="py-3 px-4 bg-base-300 rounded-lg grid grid-cols-1 gap-2">
                     <p>Host:<br/><span class="font-mono">_evermeet</span></p>
                     <p>Type:<br/><span class="font-mono">TXT</span></p>
@@ -108,7 +108,7 @@
                 </div>
             </div>
         {:else}
-            <div class="py-2 px-3 itembox mb-4 text-sm text-neutral-content grid grid-cols-1 gap-2">
+            <div class="py-2 px-3 itembox mb-4 text-sm text-base-content/75 grid grid-cols-1 gap-2">
                 <div class="flex gap-2 items-center">
                     <div>{#if $registerData.handle?.match(/^[0-9a-zA-Z-]+$/)}<div class="text-success"><Check tabindex="-1" /></div>{:else}<div class="text-error"><ExclamationCircle tabindex="-1"  /></div>{/if}</div>
                     <div>Only contains letters, numbers, and hyphens</div>

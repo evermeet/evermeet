@@ -42,7 +42,7 @@
                 <UserAvatar user={$user} size="45" />
                 <div class="">
                     <div>{$user.name}</div>
-                    <div class="text-neutral-content break-all">@{$user.handle}</div>
+                    <div class="text-base-content/75 break-all">@{$user.handle}</div>
                 </div>
             </div>
 

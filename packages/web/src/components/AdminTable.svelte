@@ -47,7 +47,7 @@
             <tr class='hover'>
                 <td><input type="checkbox" class="checkbox checkbox-sm" /></td>
                 {#each layouts[collection] as li}
-                    <td class="text-neutral-content">
+                    <td class="text-base-content/75">
                         {#if li.type === 'nameslug'}
                             {item[li.col]} <div class="ml-2 badge badge-neutral text-xs font-mono">{item.slug}</div>
                         {:else if li.type === 'location'}

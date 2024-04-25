@@ -3,6 +3,7 @@ import { createId } from '../lib/db.js'
 
 export const BaseEntity = new EntitySchema({
   name: 'BaseEntity',
+  abstract: true,
   properties: {
     id: {
       type: 'string',
@@ -20,6 +21,7 @@ export const BaseEntity = new EntitySchema({
 export const BaseDidEntity = new EntitySchema({
   name: 'BaseDidEntity',
   extends: 'BaseEntity',
+  abstract: true,
   properties: {
     did: {
       type: 'string',

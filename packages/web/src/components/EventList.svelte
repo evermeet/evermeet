@@ -22,7 +22,7 @@
             <div class="timeline-start p-2 items-start flex w-full h-full">
                 <div>
                     <div class="font-semibold">{format(new Date(day), 'MMM d')}</div>
-                    <div class="text-neutral-content">{format(new Date(day), 'EEEE')}</div>
+                    <div class="text-base-content/75">{format(new Date(day), 'EEEE')}</div>
                 </div>
             </div>
             <div class="timeline-middle">

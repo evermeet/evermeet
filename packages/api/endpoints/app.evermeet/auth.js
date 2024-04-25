@@ -166,7 +166,7 @@ export function createSession (server, ctx) {
         // refreshJwt: 'xxx',
         handle: user.handle,
         did: user.did,
-        user: db.wrap(user).toJSON()
+        user: await user.view()
       }
     }
   })
@@ -182,7 +182,7 @@ export async function getSession (server, ctx) {
           // refreshJwt: 'xxx',
           handle: user.handle,
           did: user.did,
-          user: db.wrap(user).toJSON()
+          user: await user.view()
         }
       }
     }

@@ -30,4 +30,4 @@
 
 <h3 id="hosts" class="text-2xl my-8 font-semibold">Source</h3>
 
-<pre class="overflow-scroll itembox"><code class="mono pre text-xs text-neutral-content">{JSON.stringify(item, null, 2)}</code></pre>
+<pre class="overflow-scroll itembox"><code class="mono pre text-xs text-base-content/75">{JSON.stringify(item, null, 2)}</code></pre>

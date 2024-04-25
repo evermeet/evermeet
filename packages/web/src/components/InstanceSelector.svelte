@@ -37,7 +37,7 @@
       use:melt={$trigger}
       aria-label="Visibility"
     >
-      <div class="text-neutral-content flex gap-1.5 items-center text-xs">
+      <div class="text-base-content/75 flex gap-1.5 items-center text-xs">
           <svelte:component this={instances.find(x => x.domain === $selectedLabel).local ? Server : GlobeAlt} class="w-4" tabindex="-1" />
           {$selectedLabel || 'Select visibility'}
       </div>
@@ -60,7 +60,7 @@
                 <div class="grow">
                   <div>{i.domain}</div>
                   {#if i.local}
-                    <div class="text-neutral-content text-sm">Local instance</div>
+                    <div class="text-base-content/75 text-sm">Local instance</div>
                   {/if}
                 </div>
                 <div class="">

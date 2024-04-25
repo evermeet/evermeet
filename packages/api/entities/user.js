@@ -2,12 +2,15 @@ import { EntitySchema, wrap } from '@mikro-orm/core'
 import { ObjectId } from '../lib/db.js'
 
 class User {
-  async view () {
-    const json = wrap(this).toJSON()
+  async view (ctx, opts = {}) {
+    const u = wrap(this).toJSON()
     return {
-      handle: json.handle,
-      did: json.did,
-      createdOn: json.createdOn
+      id: u.id,
+      did: u.did,
+      handle: u.handle,
+      name: u.name,
+      calendarSubscriptions: u.calendarSubscriptions,
+      createdOn: u.createdOn
     }
   }
 }

@@ -36,7 +36,7 @@
 
         {#if $user}
             <div class="mt-6">
-                <div class="itembox text-neutral-content flex gap-3">
+                <div class="itembox text-base-content/75 flex gap-3">
                     <div>You have manage access for this event.</div>
                     <a class="btn btn-secondary" href="/manage/event/{item.id}">Manage&nbsp;↗</a>
                 </div>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 {#if item.calendar.description}
-                    <div class="mt-4 text-sm text-neutral-content">
+                    <div class="mt-4 text-sm text-base-content/75">
                         {item.calendar.description}
                     </div>
                 {/if}
@@ -84,7 +84,7 @@
             <div class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2">
                 <div class="font-mono text-sm">{item.guestCountTotal} going</div>
             </div>
-            <div class="mt-4 mb-8 text-sm text-neutral-content">
+            <div class="mt-4 mb-8 text-sm text-base-content/75">
                 {#if item.guests}
                     {item.guests.map(g => g.name).slice(0,2).join(', ')} and {item.guestCountTotal} others
                 {:else}
@@ -110,7 +110,7 @@
             </div>
             <div>
                 <div class="text-lg font-mono">{format(item.dateStart, 'eeee, MMMM d')}</div>
-                <div class="text-sm text-neutral-content">6:00 PM - 10:00 PM GMT+2</div>
+                <div class="text-sm text-base-content/75">6:00 PM - 10:00 PM GMT+2</div>
             </div>
         </div>
         <div class="flex gap-4 items-center mt-4">
@@ -120,7 +120,7 @@
             <div>
                 <div class="font-mono text-lg">{item.placeName}</div>
                 {#if item.placeCity && countryName}
-                    <div class="text-sm text-neutral-content flex gap-2 items-center"><div>{item.placeCity}, {countryName}</div> <FlagIcon country={item.placeCountry} /></div>
+                    <div class="text-sm text-base-content/75 flex gap-2 items-center"><div>{item.placeCity}, {countryName}</div> <FlagIcon country={item.placeCountry} /></div>
                 {/if}
             </div>
         </div>
@@ -134,8 +134,8 @@
                     {#if userRegistered}
                         <div><img src={$user.img} alt={$user.name} class="w-10 rounded-full mb-2" /></div>
                         <div class="text-xl font-semibold font-mono">You’re In</div>
-                        <div class="mt-1.5 text-neutral-content">A confirmation email has been sent to your email.</div>
-                        <div class="mt-4 text-sm text-neutral-content">No longer able to attend? Notify the host by <button class="underline text-accent opacity-75 hover:opacity-100" on:click={unregister(item.id)}>canceling your registration</button>.</div>
+                        <div class="mt-1.5 text-base-content/75">A confirmation email has been sent to your email.</div>
+                        <div class="mt-4 text-sm text-base-content/75">No longer able to attend? Notify the host by <button class="underline text-accent opacity-75 hover:opacity-100" on:click={unregister(item.id)}>canceling your registration</button>.</div>
                     {:else}
                         <div class="mb-4">Welcome! To join the event, please register below.</div>
                         {#if $user}

@@ -1,7 +1,7 @@
 
-export function getExplore (server, ctx) {
-  server.endpoint(async ({ db }) => {
-    const calendars = await db.calendars.find({
+export function getExplore (server) {
+  server.endpoint(async (ctx) => {
+    const calendars = await ctx.db.calendars.find({
       personal: { $ne: true },
       visibility: 'public'
     })
@@ -10,7 +10,7 @@ export function getExplore (server, ctx) {
     return {
       body: {
         calendars: await Promise.all(calendars.map(async (cal) => {
-          return await cal.view({ events: false }, { db, api: ctx.api })
+          return await cal.view(ctx, { events: false })
         })),
         featured
       }

@@ -58,3 +58,11 @@ export async function xrpcCall(fetch, id, params, data, opts={}) {
 export async function blobUpload(fetch, { body, mimeType }) {
     return xrpcCall(fetch, 'app.evermeet.object.uploadBlob', null, body, { mimeType })
 }
+
+export function imgBlobUrl (did, cid, size) {
+    return `http://localhost:3002/width_${size*2},format_avif/${blobUrl(did, cid)}`
+}
+
+export function blobUrl (did, cid) {
+    return `http://localhost:3000/xrpc/app.evermeet.object.getBlob?did=${did}&cid=${cid}`
+}

@@ -9,7 +9,9 @@ defs:
         did:
           type: string
           format: did
+          example: did:plc:jxj3fiv6sapedgpz36umxsew
         cid:
           type: string
+          example: bafkreidd3q2vcudqm6i45iuwf4t7e45o25nvtngpn4z7cduadd27fmh5uq
     output:
       encoding: "*/*"

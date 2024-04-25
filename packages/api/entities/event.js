@@ -43,19 +43,24 @@ export const EventConfig = new EntitySchema({
 })
 
 export class Event {
-  async view (opts = {}, ctx) {
+  async view (ctx, opts = {}) {
     const json = {
       id: this.id,
       calendarId: this.calendarId,
       ...wrap(this.config).toJSON()
     }
 
-    const calendar = await ctx.db.calendars.findOne({ id: this.calendarId })
-    json.calendar = await calendar.view({ events: false }, ctx)
+    const calendar = typeof (opts.calendar) === 'object'
+      ? opts.calendar
+      : await ctx.db.calendars.findOne({ id: this.calendarId })
 
-    json.baseUrl = json.calendar.baseUrl + '/' + json.slug
-    json.url = json.calendar.url + '/' + json.slug
-    json.handleUrl = json.calendar.handle + '/' + json.slug
+    if (typeof (opts.calendar) !== 'object') {
+      json.calendar = await calendar.view(ctx, { events: false })
+    }
+
+    json.handleUrl = calendar.handle + '/' + json.slug
+    json.baseUrl = '/' + calendar.handle + '/' + json.slug
+
     // json.guestCountNative = (json.guestsNative || []).length
     // json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)
     return json
@@ -79,6 +84,17 @@ export const schema = new EntitySchema({
     config: {
       kind: 'embedded',
       entity: 'EventConfig'
+    },
+    did: {
+      type: 'string',
+      unique: true,
+      nullable: true
+    },
+    handle: {
+      type: 'string',
+      format: 'handle',
+      nullable: true,
+      unique: true
     }
   }
 })

@@ -27,5 +27,5 @@
 </script>
 
 <div class="tooltip tooltip-bottom" data-tip={tzInfo}>
-    <a href="https://time.is/" target="_blank" class="text-neutral-content opacity-75">{time}</a>
+    <a href="https://time.is/" target="_blank" class="text-base-content/75 opacity-75">{time}</a>
 </div>

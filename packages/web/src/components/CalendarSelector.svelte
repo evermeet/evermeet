@@ -27,7 +27,7 @@
       use:melt={$trigger}
       aria-label="Calendar"
     >
-    <div class="text-neutral-content">
+    <div class="text-base-content/75">
     {#if $selectedLabel}
         {#each [items.find(x => x.id === $selectedLabel)] as item}
         <div class="flex gap-2 items-center">
@@ -47,7 +47,7 @@
         use:melt={$menu}
         transition:fade={{ duration: 150 }}
       >
-        <li class="text-xs p-2 text-neutral-content">Choose the calendar of the event:</li>
+        <li class="text-xs p-2 text-base-content/75">Choose the calendar of the event:</li>
         {#each items as item}
           <li use:melt={$option({ value: item.id, label: item.id })}>
             <div class="flex gap-2 justify-between items-center">

@@ -1,6 +1,7 @@
-export function getProfile (server, ctx) {
-  server.endpoint(async ({ input: { id }, db }) => {
-    const obj = await ctx.api.objectGet(db, id)
+
+export function getProfile (server) {
+  server.endpoint(async (ctx) => {
+    const obj = await ctx.api.objectGet(ctx, ctx.input.id)
     if (!obj) {
       return { error: 'NotFound' }
     }

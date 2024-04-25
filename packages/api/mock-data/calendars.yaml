@@ -126,6 +126,7 @@
     img: https://pbs.twimg.com/profile_images/1626363942502125569/XJ23w0wL_400x400.jpg
     description: |
       Otevřená kryptoměnová konference. Propojujeme komunity. 💚💜
+    headerBlob: bafkreieyhez4obu4x3aqywto57wfkxdccmy4tal4jqqmihabcgh2nfvfjy
 
 - id: aiTah6Ax8ayihe
   handle: monerokon.org
@@ -145,3 +146,14 @@
     img: https://pbs.twimg.com/profile_images/1354399247312027651/RvZdIMHe_400x400.jpg
     description: |
       Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague
+  
+- handle: ethereum.org
+  did: did:web:ethereum.org
+  config:
+    name: Ethereum Foundation
+    avatarBlob: bafkreicbobdc2q4tjj3kxabn2esbih5nqeesaz3zr7ikbk7jiurtodnixy
+    headerBlob: bafkreicgdhoq2pzgol7vdrfuq6zkzlhm4hrhknbnjjwodu2wtfv2ffyxsa
+    description: |
+      EF is a non-profit and part of a community of organizations and people working to fund protocol development, grow the ecosystem, and advocate for Ethereum.
+  managers:
+    - ref: did:plc:524tuhdhh3m7li5gycdn6boe

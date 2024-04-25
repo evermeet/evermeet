@@ -153,20 +153,21 @@ export class Evermeet {
         this.lexicons.assertValidXrpcParams(id, input)
       }
       // authorize session and basic context
-      let authData = {};
       const db = this.db.getContext()
+      const [ _, user, authError ] = await this.authorizeSession(session, { db })
+      const authData = { user, authError };
       if (endpoint.auth) {
-        const [ _, user, authError ] = await this.authorizeSession(session, { db })
-        authData = { user, authError }
         await endpoint.auth(authData)
       }
       // run handler
-      out = await endpoint.handler({ input, encoding, ...authData, db })
+      console.log(`[api] ${id} user=${authData?.user?.did || 'nil'}`)
+      out = await endpoint.handler({ input, encoding, ...authData, db, api: this })
       if (!out.error) {
         // if not error - validate output
         const res = this.lexicons.assertValidXrpcOutput(id, out.body)
       }
       } catch(e) {
+        console.error(e)
         if (e.constructor.name !== 'Error') {
           out = { error: e.constructor.name, message: e.message }
         } else {
@@ -214,7 +215,7 @@ export class Evermeet {
     return [ true, user ]
   }
 
-  async objectGet (db, id, opts={}) {
+  async objectGet (ctx, id, opts={}) {
     id = id.toLowerCase()
     let item = null;    
     /*(if (id.includes(':')) {
@@ -236,30 +237,29 @@ export class Evermeet {
       }
     } else {*/
 
-      // if have `/` we know its event
+    // if have `/` we know its event
     if (id.match(/\//)) {
       const [ calendarId, eventId ] = id.split('/')
-      const calendar = await db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
+      const calendar = await ctx.db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
       if (calendar) {
-        const found = await db.events.findOne({ slug: eventId })
+        const found = await ctx.db.events.findOne({ slug: eventId })
         if (found) {
           return {
             type: 'event',
-            item: await found.view(opts, { db, api: this })
+            item: await found.view(ctx, opts)
           }
         }
       }
     }
 
-    // otherwise its calendar...
-    const cols = { calendar: 'calendars', user: 'users' }
+    // otherwise ...
+    const cols = { calendar: 'calendars', event: 'events', user: 'users' }
     for (const c of Object.keys(cols)) {
-      const found = await db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { id }, { did: id } ] })
+      const found = await ctx.db[cols[c]].findOne({ $or: [ { handle: id }, { handle: `${id}.${this.config.domain}` }, { id }, { did: id } ] })
       if (found) {
-        console.log(c)
         return {
           type: c,
-          item: await found.view(opts, { db, api: this })
+          item: await found.view(ctx, opts)
         }
       }
     }

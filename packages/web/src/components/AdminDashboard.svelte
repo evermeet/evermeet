@@ -17,7 +17,7 @@
         {#each base.collections as c}
             <div class="itembox">
                 <div class="text-2xl font-bold font-mono">{c.size}</div>
-                <div class="text-neutral-content">{c.name}</div>
+                <div class="text-base-content/75">{c.name}</div>
             </div>
         {/each}
     {:else}

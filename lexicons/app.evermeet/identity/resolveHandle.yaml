@@ -1,0 +1,27 @@
+lexicon: 1
+defs:
+  main:
+    type: query
+    parameters:
+      type: params
+      required: ["handle"]
+      properties:
+        handle:
+          type: string
+          format: handle
+          example: tree.fail
+    output:
+      encoding: application/json
+      schema:
+        type: object
+        properties:
+          did:
+            type: string
+            format: did
+          services:
+            type: array
+            items:
+              type: string
+              enum:
+                - evermeet
+                - bluesky

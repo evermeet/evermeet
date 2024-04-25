@@ -11,8 +11,9 @@
     baseUrl="/me/settings"
     title="Settings"
     tabs={[
-        { id: null, name: 'Profile' },
-        { id: 'settings', name: 'Settings' },
+        { id: null, name: 'Account' },
+        { id: 'preferences', name: 'Preferences' },
+        { id: 'security', name: 'Security' },
     ]}
     >
 

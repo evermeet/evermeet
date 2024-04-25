@@ -33,7 +33,7 @@
         const calData = await xrpcCall(fetch, 'app.evermeet.explore.getExplore')
         const calendars = calData.calendars.map(x => {
             return {
-                id: x.cuid,
+                id: x.id,
                 name: x.name,
                 handle: x.handle,
                 avatarBlob: x.avatarBlob,

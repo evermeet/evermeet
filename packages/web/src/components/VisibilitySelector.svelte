@@ -43,7 +43,7 @@
     use:melt={$trigger}
     aria-label="Visibility"
   >
-    <div class="text-neutral-content flex gap-1.5 items-center">
+    <div class="text-base-content/75 flex gap-1.5 items-center">
         <svelte:component this={states[$selected.value].ico} class="w-5"/>
         {$selectedLabel || 'Select visibility'}
     </div>
@@ -65,7 +65,7 @@
               </div>
               <div class="grow">
                 <div>{states[state].title}</div>
-                <div class="text-neutral-content/50 text-sm">{states[state].text}</div>
+                <div class="text-base-content/25 text-sm">{states[state].text}</div>
               </div>
               <div>
                 <CheckCircle variation="solid" class="size-4 {$isSelected(state) ? 'block' : 'hidden'}" />

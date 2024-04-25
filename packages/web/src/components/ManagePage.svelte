@@ -17,7 +17,7 @@
 
 <div class="{width}">
     {#if breadcrumb}
-        <div class="text-neutral-content text-sm mb-1.5"><a href="{breadcrumb.link}">{breadcrumb.name} →</a></div>
+        <div class="text-base-content/75 text-sm mb-1.5"><a href="{breadcrumb.link}">{breadcrumb.name} →</a></div>
     {/if}
     <div class="flex items-center">
         <div class="text-3xl font-semibold grow">{title}</div>

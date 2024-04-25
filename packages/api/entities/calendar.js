@@ -41,6 +41,10 @@ export const CalendarConfig = new EntitySchema({
       type: 'string',
       nullable: true
     },
+    headerBlob: {
+      type: 'string',
+      nullable: true
+    },
     description: {
       type: 'string',
       nullable: true
@@ -49,19 +53,30 @@ export const CalendarConfig = new EntitySchema({
 })
 
 export class Calendar {
-  async view (opts = {}, ctx) {
+  async view (ctx, opts = {}) {
     const c = wrap(this).toJSON()
 
     let events
     if (opts.events !== false) {
       events = []
       for (const e of await ctx.db.events.find({ calendarId: c.id })) {
-        events.push(await e.view(Object.assign(opts, { calendar: false }), ctx))
+        events.push(await e.view(ctx, Object.assign(opts, { calendar: this })))
       }
     }
     const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
     const url = `https://${ctx.api.config.domain}${c.baseUrl}`
     const handleUrl = c.handle
+
+    let userContext, managers
+    if (ctx.user) {
+      const isManager = c.managersArray.includes(ctx.user.did)
+      userContext = {
+        isManager
+      }
+      if (isManager) {
+        managers = c.managers
+      }
+    }
 
     return {
       id: c.id,
@@ -73,7 +88,9 @@ export class Calendar {
       events,
       baseUrl,
       url,
-      handleUrl
+      handleUrl,
+      $userContext: userContext,
+      managers
     }
   }
 }

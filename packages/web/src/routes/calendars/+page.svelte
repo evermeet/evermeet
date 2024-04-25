@@ -49,11 +49,11 @@
                     <a href="{c.baseUrl}" class="btn btn-sm mt-4 btn-neutral">View calendar →</a>
                 </div>
                 <div class="">
-                    <div class="text-neutral-content text-sm">Upcoming Events</div>
+                    <div class="text-base-content/75 text-sm">Upcoming Events</div>
                     {#each c.events.slice(0,2) as e}
                         <div class="mt-4">
                             <div class="font-medium hover:underline"><a href={e.baseUrl}>{e.name}</a></div>
-                            <div class="text-sm mt-1 text-neutral-content">{e.dateStart}</div>
+                            <div class="text-sm mt-1 text-base-content/75">{e.dateStart}</div>
                         </div>
                     {/each}
                 </div>

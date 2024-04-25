@@ -18,10 +18,10 @@
     }
 
     .itembox {
-        @apply border border-neutral/50 bg-base-300 rounded-lg py-5 px-4 transition-all duration-300;
+        @apply border border-neutral/15 bg-base-300 rounded-lg py-5 px-4 transition-all duration-0;
     }
     .itembox-hover {
-        @apply hover:border-base-content/25;
+        @apply hover:border-neutral/50;
     }
 
     .itembox.no-padding {
@@ -33,10 +33,10 @@
     }
 
     .xtabs > a {
-        @apply py-2 text-neutral-content hover:text-base-content;
+        @apply py-2 text-base-content/75 hover:text-base-content;
     }
     .xtabs > a.active {
-        @apply border border-2 border-t-0 border-l-0 border-r-0 text-base-content;
+        @apply border-2 border-t-0 border-l-0 border-r-0 text-base-content;
     }
 
     .form > div {

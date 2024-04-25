@@ -42,12 +42,20 @@
             return false
         }
         isProcessing = true;
-        let s;
         const ident = $credentials.identifier
+        const localIdent = !ident.match(/\./)
         const normalizedQuery = {
             identifier: ident.match(/\./) ? ident : (ident + '.' + $config.domain),
             password: $credentials.password,
         }
+        if (!localIdent) {
+            const resp = await xrpcCall(fetch, 'app.evermeet.identity.resolveHandle', { handle: ident })
+            console.log(resp)
+            isProcessing = false
+            return;
+        }
+
+        let s;
         try {
             s = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, normalizedQuery)
         } catch (e) {}
@@ -79,7 +87,7 @@
 <div class="w-[26rem] m-auto my-24 itembox p-6 shadow-xl">
     <User size="50" />
     <div class="text-2xl mt-4">Welcome!</div>
-    <div class="mt-2 text-neutral-content">Please sign in below or <a href="/register" class="underline hover:no-underline">sign up</a>.</div>
+    <div class="mt-2 text-base-content/75">Please sign in below or <a href="/register" class="underline hover:no-underline">sign up</a>.</div>
 
     <form class="mt-6" on:submit|preventDefault={submitLogin}>
 

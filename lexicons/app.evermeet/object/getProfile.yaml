@@ -9,7 +9,7 @@ defs:
       properties:
         id:
           type: string
-          example: web3privacy
+          example: events.web3privacy.info
     output:
       encoding: application/json
       schema:

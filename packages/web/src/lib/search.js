@@ -1,6 +1,6 @@
 
 import { Ticket, Calendar, Sparkles, PlusCircle, Document, 
-    ArrowLeftStartOnRectangle, ArrowRightEndOnRectangle, Cog6Tooth, Key } from 'svelte-heros-v2';
+    ArrowLeftStartOnRectangle, ArrowRightEndOnRectangle, Cog6Tooth, Key, CloudArrowDown } from 'svelte-heros-v2';
 
 export function searchItemsBase () {
     return [
@@ -45,6 +45,15 @@ export function searchItemsBase () {
             keywords: 'ce c e create create',
         },
         {
+            id: 'import-events',
+            type: 'general',
+            name: 'Import Event(s)',
+            baseUrl: '/import',
+            icon: CloudArrowDown,
+            description: 'Import one or more events into calendar',
+            keywords: 'load fetch',
+        },
+        {
             id: 'documentation',
             type: 'general',
             name: 'Documentation',
@@ -56,7 +65,7 @@ export function searchItemsBase () {
         {
             id: 'logout',
             type: 'general',
-            name: 'Sign out',
+            name: 'Sign Out',
             baseUrl: '/logout',
             icon: ArrowLeftStartOnRectangle,
             description: 'Logout from current session',
@@ -65,7 +74,7 @@ export function searchItemsBase () {
         {
             id: 'login',
             type: 'general',
-            name: 'Sign in',
+            name: 'Sign In',
             baseUrl: '/login',
             icon: ArrowRightEndOnRectangle,
             description: 'Login to current instance',
@@ -101,7 +110,7 @@ export function searchItemsBase () {
         {
             id: 'action-update-profile',
             type: 'general',
-            name: 'Update profile',
+            name: 'Update Profile',
             baseUrl: '/me/settings/account#profile',
             icon: Cog6Tooth,
             description: 'Update public profile or avatar',

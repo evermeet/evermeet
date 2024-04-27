@@ -1,0 +1,18 @@
+lexicon: 1
+defs:
+  main:
+    type: procedure
+    input:
+      encoding: application/json
+      schema:
+        type: object
+        required: ["url"]
+        properties:
+          url:
+            type: string
+            format: uri
+            example: https://lu.ma/uncloud
+    output:
+      encoding: application/json
+      schema:
+        type: object

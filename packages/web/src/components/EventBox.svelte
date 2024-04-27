@@ -5,10 +5,11 @@
     import { config } from '$lib/stores';
 
     export let item;
+    export let virtual = false;
 </script>
 
 <a href={item.baseUrl}>
-    <div class="mb-3 itembox itembox-hover flex gap-8">
+    <div class="mb-3 itembox {!virtual && "itembox-hover"} flex gap-8">
         <div class="grow">
             <div class="text-base-content/75">{format(item.dateStart, "HH:mm")}</div>
             <div class="text-xl font-medium mt-1.5">{item.name}</div>

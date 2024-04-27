@@ -25,6 +25,10 @@ export function loadFileWithInfo (fn, enc) {
   }
 }
 
+export function listDir (dir) {
+  return readdirSync(dir)
+}
+
 export function loadYamlDir (dir) {
   const data = {}
   for (const fn of readdirSync(dir)) {

@@ -4,6 +4,7 @@
     import { user } from '$lib/stores'
     import Form from './Form.svelte'
     import { xrpcCall, blobUpload } from '$lib/api';
+    import { onDestroy, onMount } from 'svelte';
 
     export let selectedTab;
 
@@ -38,6 +39,20 @@
 
     // password change
     const passwordChange = writable({})
+
+    // date preferenes
+    const datePreferences = writable($user.preferences.date || {})
+    async function submitDatePreferencesForm (d) {
+        const resp = await xrpcCall(fetch, 'app.evermeet.auth.updateAccount', null, {
+            preferences: {
+                date: d
+            }
+        })
+        if (resp.user) {
+            user.set(resp.user)
+            return true
+        }
+    }
 
 </script>
 
@@ -129,5 +144,35 @@
 
     {/if}
 
+    {#if selectedTab === 'preferences'}
 
+        <h2 class="manage-heading1">Date & Time</h2>
+        <div class="itembox mt-4">
+            <Form item={$datePreferences} onSubmit={submitDatePreferencesForm} config={{
+                bordered: false,
+                user: $user,
+                submitButton: 'Save',
+            }} schema={{
+                type: 'object',
+                properties: {
+                    hoursFormat: {
+                        title: 'Time format',
+                        type: 'string',
+                        view: 'radio',
+                        enum: [
+                            '24-hour',
+                            '12-hour'
+                        ]
+                    },
+                    timezone: {
+                        title: 'Timezone',
+                        type: 'string',
+                    }
+                }
+            }} layout={[
+                'hoursFormat',
+                //'timezone',
+            ]} />
+        </div>
+    {/if}
 </ManagePage>

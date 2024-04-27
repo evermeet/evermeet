@@ -59,7 +59,7 @@ export class Event {
     }
 
     json.handleUrl = calendar.handle + '/' + json.slug
-    json.baseUrl = '/' + calendar.handle + '/' + json.slug
+    json.baseUrl = '/' + json.handleUrl
 
     // json.guestCountNative = (json.guestsNative || []).length
     // json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)

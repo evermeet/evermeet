@@ -1,3 +1,5 @@
+import logger from 'pino'
+
 import { Lexicons } from '@atproto/lexicon'
 import * as xrpc from '@atproto/xrpc'
 
@@ -8,6 +10,7 @@ import { loadYaml, loadYamlDir, loadYamlDirList, stringify, readdirSync, join } 
 import { runtime, exitRuntime, env } from './runtime.js';
 import { initDatabase } from './db.js'
 import { loadMockData } from './mock.js';
+import { loadConnectors } from './connector.js';
 import { authVerifier } from './auth.js';
 import { loadConfig } from './config.js';
 import { BlobStore } from './blobstore.js';
@@ -36,9 +39,20 @@ export class Evermeet {
     if (runtime.name !== this.config.api.runtime) {
       throw new Error(`Wrong runtime! in config: ${this.config.api.runtime}, current: ${runtime.name}`)
     }
+
+    this.logLevel = this.env === 'development' ? 'info' : 'error'
+    this.logTransport = this.env === 'development' && {
+      target: 'pino-pretty',
+      options: {
+        colorize: true
+      }
+    }
+    this.logger = logger({
+      level: this.logLevel,
+      transport: this.logTransport,
+    })
     
-    console.log(stringify({ RUNTIME: this.runtime }))
-    console.log('ENV:', this.env)
+    this.logger.info({ domain: this.config.domain, env: this.env, runtime: this.runtime }, `${pkg.name} ${pkg.version}`)
   }
 
   async init () {
@@ -54,6 +68,9 @@ export class Evermeet {
 
       // init blobStore
       this.blobStore = new BlobStore(this)
+
+      // init connectors
+      this.connectors = await loadConnectors(this)
 
       // construct XPRC client and add lexicons
       this.xrpc = new xrpc.Client()
@@ -87,9 +104,8 @@ export class Evermeet {
       await this.init()
     }
     await this.adapterCtl.start()
-    console.log(`[${this.config.api.adapter}] HTTP adapter started at: ${this.config.api.host}:${this.config.api.port}`)
-
-    console.log('@evermeet/api started')
+    this.logger.info({ adapter: this.config.api.adapter, host: this.config.api.host, port: this.config.api.port }, 'HTTP server started')
+    this.logger.info('@evermeet/api started')
   }
 
   exit () {
@@ -132,12 +148,10 @@ export class Evermeet {
           }
           struct[ns][cat][cmd] = endpoint
           list.push(endpoint)
-
-          console.log(`Endpoint compiled: ${id}`)
         }
       }
     }
-    //console.table(list)
+    this.logger.debug({ endpoints: list.map(e => e.id) }, `XRPC endpoints compiled (${list.length})`)
     return { list, struct }
   }
 
@@ -160,14 +174,14 @@ export class Evermeet {
         await endpoint.auth(authData)
       }
       // run handler
-      console.log(`[api] ${id} user=${authData?.user?.did || 'nil'}`)
+      this.logger.debug({ endpoint: id, user: authData?.user?.did || 'nil' }, 'API request')
       out = await endpoint.handler({ input, encoding, ...authData, db, api: this })
       if (!out.error) {
         // if not error - validate output
         const res = this.lexicons.assertValidXrpcOutput(id, out.body)
       }
       } catch(e) {
-        console.error(e)
+        this.logger.error(e)
         if (e.constructor.name !== 'Error') {
           out = { error: e.constructor.name, message: e.message }
         } else {
@@ -260,6 +274,18 @@ export class Evermeet {
         return {
           type: c,
           item: await found.view(ctx, opts)
+        }
+      }
+    }
+    return null
+  }
+
+  findConnector (url) {
+    for (const c of Object.keys(this.connectors)) {
+      const conn = this.connectors[c]
+      for (const re of conn.urlPatterns) {
+        if (url.match(re)) {
+          return conn
         }
       }
     }

@@ -2,19 +2,18 @@ import { wrap } from '@mikro-orm/core'
 import { createId as cuid2 } from '@paralleldrive/cuid2'
 
 export async function initDatabase (api, conf) {
-  console.log(`[Database] Loadind storage: ${conf.storage}`)
-
   const { MikroORM, RequestContext } = await import(`@mikro-orm/${conf.storage}`)
 
   const orm = await MikroORM.init({
     dbName: conf.name,
     entities: [api.paths.entities],
-    debug: api.env === 'development'
+    debug: api.env === 'development',
+    logger: msg => api.logger.trace({ storage: 'sqlite' }, msg)
   })
 
   await orm.schema.refreshDatabase()
 
-  console.log('[Database] Storage initialized')
+  api.logger.info({ storage: 'sqlite' }, 'Database initialized')
   return {
     orm,
     em: orm.em,

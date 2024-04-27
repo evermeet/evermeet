@@ -96,6 +96,17 @@
     {#if row.view === 'password'}
         <input id={row.title} type="password" placeholder={row.placeholder} class="input {config.bordered && 'input-bordered'} {row.class} w-full" bind:value={$formData[row.column]} />
     {/if}
+    {#if row.view == 'radio'}
+        <div class="flex gap-4 mt-2">
+            {#each [null].concat(row.enum) as i}
+                <div class="flex gap-2 items-center">
+                    <div><input id={i || 'Default'} type="radio" class="radio radio-sm" name={row.column} value={i || ''} bind:group={$formData[row.column]} /></div>
+                    <label for={i || 'Default'} class="text-sm cursor-pointer" style="font-weight: normal !important;">{i || 'Default'}</label>
+                </div>
+            {/each}
+        </div>
+    {/if}
+
     {#if row.type === 'string' && !row.view}
         <input id={row.title} type="text" placeholder={row.placeholder} class="input {config.bordered && 'input-bordered'} {row.class} w-full" bind:value={$formData[row.column]} />
     {/if}

@@ -71,7 +71,7 @@
         <div class="text-sm">
             <ul class="menu menu-horizontal menu-sm">
                 <li>
-                    <CurrentTime />
+                    <CurrentTime user={$user} />
                 </li>
                 {#if $user}
                     <li><a href="/create">Create Event</a></li>
@@ -92,11 +92,11 @@
     </div>
 </div>
 
-<div>
+<div class="">
     <slot />
 
-    <div class="page-wide">
-        <footer class="footer items-center p-4 text-base-content/50 border-base-content/25 mt-16 pt-6 border border-l-0 border-r-0 border-b-0">
+    <div class="w-full">
+        <footer class="footer items-center p-4 text-base-content/50 border-base-content/10 mt-16 border border-l-0 border-r-0 border-b-0">
             <aside class="items-center grid-flow-col">
               <p>🔥 <a href="https://github.com/evermeet/evermeet" class="hover:underline" target="_blank">{pkg.name}</a> v{pkg.version} (<a href="https://docs.evermeet.app" class="hover:underline">docs</a>)</p>
             </aside> 

@@ -132,7 +132,7 @@
                     {:else}
                         <div class="w-full h-full bg-[#dddddd]/50 flex items-center justify-center font-bold text-neutral/50 leading">
                             <div>
-                                <div class="text-[4rem]">Header Picure</div>
+                                <div class="text-[4rem]">Header Picture</div>
                                 <div class="text-[2rem]">1920x548 (3.5/1)*</div>
                                 <div class="">*or something similar 😀</div>
                             </div>

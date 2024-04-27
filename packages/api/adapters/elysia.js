@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
-import { logger } from '@bogeychan/elysia-logger'
 import { cors } from '@elysiajs/cors'
+import { logger as httpLogger } from '@bogeychan/elysia-logger'
 
 export default function ({ evermeet }) {
   let app
@@ -11,6 +11,8 @@ export default function ({ evermeet }) {
       if (evermeet.runtime.name !== 'bun') {
         throw new Error(`Elysia: Only works with Bun runtime (current=${evermeet.runtime.name})`)
       }
+
+      const logger = evermeet.logger.child({ module: 'http', adapter: 'elysia' })
 
       // start adapter
       app = new Elysia({
@@ -42,7 +44,10 @@ export default function ({ evermeet }) {
             }
           }
         }))
-        .use(logger({ level: process.env.NODE_ENV === 'development' ? 'debug' : 'error' }))
+        .use(httpLogger({
+          level: evermeet.logLevel === 'debug' ? 'info' : 'error',
+          transport: evermeet.logTransport
+        }))
 
       for (const ep of evermeet.endpoints.list) {
         const method = ep.lex.defs.main.type === 'procedure' ? 'post' : 'get'
@@ -70,7 +75,6 @@ export default function ({ evermeet }) {
           if (out.encoding && out.encoding !== 'application/json') {
             set.headers['content-type'] = out.encoding
 
-            console.log(typeof (out.body))
             return new Buffer(out.body)
           }
           return out.body
@@ -90,12 +94,12 @@ export default function ({ evermeet }) {
             tags: ['app.evermeet.*']
           }
         })
-        console.log(`[elysia] Route created: [${method.toUpperCase()}] ${evermeet.config.api.prefix}/${ep.id}`)
+        logger.trace({ method: method.toUpperCase(), route: `${evermeet.config.api.prefix}/${ep.id}` }, 'Route created')
       }
       for (const ih of evermeet.internalEndpoints()) {
         const url = ih.id
         app.get(url, ih.handler)
-        console.log(`[elysia] Internal route created: [${ih.id}] ${url}`)
+        logger.trace({ method: ih.id, route: url }, 'Internal route created')
       }
       return app
     },

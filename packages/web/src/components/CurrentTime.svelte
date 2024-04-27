@@ -5,12 +5,16 @@
     import { formatInTimeZone } from 'date-fns-tz';
     import { enGB } from 'date-fns/locale/en-GB'
 
+    export let user;
+
     const currentTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const tzData = getTimeZones().find(tz => tz.name === currentTz);
     const tzInfo = formatInTimeZone(new Date(), currentTz, 'zzzz (XXX)', { locale: enGB })
 
+    let is12hours = user?.preferences.date?.hoursFormat === '12-hour'
+
     function formatted (date = new Date) {
-        return formatInTimeZone(date, currentTz, 'HH:mm zzz', { locale: enGB })
+        return formatInTimeZone(date, currentTz, is12hours ? 'hh:mm aa zzz' : 'HH:mm zzz', { locale: enGB })
     }
 
     let interval;

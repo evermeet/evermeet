@@ -21,6 +21,18 @@ defs:
                 properties:
                   $cid:
                     type: string
+          preferences:
+            type: object
+            properties:
+              date:
+                type: object
+                properties:
+                  hoursFormat:
+                    type: string
+                    enum:
+                      - 24-hour
+                      - 12-hour
+                      - ""
     output:
       encoding: application/json
       schema:

@@ -13,6 +13,7 @@ if (config.api.enabled) {
     script: './index.js',
     cwd: './packages/api',
     interpreter: config.api.runtime,
+    //interpreter_args: '--inspect=4000', 
     watch: process.env.NODE_ENV === 'development',
     env: {
       PORT: config.api.port,

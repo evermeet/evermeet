@@ -211,6 +211,12 @@ export async function updateAccount (server, { api: { authVerifier } }) {
         user.avatarBlob = avatar
       }
 
+      if (input.preferences) {
+        for (const p of Object.keys(input.preferences)) {
+          user.preferences[p] = input.preferences[p]
+        }
+      }
+
       await db.em.flush()
       return {
         body: {

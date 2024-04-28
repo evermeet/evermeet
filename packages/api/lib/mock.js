@@ -19,8 +19,18 @@ export async function loadMockData (api) {
 
   for (const [fn, entityName] of map) {
     const items = await loadYaml(join(api.paths.mockData, fn))
-    const repo = em.getRepository(entityName)
+    const entityRepo = em.getRepository(entityName)
+    let repo = entityRepo
+    const conceptRepo = em.getRepository('Concept')
+
     for (const item of items) {
+      if (entityName === 'Event') {
+        if (item.concept) {
+          repo = conceptRepo
+        } else {
+          repo = entityRepo
+        }
+      }
       if (entityName === 'Blob') {
         const b = loadBlob(item.cid)
         item.data = b.data

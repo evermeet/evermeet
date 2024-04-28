@@ -34,13 +34,14 @@ export class Evermeet {
     this.config = loadConfig(opts.configFile, this.paths.configDefaults, this.schema.config)
     this.pkg = pkg
     this.authVerifier = authVerifier
+    this.network = this.config.network || 'sandbox'
 
     // check if runtime if config is correct
     if (runtime.name !== this.config.api.runtime) {
       throw new Error(`Wrong runtime! in config: ${this.config.api.runtime}, current: ${runtime.name}`)
     }
 
-    this.logLevel = this.env === 'development' ? 'info' : 'error'
+    this.logLevel = 'trace'//this.env === 'development' ? 'info' : 'error'
     this.logTransport = this.env === 'development' && {
       target: 'pino-pretty',
       options: {
@@ -51,8 +52,7 @@ export class Evermeet {
       level: this.logLevel,
       transport: this.logTransport,
     })
-    
-    this.logger.info({ domain: this.config.domain, env: this.env, runtime: this.runtime }, `${pkg.name} ${pkg.version}`)
+    this.logger.info({ domain: this.config.domain, network: this.network, env: this.env, runtime: this.runtime }, `${pkg.name} ${pkg.version}`)
   }
 
   async init () {
@@ -252,8 +252,8 @@ export class Evermeet {
     } else {*/
 
     // if have `/` we know its event
-    if (id.match(/\//)) {
-      const [ calendarId, eventId ] = id.split('/')
+    if (id.match(/:/)) {
+      const [ calendarId, eventId ] = id.split(':')
       const calendar = await ctx.db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
       if (calendar) {
         const found = await ctx.db.events.findOne({ slug: eventId })
@@ -319,6 +319,8 @@ export class Evermeet {
             sitename: c.sitename,
             options: c.options,
             plcServer: c.plcServer,
+            network: this.network,
+            env: this.env,
           }
         }
       }

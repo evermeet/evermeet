@@ -6,7 +6,8 @@ export const EventConfig = new EntitySchema({
   embeddable: true,
   properties: {
     slug: {
-      type: 'string'
+      type: 'string',
+      nullable: true
     },
     name: {
       type: 'string'
@@ -47,6 +48,7 @@ export class Event {
     const json = {
       id: this.id,
       calendarId: this.calendarId,
+      did: this.did,
       ...wrap(this.config).toJSON()
     }
 
@@ -58,7 +60,7 @@ export class Event {
       json.calendar = await calendar.view(ctx, { events: false })
     }
 
-    json.handleUrl = calendar.handle + '/' + json.slug
+    json.handleUrl = calendar.handle + ':' + (json.slug || json.id)
     json.baseUrl = '/' + json.handleUrl
 
     // json.guestCountNative = (json.guestsNative || []).length
@@ -79,7 +81,8 @@ export const schema = new EntitySchema({
       type: 'string',
       unique: true,
       onCreate: obj => obj.config.slug,
-      onUpdate: obj => obj.config.slug
+      onUpdate: obj => obj.config.slug,
+      nullable: true
     },
     config: {
       kind: 'embedded',
@@ -97,4 +100,12 @@ export const schema = new EntitySchema({
       unique: true
     }
   }
+})
+
+class Concept extends Event {}
+
+export const ConceptSchema = new EntitySchema({
+  class: Concept,
+  name: 'Concept',
+  extends: 'Event'
 })

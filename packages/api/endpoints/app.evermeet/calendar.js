@@ -106,3 +106,14 @@ export function getUserCalendars (server, { api: { authVerifier } }) {
     }
   })
 }
+
+export function getConcepts (server) {
+  server.endpoint(async (ctx) => {
+    const { did } = ctx.input
+    const calendar = await ctx.db.calendars.findOne({ did })
+    const concepts = await ctx.db.concepts.find({ calendarId: calendar.id })
+    return {
+      body: { concepts: await Promise.all(concepts.map(i => i.view(ctx, { calendar }))) }
+    }
+  })
+}

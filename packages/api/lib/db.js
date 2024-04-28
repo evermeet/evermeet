@@ -22,6 +22,7 @@ export async function initDatabase (api, conf) {
       return {
         em,
         calendars: em.getRepository('Calendar'),
+        concepts: em.getRepository('Concept'),
         events: em.getRepository('Event'),
         users: em.getRepository('User'),
         sessions: em.getRepository('Session'),

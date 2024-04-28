@@ -5,12 +5,27 @@
     import { blobUrl } from '$lib/api';
     import { Photo, Trash } from 'svelte-heros-v2';
 
+    import { Carta, MarkdownEditor } from 'carta-md';
+	import 'carta-md/default.css'; /* Default theme */
+    import { onMount } from 'svelte';
+
     countries.registerLocale(enLocale);
     const countriesAll = countries.getNames("en", {select: "official"});
 
     export let row;
     export let config = {};
     export let formData;
+
+    onMount(() => {
+        console.log(document.documentElement.classList)
+        //document.documentElement.classList.add('dark')
+    })
+
+    const carta = new Carta({
+		// Remember to use a sanitizer to prevent XSS attacks!
+		// More on that below
+		// sanitizer: ...
+	});
 
     let image = {};
     function image_onSelected (e) {
@@ -39,7 +54,7 @@
 
 </script>
 
-<div>
+<div class="">
     {#if row.title}
         <label for={row.title}>{row.title}</label>
     {/if}
@@ -59,6 +74,12 @@
     {/if}
     {#if row.view === 'textarea'}
         <textarea id={row.title} class="textarea {config.bordered && "textarea-bordered"} w-full font-mono text-sm" placeholder={row.placeholder} bind:value={$formData[row.column]}></textarea>
+    {/if}
+    {#if row.view === 'textarea-markdown'}
+        <div class="markdown-editor">
+            <MarkdownEditor {carta} bind:value={$formData[row.column]} />
+        </div>
+        <!--textarea id={row.title} class="textarea {config.bordered && "textarea-bordered"} w-full font-mono text-sm" placeholder={row.placeholder} bind:value={$formData[row.column]}></textarea -->
     {/if}
     {#if row.view === 'string-disabled'}
         <input id={row.title} type="text" class="input {config.bordered && "input-bordered"} input-disabled w-96" value={row.value} />
@@ -111,3 +132,32 @@
         <input id={row.title} type="text" placeholder={row.placeholder} class="input {config.bordered && 'input-bordered'} {row.class} w-full" bind:value={$formData[row.column]} />
     {/if}
 </div>
+
+<style>
+
+    .markdown-editor button {
+        color: white;
+    }
+
+	:global(html.dark .markdown-body) {
+		color: #fff;
+	}
+
+	/* Editor dark mode */
+
+	:global(html.dark .carta-theme__default) {
+		--border-color: var(--border-color-dark);
+		--selection-color: var(--selection-color-dark);
+		--focus-outline: var(--focus-outline-dark);
+		--hover-color: var(--hover-color-dark);
+		--caret-color: var(--caret-color-dark);
+		--text-color: var(--text-color-dark);
+	}
+
+	/* Code dark mode */
+
+	:global(html.dark .shiki),
+	:global(html.dark .shiki span) {
+		color: var(--shiki-dark) !important;
+	}
+</style>

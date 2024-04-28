@@ -94,7 +94,7 @@
                     description: {
                         title: 'Description',
                         type: 'string',
-                        view: 'textarea',
+                        view: 'textarea-markdown',
                     }
                 }
             }} layout={[

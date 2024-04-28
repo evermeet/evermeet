@@ -14,7 +14,11 @@
         @apply max-w-[--max-width-wide-page] mx-auto mt-4 px-4;
     }
     .page-extra-wide {
-        @apply max-w-[--max-width-extra-wide-page] mx-auto;
+        @apply max-w-[--max-width-extra-wide-page] mx-auto px-4;
+    }
+
+    .page-full {
+        @apply mx-auto px-4;
     }
 
     .itembox {
@@ -29,11 +33,11 @@
     }
 
     .xtabs {
-        @apply flex gap-4;
+        @apply flex items-end gap-2;
     }
 
     .xtabs > a {
-        @apply py-2 text-base-content/75 hover:text-base-content;
+        @apply py-2 px-2 text-base-content/75 hover:text-base-content hover:bg-base-300 rounded-t-lg;
     }
     .xtabs > a.active {
         @apply border-2 border-t-0 border-l-0 border-r-0 text-base-content;

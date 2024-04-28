@@ -12,7 +12,7 @@
       https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
 
 - id: 2e9e2199afca02
-  handle: events.web3privacy.info
+  handle: web3privacy.info
   did: did:plc:jxj3fiv6sapedgpz36umxsew
   managers:
   - ref: did:plc:524tuhdhh3m7li5gycdn6boe
@@ -27,6 +27,11 @@
       Research project & community about privacy in Web3 industry
       (web3privacy.info) All events: https://web3privacy.info/events
     avatarBlob: bafkreidd3q2vcudqm6i45iuwf4t7e45o25nvtngpn4z7cduadd27fmh5uq
+    refs:
+      web: https://web3privacy.info/
+      github: https://github.com/web3privacy
+      twitter: https://twitter.com/web3privacy
+      matrix: https://matrix.to/#/#web3privacy:gwei.cz
 
 - id: die6loowahGe
   did: did:web:cryptocanal.org
@@ -108,6 +113,8 @@
     subs: 0
     avatarBlob: bafkreibap44yfum56ndyb7ruqs67fc5jaw2wmvjwvffuvuqy3jlbrwtcii
     description: Privacy Lunarpunk Hackathon in Brno, Czech Republic
+    refs:
+      twitter: https://twitter.com/ethbrno
 
 - handle: paralelnipolis.evermeet.local
   did: did:web:paralelnipolis.cz

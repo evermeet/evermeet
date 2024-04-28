@@ -48,6 +48,10 @@ export const CalendarConfig = new EntitySchema({
     description: {
       type: 'string',
       nullable: true
+    },
+    refs: {
+      type: 'object',
+      nullable: true
     }
   }
 })
@@ -61,6 +65,13 @@ export class Calendar {
       events = []
       for (const e of await ctx.db.events.find({ calendarId: c.id })) {
         events.push(await e.view(ctx, Object.assign(opts, { calendar: this })))
+      }
+    }
+    let concepts
+    if (opts.concepts !== false || opts.concepts !== false) {
+      const conceptsArr = await ctx.db.concepts.find({ calendarId: c.id })
+      if (conceptsArr) {
+        concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
       }
     }
     const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
@@ -86,6 +97,7 @@ export class Calendar {
       personal: c.personal,
       ...c.config,
       events,
+      concepts,
       baseUrl,
       url,
       handleUrl,
@@ -95,7 +107,7 @@ export class Calendar {
   }
 }
 
-export const schema = new EntitySchema({
+export const CalendarSchema = new EntitySchema({
   class: Calendar,
   name: 'Calendar',
   extends: 'BaseDidEntity',

@@ -6,7 +6,8 @@
 
     export let item;
     export let size = 'normal';
-    export let type;
+    export let type = null;
+    export let margin = 'mb-4 mt-2'
 
     const {
         elements: { trigger, content, arrow },
@@ -22,7 +23,7 @@
     });
 </script>
 
-<div class="flex gap-3 items-center mb-4 mt-2">
+<div class="flex gap-3 items-center {margin}">
     <a href="https://{item.handleUrl}" class="font-mono opacity-50 hover:opacity-75 {size === 'small' ? 'text-sm' : ''}">@{item.handle || item.handleUrl}</a>
     <div class="text-success opacity-50 flex gap-1 text-sm items-center hover:opacity-100 trigger cursor-help" use:melt={$trigger}><LockClosed class="w-[1em]" />verified</div>
 </div>

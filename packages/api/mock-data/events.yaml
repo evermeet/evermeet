@@ -71,8 +71,10 @@
       enabled: true
 
 - calendarId: 2e9e2199afca02
+  concept: true
+  did: "did:plc:34239992399"
   config:
-    slug: w3pn-m24ber
+    #slug: w3pn-m24ber
     name: W3PN Meetup @ ETHBerlin 4
     dateStart: 2024-05-22T12:00
     dateEnd: 2024-05-22T19:00

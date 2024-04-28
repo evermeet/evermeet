@@ -2,15 +2,18 @@
     import "../app.css";
     import "/node_modules/flag-icons/css/flag-icons.min.css";
 
-    import { Ticket, Calendar, Sparkles, Fire, WrenchScrewdriver, Bell, MagnifyingGlass } from 'svelte-heros-v2';
+    import { Ticket, Calendar, Sparkles, Fire, WrenchScrewdriver, Bell, MagnifyingGlass, ChatBubbleLeftRight } from 'svelte-heros-v2';
     import { browser } from '$app/environment';
     import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
-    import { user, session, config } from '$lib/stores';
+    import { user, session, config, socket } from '$lib/stores';
 
     import CurrentTime from "../components/CurrentTime.svelte";
     import UserMenu from "../components/UserMenu.svelte";
     import SearchDialog from "../components/SearchDialog.svelte";
+    import { onMount } from "svelte";
+
+    import { connect, StringCodec } from "nats.ws";
 
     export let data;
 
@@ -32,6 +35,11 @@
             ico: Calendar
         },
         {
+            title: 'Chats',
+            url: '/chats',
+            ico: ChatBubbleLeftRight
+        },
+        {
             title: 'Explore',
             url: '/',
             ico: Sparkles
@@ -42,6 +50,25 @@
             ico: WrenchScrewdriver
         }*/
     ]
+
+    onMount(async () => {
+        const nc = await connect({
+            servers: ["ws://127.0.0.1:4223"]
+        })
+        console.log('evermeet nats connected')
+        const sc = StringCodec();
+        // create a simple subscriber and iterate over messages
+        // matching the subscription
+
+        socket.set({ nc, sc })
+        const sub = nc.subscribe("hello");
+        (async () => {
+        for await (const m of sub) {
+            console.log(`[${sub.getProcessed()}]: ${sc.decode(m.data)}`);
+        }
+        console.log("subscription closed");
+        })();
+    })
     
 </script>
 
@@ -51,16 +78,33 @@
 
 <div class="navbar px-6">
     <div class="navbar-start">
-        <div><a href="/" class="font-mono flex gap-1.5 text-sm items-center opacity-75 hover:opacity-100"><Fire /> {$config.sitename || $config.domain}</a></div>
+        <div class="flex items-center gap-2">
+            <a href="/" class="font-mono flex gap-1.5 text-sm items-center opacity-75 hover:opacity-100">
+                <Fire /> {$config.sitename || $config.domain}
+            </a>
+            {#if $config?.env === 'development'}
+                <div class="badge badge-accent">dev</div>
+            {/if}
+            {#if $config?.network !== 'mainnet'}
+                <div class="badge badge-neutral">{$config.network}</div>
+            {/if}
+            <div class="{$socket ? 'text-transparent' : 'text-warning'} opacity-50 flex items-center text-xs">
+                <div class="h-1.5 w-1.5 inline-block mr-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <circle cx="50%" cy="50%" r="40%" fill="currentColor" />
+                  </svg>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="navbar-center max-w-[80rem] w-auto">
         {#if $user}
             <ul class="menu menu-horizontal w-full gap-1">
                 {#each menu as mi}
-                    <li>
-                        <a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''}">
-                            <svelte:component this={mi.ico} tabindex="-1" class="outline-none" />
-                            {mi.title}
+                    <li class="group">
+                        <a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''} flex group-hover:gap-1.5 gap-0">
+                            <div><svelte:component this={mi.ico} tabindex="-1" class="outline-none" /></div>
+                            <div class="group-hover:block group-hover:w-16 group-hover:opacity-100 w-0 h-auto opacity-0 transition-all outline-none">{mi.title}</div>
                         </a>
                     </li>
                 {/each}
@@ -82,7 +126,10 @@
         </div>
             <div class="mr-2 flex text-base-content/75 gap-1">
                 <SearchDialog />
-                <div class="w-8 h-8 rounded-full aspect-square border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center"><Bell size="20" /></div>
+                <div class="indicator w-8 h-8 rounded-full aspect-square border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center">
+                    <span class="indicator-item badge badge-xs badge-secondary">9</span>
+                    <Bell size="20" />
+                </div>
             </div>
         {#if $user}
             <UserMenu />

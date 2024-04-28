@@ -4,7 +4,7 @@
     import countries from 'i18n-iso-countries';
     import enLocale from 'i18n-iso-countries/langs/en.json';
     import { parse, parseInline } from 'marked';
-    import { user, config, eventDetail } from '$lib/stores';
+    import { user, config } from '$lib/stores';
     import { register, unregister } from '$lib/actions';
     import FlagIcon from './FlagIcon.svelte';
     import HandleBadge from './HandleBadge.svelte';
@@ -13,11 +13,7 @@
     countries.registerLocale(enLocale);
 
     export let item;
-    eventDetail.set(item);
 
-    console.log(item.url)
-
-    $: item = $eventDetail;
     $: countryName = item.placeCountry ? countries.getName(item.placeCountry, 'en') : ''
     $: userRegistered = $user && $user.events?.find(e => e.ref === item.id) ? true : false
 </script>

@@ -8,6 +8,7 @@
     import { stringToSlug }from '$lib/utils';
     import CalendarAvatar from '../../components/CalendarAvatar.svelte';
     import VisibilitySelector from '../../components/VisibilitySelector.svelte';
+    import { onMount } from 'svelte';
 
     const item = writable({ visibility: 'public' })
     const visibility = writable($item.visibility)
@@ -19,6 +20,10 @@
     $: files = { avatar: {}, header: {} }
     $: handlePlaceholder = $item.name ? stringToSlug($item.name) : 'your-calendar'
     $: handle = normalized.handle
+
+    onMount(() => {
+        console.log('x')
+    })
 
     visibility.subscribe(v => {
         $item.visibility = v
@@ -138,7 +143,7 @@
                             </div>
                         </div>
                     {/if}
-                    <button class="" on:click|preventDefault={files.header.input.click()}>
+                    <button type="button" class="" on:click|preventDefault={files.header.input.click()}>
                         <div class="hint opacity-0 group-hover:opacity-100 absolute w-full h-full bg-base-300/50 font-semibold top-0 left-0 transition-all duration-200 backdrop-blur">
                             <div class="flex py-2 flex-wrap h-full w-full gap-3 items-center justify-center">
                                 <div><Photo class="outline-none" /></div>
@@ -147,7 +152,7 @@
                         </div>
                     </button>
                     {#if files.header?.dataUrl}
-                        <button class="btn btn-accent absolute opacity-0 group-hover:opacity-100 top-4 right-6 z-50" on:click|preventDefault={onFileRemoved('header')}>
+                        <button type="button" class="btn btn-accent absolute opacity-0 group-hover:opacity-100 top-4 right-6 z-50" on:click|preventDefault={onFileRemoved('header')}>
                             <Trash class="outline-none" />
                         </button>
                     {/if}
@@ -159,11 +164,11 @@
                  
                     <div class="hint opacity-0 group-hover:opacity-100 absolute w-[80px] h-[80px] backdrop-blur-sm bg-base-300/50 text-xs font-semibold top-[4px] left-[4px] transition-all duration-200 flex justify-center items-center">
                         {#if files.avatar?.dataUrl}
-                            <button class="btn btn-sm btn-accent absolute opacity-0 group-hover:opacity-100" on:click|preventDefault={onFileRemoved('avatar')}>
+                            <button type="button" class="btn btn-sm btn-accent absolute opacity-0 group-hover:opacity-100" on:click|preventDefault={onFileRemoved('avatar')}>
                                 <Trash class="outline-none" size={18} />
                             </button>
                         {:else}
-                            <button on:click|preventDefault={files.avatar.input.click()} class="flex py-2 flex-wrap gap-1 h-full w-full items-center justify-center">
+                            <button type="button" on:click|preventDefault={files.avatar.input.click()} class="flex py-2 flex-wrap gap-1 h-full w-full items-center justify-center">
                                 <div><Photo class="outline-none" /></div>
                                 <div>Choose avatar</div>
                             </button>

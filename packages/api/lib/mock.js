@@ -1,4 +1,5 @@
 import { loadYaml, loadFile, loadFileWithInfo, join, detect } from './utils.js'
+import { wrap } from '@mikro-orm/core'
 
 export async function loadMockData (api) {
   const db = api.db
@@ -8,7 +9,9 @@ export async function loadMockData (api) {
     ['events.yaml', 'Event'],
     ['users.yaml', 'User'],
     ['sessions.yaml', 'Session'],
-    ['blobs.yaml', 'Blob']
+    ['messages.yaml', 'Message'],
+    ['blobs.yaml', 'Blob'],
+    ['rooms.yaml', 'Room']
   ]
 
   const loadBlob = (cid) => {

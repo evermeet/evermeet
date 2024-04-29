@@ -1,0 +1,12 @@
+
+- room: testRoomId
+  msg: This is our chat
+  authorDid: did:plc:jxj3fiv6sapedgpz36umxsew
+  createdOn: "2024-03-23T23:54:50.313Z"
+- room: testRoomId
+  authorDid: did:plc:jxj3fiv6sapedgpz36umxsew
+  msg: second msg
+  createdOn: "2024-04-21T23:54:50.313Z"
+- room: testRoomId
+  authorDid: did:plc:524tuhdhh3m7li5gycdn6boe
+  msg: Hello guys!

@@ -1,3 +1,5 @@
+import { parse, parseInline } from 'marked'
+import DOMPurify from "isomorphic-dompurify";
 
 export function stringToSlug(str) {
     return str
@@ -7,4 +9,8 @@ export function stringToSlug(str) {
         .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
         .replace(/\s+/g, '-') // Replace spaces with -
         .replace(/-+/g, '-'); // Replace multiple - with single -
+}
+
+export function markdownToHTML(md, opts = {}) {
+    return DOMPurify.sanitize(parse(md))
 }

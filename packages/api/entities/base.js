@@ -11,8 +11,7 @@ export const BaseEntity = new EntitySchema({
       onCreate: e => e.id || createId()
     },
     createdOn: {
-      type: 'string',
-      format: 'date-time',
+      type: 'date',
       onCreate: () => (new Date()).toISOString()
     }
   }

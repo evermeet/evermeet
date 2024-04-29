@@ -41,7 +41,7 @@ export class Evermeet {
       throw new Error(`Wrong runtime! in config: ${this.config.api.runtime}, current: ${runtime.name}`)
     }
 
-    this.logLevel = 'trace'//this.env === 'development' ? 'info' : 'error'
+    this.logLevel = this.env === 'development' ? 'info' : 'error'
     this.logTransport = this.env === 'development' && {
       target: 'pino-pretty',
       options: {

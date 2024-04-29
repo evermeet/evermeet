@@ -1,5 +1,6 @@
 import { wrap } from '@mikro-orm/core'
 import { createId as cuid2 } from '@paralleldrive/cuid2'
+import ShortUniqueId from 'short-unique-id'
 
 export async function initDatabase (api, conf) {
   const { MikroORM, RequestContext } = await import(`@mikro-orm/${conf.storage}`)
@@ -27,6 +28,8 @@ export async function initDatabase (api, conf) {
         users: em.getRepository('User'),
         sessions: em.getRepository('Session'),
         blobs: em.getRepository('Blob'),
+        messages: em.getRepository('Message'),
+        rooms: em.getRepository('Room'),
         wrap
       }
     }
@@ -35,6 +38,10 @@ export async function initDatabase (api, conf) {
 
 export function createId () {
   return cuid2()
+}
+
+export function createShortId () {
+  return (new ShortUniqueId({ length: 5 }).rnd())
 }
 
 export function ObjectId () {

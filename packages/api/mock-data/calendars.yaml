@@ -32,6 +32,15 @@
       github: https://github.com/web3privacy
       twitter: https://twitter.com/web3privacy
       matrix: https://matrix.to/#/#web3privacy:gwei.cz
+    rooms:
+      - id: testRoomId
+        slug: general
+      - slug: help
+      - slug: assistant
+      - slug: speakers
+        private: true
+      - slug: team
+        private: true
 
 - id: die6loowahGe
   did: did:web:cryptocanal.org
@@ -44,6 +53,14 @@
     backdropImg: >-
       https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=1250,height=357.14285714285717/calendar-cover-images/6t/feb1976c-37ae-4100-8d1b-db2ddcfe409a
     description: We organise ETHDam and monthly meetups in Amsterdam, Rotterdam and Zurich 🦦
+    rooms:
+      - slug: general
+      - slug: help
+      - slug: assistant
+      - slug: speakers
+        private: true
+      - slug: team
+        private: true
 
 - handle: ob24.evermeet.local
   did: did:web:onchainbrno.com
@@ -97,13 +114,18 @@
     description: >-
       Jsme neformální síť lokálních bitcoinových komunit. Propojujeme bitcoinery a pomáháme s adopcí bitcoinu.
 
-#- id: b52cab85781d88
-#  slug: dod
-#  name: Department of Decentralization (DoD)
-#  subs: 200
-#  img: https://dod.ngo/wolpy.svg
-#  description: |
-#    Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
+- id: b52cab85781d88
+  handle: dod.ngo
+  did: did:web:dod.ngo
+  config:
+    slug: dod
+    name: Department of Decentralization (DoD)
+    subs: 200
+    img: https://dod.ngo/wolpy.svg
+    description: |
+      Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
+    backdropImg: |
+      https://raw.githubusercontent.com/Department-of-Decentralization/pb23-photos/main/1289.jpg
 
 - id: df5744efdd3368
   did: did:plc:h4c53spyxe6wab5j7jonafju

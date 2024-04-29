@@ -1,0 +1,6 @@
+- id: testRoomId
+  repo: did:plc:jxj3fiv6sapedgpz36umxsew
+  slug: general
+
+- repo: did:plc:jxj3fiv6sapedgpz36umxsew
+  slug: support

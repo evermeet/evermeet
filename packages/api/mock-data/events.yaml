@@ -83,31 +83,32 @@
     placeCountry: de
     placeCity: Berlin
 
-#- slug: ethberlin4
-#  name: ETHBerlin04
-#  dateStart: 2024-05-24T12:00
-#  dateEnd: 2024-05-26T12:00
-#  placeName: TBD (Kreuzberg)
-#  placeCountry: de
-#  placeCity: Berlin
-#  img: https://pbs.twimg.com/profile_images/1752740591899660288/xu9ex0n0_400x400.jpg
-#  calendarId: b52cab85781d88
-#  hosts:
-#    - name: Afri
-#      img: https://data.web3privacy.info/img/people/afri-schoedon.jpg
-#    - name: franzi
-#      img: https://pbs.twimg.com/profile_images/1775206823521320960/BT2954as_400x400.jpg
-#  description: |
-#    ETHBerlin is a hackathon, a cultural festival, an educational event, a platform for hacktivism, and a community initiative to push the decentralized ecosystem forward.
-#
-#    Loading ETHBERLIN<<04<<<<IDENTITY<<CRISIS<<: May 24-26, 2024, Berlin, Germany.
-#
-#    The situation is dire. We have been operating in crisis mode for years now. Established systems are failing, new and old imperialist powers are throwing continents into wars of attrition, global supply chains are collapsing, financial markets are tumbling, healthcare systems are falling apart, education is on a consistent downward spiral — the list goes on.
-#
-#    But there is hope: The soils to grow new ideas have never been more nutritious. It has never been more urgent to double down on new revolutionary concepts and ideas. It is high time to change the world.
-#
-#    For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
-#  web: https://ethberlin.org/
+- calendarId: b52cab85781d88
+  config:
+    slug: ethberlin4
+    name: ETHBerlin04
+    dateStart: 2024-05-24T12:00
+    dateEnd: 2024-05-26T12:00
+    placeName: TBD (Kreuzberg)
+    placeCountry: de
+    placeCity: Berlin
+    img: https://pbs.twimg.com/profile_images/1780553583777234944/APhv5npk_400x400.jpg
+    hosts:
+      - name: Afri
+        img: https://data.web3privacy.info/img/people/afri-schoedon.jpg
+      - name: franzi
+        img: https://pbs.twimg.com/profile_images/1775206823521320960/BT2954as_400x400.jpg
+    description: |
+      ETHBerlin is a hackathon, a cultural festival, an educational event, a platform for hacktivism, and a community initiative to push the decentralized ecosystem forward.
+
+      Loading ETHBERLIN<<04<<<<IDENTITY<<CRISIS<<: May 24-26, 2024, Berlin, Germany.
+
+      The situation is dire. We have been operating in crisis mode for years now. Established systems are failing, new and old imperialist powers are throwing continents into wars of attrition, global supply chains are collapsing, financial markets are tumbling, healthcare systems are falling apart, education is on a consistent downward spiral — the list goes on.
+
+      But there is hope: The soils to grow new ideas have never been more nutritious. It has never been more urgent to double down on new revolutionary concepts and ideas. It is high time to change the world.
+
+      For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
+    web: https://ethberlin.org/
 
 - calendarId: 2e9e2199afca02
   config:

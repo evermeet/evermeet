@@ -11,6 +11,7 @@
     import EventBox from './EventBox.svelte';
     import Refs from './Refs.svelte';
     import Chat from './Chat.svelte';
+    import ChatRoomSelect from './ChatRoomSelect.svelte';
     import { imgBlobUrl } from '$lib/api';
     
     export let item
@@ -24,8 +25,11 @@
         { id: 'contributors', name: 'People', ico: Users },
         //{ id: 'about', name: 'About' },
         { id: 'feed', name: 'Feed', ico: QueueList },
-        { id: 'chat', name: 'Chat', ico: ChatBubbleLeft },
     ]
+
+    if (item.rooms && item.rooms.length > 0) {
+        tabs.push({ id: 'chat', name: 'Chat', ico: ChatBubbleLeft })
+    }
 
     $: subscribed = $user?.calendarSubscriptions?.find(sc => sc.ref === item.did)
     $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
@@ -33,8 +37,9 @@
     $: isFullPage = selectedTab === null && !params.expand
     $: backdropImg = isFullPage && ((item.headerBlob && imgBlobUrl(item.did, item.headerBlob, 1000)) || item.backdropImg)
 
- 
-
+    $: currentRoom = typeof(params.room) === 'string' ? params.room : 'general'
+    $: currentRoomObj = item.rooms.find(r => r.slug === currentRoom)
+    
     function changeTab () {
     }
 </script>
@@ -162,7 +167,8 @@
     <div class="page-wide">
     </div>
     <div class="page-wide">
-        <Chat {item} room={typeof(params.room) === 'string' ? params.room : 'general'} />
+        <ChatRoomSelect rooms={item.rooms} baseUrl={item.baseUrl} {currentRoom} />
+        <Chat {item} room={currentRoomObj} chatData={item._chat} />
     </div>
 
 {:else if selectedTab === null}

@@ -14,7 +14,7 @@ export const CalendarManager = new EntitySchema({
   }
 })
 
-export const CalendarConfig = new EntitySchema({
+export const CalendarConfigEntity = new EntitySchema({
   name: 'CalendarConfig',
   embeddable: true,
   properties: {
@@ -74,6 +74,13 @@ export class Calendar {
         concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
       }
     }
+
+    let rooms
+    const roomsQuery = await ctx.db.rooms.find({ repo: this.did })
+    if (roomsQuery) {
+      rooms = await Promise.all(roomsQuery.map(r => r.view(ctx)))
+    }
+
     const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
     const url = `https://${ctx.api.config.domain}${c.baseUrl}`
     const handleUrl = c.handle
@@ -98,6 +105,7 @@ export class Calendar {
       ...c.config,
       events,
       concepts,
+      rooms,
       baseUrl,
       url,
       handleUrl,
@@ -124,7 +132,8 @@ export const CalendarSchema = new EntitySchema({
     },
     config: {
       kind: 'embedded',
-      entity: 'CalendarConfig'
+      entity: 'CalendarConfig',
+      onCreate: () => new CalendarConfig()
     },
     managersArray: {
       type: 'array',

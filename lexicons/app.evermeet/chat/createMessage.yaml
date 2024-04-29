@@ -1,0 +1,22 @@
+lexicon: 1
+defs:
+  main:
+    type: procedure
+    input:
+      encoding: application/json
+      schema:
+        type: object
+        required: ["room", "msg"]
+        properties:
+          room:
+            type: string
+            example: testRoomId
+          msg:
+            type: string
+            example: Hello
+            minLength: 1
+            maxLength: 2600
+    output:
+      encoding: application/json
+      schema:
+        type: object

@@ -65,10 +65,10 @@
             if (item.baseUrl.match(/^http/)) {
                 window.location = item.baseUrl
             } else {
+                console.log('Going to:', item.baseUrl)
                 goto(item.baseUrl, { invalidateAll: true })
             }
         }
-        console.log('xx')
     }
 
     const {

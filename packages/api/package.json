@@ -16,29 +16,29 @@
     "@atproto/xrpc": "^0.5.0",
     "@bogeychan/elysia-logger": "^0.0.21",
     "@elysiajs/cors": "^1.0.2",
-    "@elysiajs/swagger": "^1.0.3",
+    "@elysiajs/swagger": "^1.0.4",
+    "@evermeet/did-plc-lib": "file:../did-plc-lib",
     "@mikro-orm/core": "^6.2.3",
     "@mikro-orm/sqlite": "^6.2.3",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@web5/dids": "^1.0.0",
-    "ajv": "^8.12.0",
+    "@web5/dids": "^1.0.1",
+    "ajv": "^8.13.0",
     "argon2": "^0.40.1",
     "cheerio": "1.0.0-rc.12",
     "eciesjs": "^0.4.6",
-    "elysia": "^1.0.13",
+    "elysia": "^1.0.15",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "multiformats": "^9.6.4",
+    "multiformats": "^9.9.0",
     "pino": "^9.0.0",
     "pino-http": "^9.0.0",
     "pino-pretty": "^11.0.0",
-    "short-unique-id": "^5.0.3",
+    "short-unique-id": "^5.1.1",
     "sqlite3": "^5.1.7",
     "uint8arrays": "3.0.0",
     "uuid": "^9.0.1",
     "wasmagic": "^1.0.1",
-    "yaml": "^2.4.1",
-    "@evermeet/did-plc-lib": "file:../did-plc-lib"
+    "yaml": "^2.4.2"
   },
   "devDependencies": {
     "@fastify/cookie": "^9.3.1",
@@ -49,6 +49,6 @@
     "@mikro-orm/libsql": "^6.2.3",
     "fastify": "^4.26.2",
     "hono": "^4.2.9",
-    "vitest": "^1.5.0"
+    "vitest": "^1.5.3"
   }
 }

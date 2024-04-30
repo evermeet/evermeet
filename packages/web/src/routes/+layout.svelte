@@ -7,6 +7,7 @@
     import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
     import { config, socket } from '$lib/stores';
+    import { t, locale } from 'svelte-i18n-lingui';
 
     import CurrentTime from "../components/CurrentTime.svelte";
     import UserMenu from "../components/UserMenu.svelte";
@@ -23,22 +24,22 @@
 
     const menu = [
         {
-            title: 'Events',
+            title: $t`Events`,
             url: '/events',
             ico: Ticket
         },
         {
-            title: 'Calendars',
+            title: $t`Calendars`,
             url: '/calendars',
             ico: Calendar
         },
         {
-            title: 'Chats',
+            title: $t`Chats`,
             url: '/chats',
             ico: ChatBubbleLeftRight
         },
         {
-            title: 'Explore',
+            title: $t`Explore`,
             url: '/',
             ico: Sparkles
         },
@@ -50,6 +51,10 @@
     ]
 
     onMount(async () => {
+
+        const { lang, messages } = data.locale
+        locale.set(lang, messages)
+
         const nc = await connect({
             servers: ["ws://127.0.0.1:4223"]
         })
@@ -116,9 +121,9 @@
                     <CurrentTime user={user} />
                 </li>
                 {#if user}
-                    <li><a href="/create">Create Event</a></li>
+                    <li><a href="/create">{$t`Create Event`}</a></li>
                 {:else if $page.url.pathname != '/'}
-                    <li><a href="/">Explore events ↗</a></li>
+                    <li><a href="/">{$t`Explore events`} ↗</a></li>
                 {/if}
             </ul>
         </div>

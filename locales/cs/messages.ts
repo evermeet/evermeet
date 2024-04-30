@@ -1,0 +1,1 @@
+/*eslint-disable*/import type{Messages}from"@lingui/core";export const messages:Messages=JSON.parse("{\"/jjyAk\":\"Název kalendáře\",\"EUpfsd\":\"Kalendáře\",\"8Q+lLG\":\"Konverzace\",\"ZXnI6P\":\"Vytvořit kalendář\",\"uN355O\":\"Vytvořit událost\",\"tst44n\":\"Události\",\"8tjQCz\":\"Prozkoumat\",\"2gLzpu\":\"Explore events\"}");

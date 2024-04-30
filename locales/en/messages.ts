@@ -1,0 +1,1 @@
+/*eslint-disable*/import type{Messages}from"@lingui/core";export const messages:Messages=JSON.parse("{\"/jjyAk\":\"Calendar Name\",\"EUpfsd\":\"Calendars\",\"8Q+lLG\":\"Chats\",\"ZXnI6P\":\"Create Calendar\",\"uN355O\":\"Create Event\",\"tst44n\":\"Events\",\"8tjQCz\":\"Explore\",\"2gLzpu\":\"Explore events\"}");

@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2024-04-30 23:59+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: cs\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/routes/create-calendar/+page.svelte:199
+msgid "Calendar Name"
+msgstr "Název kalendáře"
+
+#: src/routes/+layout.svelte:32
+msgid "Calendars"
+msgstr "Kalendáře"
+
+#: src/routes/+layout.svelte:37
+msgid "Chats"
+msgstr "Konverzace"
+
+#: src/routes/calendars/+page.svelte:24
+#: src/routes/create-calendar/+page.svelte:134
+#: src/routes/create-calendar/+page.svelte:218
+msgid "Create Calendar"
+msgstr "Vytvořit kalendář"
+
+#: src/routes/+layout.svelte:124
+msgid "Create Event"
+msgstr "Vytvořit událost"
+
+#: src/routes/+layout.svelte:27
+msgid "Events"
+msgstr "Události"
+
+#: src/routes/+layout.svelte:42
+msgid "Explore"
+msgstr "Prozkoumat"
+
+#: src/routes/+layout.svelte:126
+msgid "Explore events"
+msgstr ""

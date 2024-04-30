@@ -9,6 +9,7 @@
     import CalendarAvatar from '../../components/CalendarAvatar.svelte';
     import VisibilitySelector from '../../components/VisibilitySelector.svelte';
     import { getContext, onMount } from 'svelte';
+    import { t } from 'svelte-i18n-lingui';
 
     const user = getContext('user')
     const item = writable({ visibility: 'public' })
@@ -130,7 +131,7 @@
 
 
 <div class="page-wide">
-    <h1 class="heading1">Create Calendar</h1>
+    <h1 class="heading1">{$t`Create Calendar`}</h1>
     <form on:submit|preventDefault={submitForm}>
         <div class="itembox no-padding">
             <div class="-z-10">
@@ -195,7 +196,7 @@
             </div>
             <div class="py-5 px-4">
                 <div class="">
-                    <input type="text" class="input text-xl w-full" disabled={loading} placeholder="Calendar Name" bind:value={$item.name} />
+                    <input type="text" class="input text-xl w-full" disabled={loading} placeholder={$t`Calendar Name`} bind:value={$item.name} />
                 </div>
                 <div class="mt-4">
                     <input type="text" class="input w-full" disabled={loading} placeholder="Add a short description." bind:value={$item.description} />
@@ -214,7 +215,7 @@
         <div class="mt-4">
             <button type="submit" class="btn btn-primary min-w-48 {(!valid || loading) && 'btn-disabled'}">
                 {#if !loading}
-                    Create Calendar
+                    {$t`Create Calendar`}
                 {:else}
                     <span class="loading loading-infinity loading-lg"></span>
                 {/if}

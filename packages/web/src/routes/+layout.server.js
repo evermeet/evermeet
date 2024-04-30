@@ -1,5 +1,6 @@
 import { xrpcCall } from '$lib/api.js';
 import { loadConfig } from '$lib/config.js';
+import { t, locale } from 'svelte-i18n-lingui';
 
 export async function load({ fetch, cookies }) {
 
@@ -21,8 +22,16 @@ export async function load({ fetch, cookies }) {
             console.error(e)
         }
     }
+    const lang = "cs"
+    const { messages } = await import(`../../../../locales/${lang}/messages.ts`)
+    locale.set(lang, messages)    
+
     return {
         user,
-        config
+        config,
+        locale: {
+            lang,
+            messages
+        }
     }
 }

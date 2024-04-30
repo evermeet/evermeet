@@ -4,7 +4,9 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"extract": "bun run --bun lingui extract",
+		"compile": "bun run --bun lingui compile --typescript"
 	},
 	"devDependencies": {
 		"@atproto/xrpc": "^0.5.0",
@@ -14,6 +16,9 @@
 		"@lexical/plain-text": "^0.14.5",
 		"@lexical/rich-text": "^0.14.5",
 		"@lexical/utils": "^0.14.5",
+		"@lingui/cli": "^4.10.0",
+		"@lingui/core": "^4.10.0",
+		"@lingui/macro": "^4.10.0",
 		"@melt-ui/pp": "^0.3.1",
 		"@melt-ui/svelte": "^0.76.3",
 		"@modyfi/vite-plugin-yaml": "^1.1.0",
@@ -43,6 +48,8 @@
 		"svelte-adapter-bun": "^0.5.2",
 		"svelte-boring-avatars": "^1.2.6",
 		"svelte-heros-v2": "^1.2.2",
+		"svelte-i18n-lingui": "file:../../../svelte-i18n-lingui",
+		"svelte-i18n-lingui/extractor": "file:../../../svelte-i18n-lingui",
 		"svelte-lexical": "^0.4.0",
 		"svelte-purify": "^1.1.22",
 		"tailwindcss": "^3.4.3",

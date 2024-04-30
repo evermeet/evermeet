@@ -4,6 +4,7 @@
     import EventDetail from '../../components/EventDetail.svelte';
     import CalendarBox from '../../components/CalendarBox.svelte';
     import CalendarAvatar from '../../components/CalendarAvatar.svelte';
+    import { t } from 'svelte-i18n-lingui';
 
     export let data;
     const { subscribed, owned } = data.calendars;
@@ -20,7 +21,7 @@
     <div class="flex items-center">
         <div class="grow"><h2 class="heading2 no-margin">My Calendars</h2></div>
         <div>
-            <a href="/create-calendar" class="btn btn-sm btn-neutral">+ Create Calendar</a>
+            <a href="/create-calendar" class="btn btn-sm btn-neutral">+ {$t`Create Calendar`}</a>
         </div>
     </div>
 

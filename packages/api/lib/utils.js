@@ -10,7 +10,7 @@ export function detect (buffer) {
 }
 
 export function loadFile (fn, enc = 'utf-8') {
-  return readFileSync(fn, enc)
+  return readFileSync(fn, enc === 'buffer' ? null : enc)
 }
 
 export function loadYaml (fn) {
@@ -63,6 +63,18 @@ export function loadYamlDirList (dir, arr = [], p = []) {
     arr.push({ id: [...p, n].join('.'), data: loadYaml(fp) })
   }
   return arr
+}
+
+export function base64ToBytes (base64) {
+  const binString = atob(base64)
+  return Uint8Array.from(binString, (m) => m.codePointAt(0))
+}
+
+export function bytesToBase64 (bytes) {
+  const binString = Array.from(bytes, (byte) =>
+    String.fromCodePoint(byte)
+  ).join('')
+  return btoa(binString)
 }
 
 export const defaultsDeep = _.defaultsDeep

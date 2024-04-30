@@ -30,7 +30,7 @@
             }
         })
         miniSearch.addAll(data)
-        const calData = await xrpcCall(fetch, 'app.evermeet.explore.getExplore')
+        const calData = await xrpcCall({ fetch }, 'app.evermeet.explore.getExplore')
         const calendars = calData.calendars.map(x => {
             return {
                 id: x.id,
@@ -154,7 +154,7 @@
 </button>
 
 {#if $comboOpen}
-    <div use:melt={$portalled}>
+    <div id="masterSearchDialog" use:melt={$portalled}>
         <div use:melt={$overlay}
             class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
         />

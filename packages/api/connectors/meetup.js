@@ -1,5 +1,5 @@
 
-import { Connector, fetchNextPage } from '../lib/connector'
+import { Connector, fetchNextPage } from '../lib/connector.js'
 
 function processEvent (e) {
   return {

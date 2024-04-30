@@ -21,7 +21,7 @@
         isLoading = true
         let res
         try {
-            res = await xrpcCall(fetch, 'app.evermeet.event.importEvents', null, { url })
+            res = await xrpcCall({ fetch }, 'app.evermeet.event.importEvents', null, { url })
         } catch (e) {
             error = e.message
         }

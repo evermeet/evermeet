@@ -1,20 +1,23 @@
-import { Elysia, t } from 'elysia'
+import { Hono } from 'hono'
+import { swaggerUI } from '@hono/swagger-ui'
+
+// app.get('/', (c) => c.text('Hono!'))
+
+/* import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
-// import { logger as httpLogger } from '@bogeychan/elysia-logger'
+import { logger as httpLogger } from '@bogeychan/elysia-logger' */
 
 export default function ({ evermeet }) {
   let app
   return {
     async init () {
-      // check environment
-      /* if (evermeet.runtime.name !== 'bun') {
-        throw new Error(`Elysia: Only works with Bun runtime (current=${evermeet.runtime.name})`)
-      } */
-      const logger = evermeet.logger.child({ module: 'http', adapter: 'elysia' })
+      const logger = evermeet.logger.child({ module: 'http', adapter: 'hono' })
+
+      const app = new Hono()
 
       // start adapter
-      app = new Elysia({
+      /* app = new Elysia({
         prefix: evermeet.config.api.prefix
       })
         .use(cors())
@@ -43,10 +46,12 @@ export default function ({ evermeet }) {
             }
           }
         }))
-        /* .use(httpLogger({
+        .use(httpLogger({
           level: evermeet.logLevel === 'debug' ? 'info' : 'error',
           transport: evermeet.logTransport
         })) */
+
+      app.get('/_swagger', swaggerUI({ url: '/doc' }))
 
       for (const ep of evermeet.endpoints.list) {
         const method = ep.lex.defs.main.type === 'procedure' ? 'post' : 'get'
@@ -107,10 +112,6 @@ export default function ({ evermeet }) {
         hostname: evermeet.config.api.host,
         port: evermeet.config.api.port
       })
-      return app
-    },
-    getCookie (req, key) {
-      return req.cookie[key]?.value
     }
   }
 }

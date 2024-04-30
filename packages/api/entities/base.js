@@ -33,12 +33,13 @@ export const BaseDidEntity = new EntitySchema({
       unique: true
     },
     signingKey: {
-      type: 'string',
-      nullable: true,
-      lazy: true
+      type: 'object',
+      object: true,
+      nullable: true
+      // lazy: true
     },
     rotationKey: {
-      type: 'string',
+      type: 'object',
       nullable: true,
       lazy: true
     }

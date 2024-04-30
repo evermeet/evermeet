@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { DidJwk } from '@web5/dids'
 
 import { Secp256k1Keypair } from '@atproto/crypto'
-import * as plc from '../../../did-plc-lib'
+import { Client as PlcClient } from '@evermeet/did-plc-lib'
 
 function base64ToBytes (base64) {
   const binString = atob(base64)
@@ -23,11 +23,13 @@ function createSessionToken (user, ctx) {
 
 // ----------------------------------------------------------------------
 
-export async function generateDid (server, ctx) {
-  server.endpoint(async ({ input: { handle }, db }) => {
-    const plcClient = new plc.Client(ctx.api.config.plcServer)
+export async function generateDid (server) {
+  server.endpoint(async (ctx) => {
+    const { db, input } = ctx
+    const { handle } = ctx.input
+    const plcClient = new PlcClient(ctx.api.config.plcServer)
 
-    const obj = await ctx.api.objectGet(db, handle)
+    const obj = await ctx.api.objectGet(ctx, handle)
     if (obj) {
       return { error: 'HandleNotAvailable' }
     }
@@ -83,7 +85,7 @@ export async function createAccount (server, ctx) {
     const signingKey = await Secp256k1Keypair.create({ exportable: true })
     const rotationKey = await Secp256k1Keypair.create({ exportable: true })
 
-    const plcClient = new plc.Client(ctx.api.config.plcServer)
+    const plcClient = new PlcClient(ctx.api.config.plcServer)
     const did = await plcClient.createDid({
       signingKey: signingKey.did(),
       handle,

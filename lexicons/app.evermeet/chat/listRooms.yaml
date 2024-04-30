@@ -4,14 +4,11 @@ defs:
     type: query
     parameters:
       type: params
-      required: ["repo", "room"]
       properties:
-        room:
-          type: string
-          example: testRoomId
         repo:
           type: string
           format: did
+          example: did:web:evermeet.local
     output:
       encoding: application/json
       schema:

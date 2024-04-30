@@ -49,7 +49,7 @@
             password: $credentials.password,
         }
         if (!localIdent) {
-            const resp = await xrpcCall(fetch, 'app.evermeet.identity.resolveHandle', { handle: ident })
+            const resp = await xrpcCall({ fetch }, 'app.evermeet.identity.resolveHandle', { handle: ident })
             console.log(resp)
             isProcessing = false
             return;
@@ -57,7 +57,7 @@
 
         let s;
         try {
-            s = await xrpcCall(fetch, 'app.evermeet.auth.createSession', null, normalizedQuery)
+            s = await xrpcCall({ fetch }, 'app.evermeet.auth.createSession', null, normalizedQuery)
         } catch (e) {}
 
         isProcessing = false;

@@ -1,30 +1,29 @@
 <script>
     import { writable } from 'svelte/store'
     import ManagePage from './ManagePage.svelte'
-    import { user } from '$lib/stores'
     import Form from './Form.svelte'
     import { xrpcCall, blobUpload } from '$lib/api';
-    import { onDestroy, onMount } from 'svelte';
+    import { onDestroy, onMount, getContext, setContext } from 'svelte';
 
     export let selectedTab;
 
-    $: u = $user
+    const user = getContext("user")
 
     // update profile
     const profile = writable({
-        name: $user.name,
-        description: $user.description,
-        avatarBlob: $user.avatarBlob,
+        name: user.name,
+        description: user.description,
+        avatarBlob: user.avatarBlob,
     })
     async function submitProfileForm (d) {
         let avatar = undefined
         if (d.avatarBlob && typeof(d.avatarBlob) === 'object') {
-            const blob = await blobUpload(fetch, d.avatarBlob.data)
+            const blob = await blobUpload({ fetch, user }, d.avatarBlob.data)
             avatar = { $cid: blob?.blob.cid }
         } else if (d.avatarBlob) {
             avatar = { $cid: d.avatarBlob }
         }
-        const resp = await xrpcCall(fetch, 'app.evermeet.auth.updateAccount', null, {
+        const resp = await xrpcCall({ fetch, user }, 'app.evermeet.auth.updateAccount', null, {
             profile: {
                 name: d.name,
                 description: d.description,
@@ -32,7 +31,7 @@
             }
         })
         if (resp.user) {
-            user.set(resp.user)
+            setContext('user', Object.assign(resp.user, { token: user.token }))
             return true
         }
     }
@@ -41,9 +40,9 @@
     const passwordChange = writable({})
 
     // date preferenes
-    const datePreferences = writable($user.preferences.date || {})
+    const datePreferences = writable(user.preferences.date || {})
     async function submitDatePreferencesForm (d) {
-        const resp = await xrpcCall(fetch, 'app.evermeet.auth.updateAccount', null, {
+        const resp = await xrpcCall({ fetch, user }, 'app.evermeet.auth.updateAccount', null, {
             preferences: {
                 date: d
             }
@@ -69,14 +68,14 @@
     {#if selectedTab === 'account'}
         <h2 class="manage-heading1">Handle</h2>
         <div>
-            Your handle: <span class="font-semibold text-accent">@{$user.handle}</span>
+            Your handle: <span class="font-semibold text-accent">@{user.handle}</span>
         </div>
 
         <h2 id="profile" class="manage-heading1">Public Profile</h2>
         <div class="itembox mt-4">
             <Form item={$profile} onSubmit={submitProfileForm} config={{ 
                 bordered: false,
-                user: $user,
+                user,
                 submitButton: 'Save profile'
             }} schema={{
                 type: 'object',
@@ -108,7 +107,7 @@
         <div class="itembox mt-4">
             <Form item={$passwordChange} config={{
                 bordered: false,
-                user: $user,
+                user,
                 submitButton: 'Update password',
             }} schema={{
                 type: 'object',
@@ -150,7 +149,7 @@
         <div class="itembox mt-4">
             <Form item={$datePreferences} onSubmit={submitDatePreferencesForm} config={{
                 bordered: false,
-                user: $user,
+                user,
                 submitButton: 'Save',
             }} schema={{
                 type: 'object',

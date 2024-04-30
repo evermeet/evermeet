@@ -1,14 +1,10 @@
 import { browser } from '$app/environment'
 import { env } from '$env/dynamic/public'
 import { Client } from '@atproto/xrpc'
-import { session as origSession } from '$lib/stores'
+//import { session as origSession } from '$lib/stores'
+import { getContext } from 'svelte'
 
 let xrpcClient;
-let session;
-
-origSession.subscribe(cs => {
-    session = cs
-})
 
 async function createXrpcClient (fetch) {
     const client = new Client()
@@ -37,7 +33,7 @@ export async function internalApiCall(fetch, id) {
     return resp.json()
 }
 
-export async function xrpcCall(fetch, id, params, data, opts={}) {
+export async function xrpcCall({ fetch, user }, id, params, data, opts={}) {
     const apiHost = env[browser ? "VITE_BACKEND_URL_PUBLIC" : "VITE_BACKEND_URL"] || ""
     if (!xrpcClient) {
         xrpcClient = await createXrpcClient(fetch)
@@ -45,8 +41,8 @@ export async function xrpcCall(fetch, id, params, data, opts={}) {
     const headers = {}
     if (opts.token) {
         headers.Authorization = 'Bearer ' + opts.token
-    } else if (session?.accessJwt) {
-        headers.Authorization = 'Bearer ' + session.accessJwt
+    } else if (user?.token) {
+        headers.Authorization = 'Bearer ' + user.token
     }
     if (opts.mimeType) {
         headers['Content-Type'] = opts.mimeType
@@ -55,8 +51,8 @@ export async function xrpcCall(fetch, id, params, data, opts={}) {
     return resp.data
 }
 
-export async function blobUpload(fetch, { body, mimeType }) {
-    return xrpcCall(fetch, 'app.evermeet.object.uploadBlob', null, body, { mimeType })
+export async function blobUpload(args, { body, mimeType }) {
+    return xrpcCall(args, 'app.evermeet.object.uploadBlob', null, body, { mimeType })
 }
 
 export function imgBlobUrl (did, cid, size) {

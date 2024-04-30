@@ -112,7 +112,7 @@
                 </div>
             </div>
         </div>
-        <input id={row.title} type="file" class="hidden" accept=".jpg, .jpeg, .png, .webp, .avif" on:change={image_onSelected} bind:value={$formData[row.column]} />
+        <input id={row.title} type="file" class="hidden" accept=".jpg, .jpeg, .png, .webp, .avif" on:change={image_onSelected} />
     {/if}
     {#if row.view === 'password'}
         <input id={row.title} type="password" placeholder={row.placeholder} class="input {config.bordered && 'input-bordered'} {row.class} w-full" bind:value={$formData[row.column]} />

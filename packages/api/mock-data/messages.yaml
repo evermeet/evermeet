@@ -5,6 +5,24 @@
   createdOn: "2024-03-23T23:54:50.313Z"
 - room: testRoomId
   authorDid: did:plc:jxj3fiv6sapedgpz36umxsew
+  createdOn: "2024-03-23T23:55:50.313Z"
+  msg: |
+    Here's an inline markdown sample:
+
+    This is _italic_ text. This is **bold** text. You can also combine them, like _**this**_. Finally, `code` can be marked too.
+
+    For lists, you can use:
+
+    -   Item 1
+    -   Item 2
+      - Subitem 2.1
+      - Subitem 2.2
+    -   Item 3
+
+    For links, format as [Link Text](URL). For example, [click here](https://www.raycast.com/).
+
+- room: testRoomId
+  authorDid: did:plc:jxj3fiv6sapedgpz36umxsew
   msg: second msg
   createdOn: "2024-04-21T23:54:50.313Z"
 - room: testRoomId

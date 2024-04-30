@@ -1,6 +1,7 @@
 
 <script>
-    import { user, session } from '$lib/stores'
+    //import { user, session } from '$lib/stores'
+    import { getContext , setContext } from 'svelte';
     import Cookies from 'js-cookie'
     import { goto } from '$app/navigation';
     import { createDropdownMenu, melt } from '@melt-ui/svelte';
@@ -8,6 +9,8 @@
     import { fly } from 'svelte/transition';
     
     import UserAvatar from './UserAvatar.svelte';
+
+    const user = getContext("user")
 
     const {
         elements: { trigger, menu, item, separator, arrow },
@@ -24,7 +27,8 @@
     } = createSubmenu();
     
     function doLogout () {
-        session.set(null)
+        //session.set(null)
+        setContext("user", null)
         Cookies.remove('evermeet-session-id')
         goto('/')
     }
@@ -32,17 +36,17 @@
 
 
 <button class="block trigger rounded-full border-[0.3em] border-transparent hover:border-neutral" use:melt={$trigger} aria-label="User menu">
-    <UserAvatar user={$user} />
+    <UserAvatar user={user} />
 </button>
 
 {#if $open}
     <ul class="popup-menu text-sm max-w-96" use:melt={$menu} transition:fly={{ duration: 150, y: -10 }}>
         <li>
             <div class="flex gap-4 items-center bg-base-200 py-2 px-4 rounded mb-2">
-                <UserAvatar user={$user} size="45" />
+                <UserAvatar user={user} size="45" />
                 <div class="">
-                    <div>{$user.name}</div>
-                    <div class="text-base-content/75 break-all">@{$user.handle}</div>
+                    <div>{user.name}</div>
+                    <div class="text-base-content/75 break-all">@{user.handle}</div>
                 </div>
             </div>
 

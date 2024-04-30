@@ -4,3 +4,7 @@
 
 - repo: did:plc:jxj3fiv6sapedgpz36umxsew
   slug: support
+
+- id: n1w5lhdnpsujxz7kvd3a2tix
+  repo: did:web:evermeet.local
+  slug: general

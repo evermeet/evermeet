@@ -4,22 +4,25 @@ import { loadConfig } from '$lib/config.js';
 export async function load({ fetch, cookies }) {
 
     const config = await loadConfig();
-    let session = false;
+    let user = false;
     const sessionId = cookies.get('evermeet-session-id')
     if (sessionId) {
         try {
-            session = await xrpcCall(fetch, 'app.evermeet.auth.getSession', null, null, {
+            const session = await xrpcCall({ fetch }, 'app.evermeet.auth.getSession', null, null, {
                 headers: {
                     authorization: 'Bearer ' + sessionId
                 }
             });
-            session.accessJwt = sessionId
+            //session.accessJwt = sessionId
+            user = session.user
+            user.token = sessionId
+
         } catch (e) {
             console.error(e)
         }
     }
     return {
-        session,
+        user,
         config
     }
 }

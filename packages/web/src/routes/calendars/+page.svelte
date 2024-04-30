@@ -20,7 +20,7 @@
     <div class="flex items-center">
         <div class="grow"><h2 class="heading2 no-margin">My Calendars</h2></div>
         <div>
-            <a href="/create-calendar"><button class="btn btn-sm btn-neutral">+ Create Calendar</button></a>
+            <a href="/create-calendar" class="btn btn-sm btn-neutral">+ Create Calendar</a>
         </div>
     </div>
 

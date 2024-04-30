@@ -1,15 +1,17 @@
 <script>
-    import { user } from '$lib/stores'
     import { calendarSubscribe, calendarUnsubscribe } from '$lib/actions';
+    import { getContext } from 'svelte';
     import CalendarAvatar from './CalendarAvatar.svelte';
 
     export let item;
     export let preview = null;
 
+    const user = getContext("user")
+
     const c = item;
 
-    $: subscribed = $user?.subscribedCalendars?.find(sc => sc.ref === c.id || sc.ref === c.slug)
-    $: managed = $user ? item.managers?.find(mi => mi.ref === $user.did) : false
+    $: subscribed = user?.subscribedCalendars?.find(sc => sc.ref === c.id || sc.ref === c.slug)
+    $: managed = user ? item.managers?.find(mi => mi.ref === user.did) : false
 </script>
 
 <a href={c.baseUrl}>
@@ -18,7 +20,7 @@
             <div class="w-12 h-12 mb-2 grow">
                 <CalendarAvatar calendar={item} size="48" />
             </div>
-            {#if $user && !c.personal && !managed && !$user.calendarSubscriptions?.find(cm => cm.ref === item.did )}
+            {#if user && !c.personal && !managed && !user.calendarSubscriptions?.find(cm => cm.ref === item.did )}
                 <div class="">
                     {#if subscribed}
                         <button class="btn btn-sm" on:click|preventDefault={calendarUnsubscribe(c.id)}>Subscribed</button>

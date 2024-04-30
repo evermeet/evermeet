@@ -19,6 +19,7 @@ api:
   jwtSecret: Xai9Xahjeisiegeipheogu
 web:
   enabled: true
+  runtime: bun
   port: 3001
   host: localhost
 featuredCalendars: []

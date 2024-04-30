@@ -30,7 +30,7 @@
         isProcessing = true
         let resp;
         try {
-            resp = await xrpcCall(fetch, 'app.evermeet.auth.createAccount', null, {
+            resp = await xrpcCall({ fetch }, 'app.evermeet.auth.createAccount', null, {
                 handle: d.handle + '.' + $config.domain,
                 password: d.password,
             })
@@ -55,7 +55,7 @@
     async function generateDid () {
         let resp;
         try {
-            resp = await xrpcCall(fetch, 'app.evermeet.auth.generateDid', null, { handle: $registerData.handle });
+            resp = await xrpcCall({ fetch }, 'app.evermeet.auth.generateDid', null, { handle: $registerData.handle });
         } catch (e) {}
         did.set({ did: resp.did, handle: $registerData.handle })
         return null;

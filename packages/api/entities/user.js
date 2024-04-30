@@ -97,8 +97,8 @@ export const schema = new EntitySchema({
     },
     signingKey: {
       type: 'string',
-      nullable: true,
-      lazy: true
+      nullable: true
+      // lazy: true
     },
     rotationKey: {
       type: 'string',

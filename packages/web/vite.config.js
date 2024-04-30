@@ -6,5 +6,12 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		ViteYaml()
-	]
+	],
+	build: {
+		commonjsOptions: {
+			dynamicRequireTargets: [
+				'langs/*.json'
+			]
+		}
+	}
 });

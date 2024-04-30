@@ -30,6 +30,7 @@ if (config.web.enabled) {
       script: './node_modules/vite/bin/vite.js',
       args: `--host ${config.web.host} --port ${config.web.port} dev`,
       cwd: './packages/web',
+      interpreter: config.web.runtime,
       env: {
         PORT: config.web.port,
         VITE_BACKEND_URL: `http://${config.api.host}:${config.api.port}`,

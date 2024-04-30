@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import { listDir, join } from './utils'
+import { listDir, join } from './utils.js'
 
 export class Connector {
   constructor (data) {

@@ -6,22 +6,20 @@
     import { browser } from '$app/environment';
     import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
-    import { user, session, config, socket } from '$lib/stores';
+    import { config, socket } from '$lib/stores';
 
     import CurrentTime from "../components/CurrentTime.svelte";
     import UserMenu from "../components/UserMenu.svelte";
     import SearchDialog from "../components/SearchDialog.svelte";
-    import { onMount } from "svelte";
+    import { onMount, setContext } from "svelte";
 
     import { connect, StringCodec } from "nats.ws";
 
-    export let data;
+    const { data } = $props()
+    config.set(data.config)
 
-    session.subscribe((s) => {
-        user.set(s?.user)
-    })
-    session.set(data.session)
-    config.set(data.config);
+    const user = data.user
+    setContext("user", user)
 
     const menu = [
         {
@@ -98,7 +96,7 @@
         </div>
     </div>
     <div class="navbar-center max-w-[80rem] w-auto">
-        {#if $user}
+        {#if user}
             <ul class="menu menu-horizontal w-full gap-1">
                 {#each menu as mi}
                     <li class="group">
@@ -115,9 +113,9 @@
         <div class="text-sm">
             <ul class="menu menu-horizontal menu-sm">
                 <li>
-                    <CurrentTime user={$user} />
+                    <CurrentTime user={user} />
                 </li>
-                {#if $user}
+                {#if user}
                     <li><a href="/create">Create Event</a></li>
                 {:else if $page.url.pathname != '/'}
                     <li><a href="/">Explore events ↗</a></li>
@@ -126,12 +124,14 @@
         </div>
             <div class="mr-2 flex text-base-content/75 gap-1">
                 <SearchDialog />
+            </div>
+        {#if user}
+            <div class="mr-2 flex text-base-content/75 gap-1">
                 <div class="indicator w-8 h-8 rounded-full aspect-square border-[0.4em] border-transparent hover:border-neutral hover:bg-neutral cursor-pointer flex items-center justify-center">
                     <span class="indicator-item badge badge-xs badge-secondary">9</span>
                     <Bell size="20" />
                 </div>
             </div>
-        {#if $user}
             <UserMenu />
         {:else}
             <a class="btn btn-sm btn-accent" href="/login?next={encodeURIComponent($page.url.pathname)}">Login</a>

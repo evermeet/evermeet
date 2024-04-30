@@ -1,8 +1,22 @@
 import { EntitySchema, wrap } from '@mikro-orm/core'
+import { encrypt, decrypt, PrivateKey } from 'eciesjs'
+import { bytesToBase64 } from '../lib/utils.js'
 
 export class Message {
   async view (ctx) {
     const m = wrap(this).toJSON()
+
+    /* const key = JSON.parse(ctx.user.signingKey)
+    //const sk = new PrivateKey()
+    //const pk = sk.publicKey.toHex() //Uint8Array.from(key.publicKey)
+    const pk = new Uint8Array(Object.values(key.publicKey))
+    const sk = { secret: new Uint8Array(Object.values(key.privateKey)) }
+
+    const enc = encrypt(pk, Buffer.from(m.msg))
+
+    m.ciphertext = bytesToBase64(enc)
+    //m.decrypted = decrypt(sk.secret, enc).toString()
+*/
     // load author
     const authorQuery = await ctx.api.objectGet(ctx, m.authorDid)
     if (authorQuery) {

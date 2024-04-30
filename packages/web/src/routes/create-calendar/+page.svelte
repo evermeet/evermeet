@@ -8,18 +8,19 @@
     import { stringToSlug }from '$lib/utils';
     import CalendarAvatar from '../../components/CalendarAvatar.svelte';
     import VisibilitySelector from '../../components/VisibilitySelector.svelte';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
 
+    const user = getContext('user')
     const item = writable({ visibility: 'public' })
     const visibility = writable($item.visibility)
 
-    let loading = false;
-    let valid = false;
-    let normalized = {};
+    let loading = $state(false);
+    let valid = $state(false);
+    let normalized = $state(normalize($item));
+    let handle = $derived(normalized.handle)
 
-    $: files = { avatar: {}, header: {} }
-    $: handlePlaceholder = $item.name ? stringToSlug($item.name) : 'your-calendar'
-    $: handle = normalized.handle
+    let files = $state({ avatar: {}, header: {} })
+    let handlePlaceholder = $derived($item.name ? stringToSlug($item.name) : 'your-calendar')
 
     onMount(() => {
         console.log('x')
@@ -29,10 +30,7 @@
         $item.visibility = v
     })
 
-    item.subscribe(i => {
-        if (!i) {
-            return
-        }
+    function normalize(i) {
         const n = {
             name: i.name,
             description: i.description,
@@ -45,6 +43,14 @@
         if (n.visibility === 'private') {
             delete n.handle
         }
+        return n
+    }
+
+    item.subscribe(i => {
+        if (!i) {
+            return
+        }
+        const n = normalize(i)
         normalized = n
 
         if (!n.name || n.name.length < 3) {
@@ -65,11 +71,11 @@
         }
         let avatarBlob, headerBlob;
         if (files.avatar.data) {
-            const blob = await blobUpload(fetch, files.avatar.data)
+            const blob = await blobUpload({ user }, files.avatar.data)
             avatarBlob = { $cid: blob?.blob.cid }
         }
         if (files.header.data) {
-            const blob = await blobUpload(fetch, files.header.data)
+            const blob = await blobUpload({ user }, files.header.data)
             headerBlob = { $cid: blob?.blob.cid }
         }
 
@@ -80,7 +86,7 @@
             headerBlob,
         }
         console.log(data)
-        const cal = await xrpcCall(fetch, 'app.evermeet.calendar.createCalendar', null, data)
+        const cal = await xrpcCall({ user }, 'app.evermeet.calendar.createCalendar', null, data)
         if (cal.error) {
             loading = false
             return false
@@ -143,7 +149,7 @@
                             </div>
                         </div>
                     {/if}
-                    <button type="button" class="" on:click|preventDefault={files.header.input.click()}>
+                    <button type="button" class="" on:click|preventDefault={() => files?.header?.input?.click()}>
                         <div class="hint opacity-0 group-hover:opacity-100 absolute w-full h-full bg-base-300/50 font-semibold top-0 left-0 transition-all duration-200 backdrop-blur">
                             <div class="flex py-2 flex-wrap h-full w-full gap-3 items-center justify-center">
                                 <div><Photo class="outline-none" /></div>
@@ -168,7 +174,7 @@
                                 <Trash class="outline-none" size={18} />
                             </button>
                         {:else}
-                            <button type="button" on:click|preventDefault={files.avatar.input.click()} class="flex py-2 flex-wrap gap-1 h-full w-full items-center justify-center">
+                            <button type="button" on:click|preventDefault={() => files?.avatar?.input?.click()} class="flex py-2 flex-wrap gap-1 h-full w-full items-center justify-center">
                                 <div><Photo class="outline-none" /></div>
                                 <div>Choose avatar</div>
                             </button>

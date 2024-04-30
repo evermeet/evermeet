@@ -1,6 +1,6 @@
 
 import { Ticket, Calendar, Sparkles, PlusCircle, Document, 
-    ArrowLeftStartOnRectangle, ArrowRightEndOnRectangle, Cog6Tooth, Key, CloudArrowDown } from 'svelte-heros-v2';
+    ArrowLeftStartOnRectangle, ArrowRightEndOnRectangle, Cog6Tooth, Key, CloudArrowDown, ChatBubbleLeftRight } from 'svelte-heros-v2';
 
 export function searchItemsBase () {
     return [
@@ -18,6 +18,13 @@ export function searchItemsBase () {
             name: 'Calendars',
             baseUrl: '/calendars',
             icon: Calendar,
+        },
+        {
+            id: 'chat',
+            type: 'general',
+            name: 'Chats',
+            baseUrl: '/chats',
+            icon: ChatBubbleLeftRight,
         },
         {
             id: 'explore',

@@ -1,7 +1,8 @@
 <script>
     import EventBox from '../components/EventBox.svelte';
     import CalendarBox from '../components/CalendarBox.svelte';
-    import { config, user } from '$lib/stores';
+    import { config } from '$lib/stores';
+    import { getContext } from 'svelte';
 
     export let data;
 

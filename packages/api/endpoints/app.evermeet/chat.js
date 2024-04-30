@@ -1,3 +1,23 @@
+
+export function listRooms (server) {
+  server.endpoint(async (ctx) => {
+    const repo = ctx.input.repo || ctx.user?.did
+    if (!repo) {
+      return { error: 'Need specify repo or be logged' }
+    }
+
+    const msgs = await ctx.db.rooms.find()
+
+    if (!msgs) {
+      return { error: 'NotFound' }
+    }
+    return {
+      encoding: 'application/json',
+      body: await Promise.all(msgs.map(m => m.view(ctx)))
+    }
+  })
+}
+
 export function getMessages (server) {
   server.endpoint(async (ctx) => {
     const { repo, room } = ctx.input

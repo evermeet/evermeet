@@ -1,5 +1,5 @@
 import { Secp256k1Keypair } from '@atproto/crypto'
-import * as plc from '@evermeet/did-plc-lib'
+import * as plc from '../../did-plc-lib'
 
 function base64ToBytes (base64) {
   const binString = atob(base64)

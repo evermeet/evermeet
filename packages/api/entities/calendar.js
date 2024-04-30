@@ -69,16 +69,31 @@ export class Calendar {
     }
     let concepts
     if (opts.concepts !== false || opts.concepts !== false) {
-      const conceptsArr = await ctx.db.concepts.find({ calendarId: c.id })
-      if (conceptsArr) {
-        concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
+      if (ctx.cache?.calendar[this.did]?.concepts) {
+        concepts = ctx.cache?.calendar[this.did]?.concepts
+      } else {
+        const conceptsArr = await ctx.db.concepts.find({ calendarId: c.id })
+        if (conceptsArr) {
+          concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
+        }
       }
     }
 
     let rooms
-    const roomsQuery = await ctx.db.rooms.find({ repo: this.did })
-    if (roomsQuery) {
-      rooms = await Promise.all(roomsQuery.map(r => r.view(ctx)))
+    if (ctx.cache?.calendar[this.did]?.rooms) {
+      rooms = ctx.cache?.calendar[this.did]?.rooms
+    } else {
+      const roomsQuery = await ctx.db.rooms.find({ repo: this.did })
+      if (roomsQuery) {
+        rooms = await Promise.all(roomsQuery.map(r => r.view(ctx)))
+        if (!ctx.cache) {
+          ctx.cache = {}
+        }
+        if (!ctx.cache.calendar) {
+          ctx.cache.calendar = {}
+        }
+        ctx.cache.calendar[this.did] = rooms
+      }
     }
 
     const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`

@@ -103,11 +103,20 @@ export default function ({ evermeet }) {
       return app
     },
     async start () {
-      return app.listen({
-        hostname: evermeet.config.api.host,
-        port: evermeet.config.api.port
-      })
-      return app
+      if (evermeet.runtime.name === 'bun') {
+        return app.listen({
+          hostname: evermeet.config.api.host,
+          port: evermeet.config.api.port
+        })
+      } else if (evermeet.runtime.name === 'deno') {
+        return Deno.serve({
+          hostname: evermeet.config.api.host,
+          port: evermeet.config.api.port,
+          handler: app.fetch
+        })
+      } else {
+        throw new Error(`Runtime not supported: ${evermeet.runtime.name}`)
+      }
     },
     getCookie (req, key) {
       return req.cookie[key]?.value

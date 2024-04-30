@@ -1,15 +1,15 @@
 import { wrap } from '@mikro-orm/core'
 import { createId as cuid2 } from '@paralleldrive/cuid2'
 import ShortUniqueId from 'short-unique-id'
+const { MikroORM, RequestContext } = await import(`@mikro-orm/libsql`)
 
 export async function initDatabase (api, conf) {
-  const { MikroORM, RequestContext } = await import(`@mikro-orm/${conf.storage}`)
 
   const orm = await MikroORM.init({
     dbName: conf.name,
     entities: [api.paths.entities],
     debug: api.env === 'development',
-    logger: msg => api.logger.trace({ storage: 'sqlite' }, msg)
+    logger: msg => api.logger.trace(msg)
   })
 
   await orm.schema.refreshDatabase()

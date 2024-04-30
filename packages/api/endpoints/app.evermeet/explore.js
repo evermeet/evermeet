@@ -7,6 +7,22 @@ export function getExplore (server) {
     })
     const featured = []
 
+    if (!ctx.cache) {
+      ctx.cache = {}
+    }
+    if (!ctx.cache.calendar) {
+      ctx.cache.calendar = {}
+    }
+
+    const rooms = await ctx.db.rooms.find({ repo: { $in: calendars.map(c => c.did) } })
+    const concepts = await ctx.db.concepts.find({ calendarId: { $in: calendars.map(c => c.id) } })
+    for (const c of calendars) {
+      ctx.cache.calendar[c.did] = {
+        rooms: rooms.filter(r => r.repo === c.did),
+        concepts: concepts.filter(_c => _c.calendarId === c.id)
+      }
+    }
+
     return {
       body: {
         calendars: await Promise.all(calendars.map(async (cal) => {

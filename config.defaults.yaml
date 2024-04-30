@@ -17,6 +17,7 @@ api:
     password: putYourPasswordHere
   sessionName: evermeet-session-id
   jwtSecret: Xai9Xahjeisiegeipheogu
+  trace: false
 web:
   enabled: true
   runtime: bun

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { DidJwk } from '@web5/dids'
 
 import { Secp256k1Keypair } from '@atproto/crypto'
-import { Client as PlcClient } from '@evermeet/did-plc-lib'
+import { Client as PlcClient } from '../../../did-plc-lib'
 
 function base64ToBytes (base64) {
   const binString = atob(base64)

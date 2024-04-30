@@ -13,7 +13,7 @@ if (config.api.enabled) {
     script: './index.js',
     cwd: './packages/api',
     interpreter: config.api.runtime,
-    //interpreter_args: '--inspect=4000', 
+    interpreter_args: config.api.runtime === 'deno' ? 'task run' : '', //--inspect=4000', 
     watch: process.env.NODE_ENV === 'development',
     env: {
       PORT: config.api.port,
@@ -55,7 +55,8 @@ services.push({
   name: 'evermeet-img-server',
   script: './index.js',
   cwd: './packages/img-server',
-  interpreter: config.api.runtime,
+  interpreter: config.api.runtime === 'deno' ? 'bun' : config.api.runtime,
+  //interpreter_args: config.api.runtime === 'deno' ? '' : '',
   watch: process.env.NODE_ENV === 'development',
   env: {
     PORT: 3002

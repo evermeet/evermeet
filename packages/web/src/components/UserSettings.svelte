@@ -4,6 +4,7 @@
     import Form from './Form.svelte'
     import { xrpcCall, blobUpload } from '$lib/api';
     import { onDestroy, onMount, getContext, setContext } from 'svelte';
+    import { t } from '$lib/i18n';
 
     export let selectedTab;
 
@@ -57,41 +58,41 @@
 
 <ManagePage {selectedTab}
     baseUrl="/me/settings"
-    title="Settings"
+    title={$t`Settings`}
     tabs={[
-        { id: 'account', name: 'Account' },
-        { id: 'preferences', name: 'Preferences' },
-        { id: 'security', name: 'Security' },
+        { id: 'account', name: $t`Account` },
+        { id: 'preferences', name: $t`Preferences` },
+        { id: 'security', name: $t`Security` },
     ]}
     >
 
     {#if selectedTab === 'account'}
-        <h2 class="manage-heading1">Handle</h2>
+        <h2 class="manage-heading1">{$t`Handle`}</h2>
         <div>
-            Your handle: <span class="font-semibold text-accent">@{user.handle}</span>
+            {$t`Your handle`}: <span class="font-semibold text-accent">@{user.handle}</span>
         </div>
 
-        <h2 id="profile" class="manage-heading1">Public Profile</h2>
+        <h2 id="profile" class="manage-heading1">{$t`Public Profile`}</h2>
         <div class="itembox mt-4">
             <Form item={$profile} onSubmit={submitProfileForm} config={{ 
                 bordered: false,
                 user,
-                submitButton: 'Save profile'
+                submitButton: $t`Save profile`
             }} schema={{
                 type: 'object',
                 properties: {
                     name: {
-                        title: 'Display Name',
+                        title: $t`Display Name`,
                         type: 'string',
                         placeholder: 'name',
                     },
                     avatarBlob: {
-                        title: 'Profile Image (avatar)',
+                        title: $t`Profile Image (avatar)`,
                         type: 'string',
                         view: 'image',
                     },
                     description: {
-                        title: 'Description',
+                        title: $t`Description`,
                         type: 'string',
                         view: 'textarea-markdown',
                     }
@@ -103,27 +104,27 @@
             ]} />
         </div>
 
-        <h2 id="password" class="manage-heading1">Password</h2>
+        <h2 id="password" class="manage-heading1">{$t`Password`}</h2>
         <div class="itembox mt-4">
             <Form item={$passwordChange} config={{
                 bordered: false,
                 user,
-                submitButton: 'Update password',
+                submitButton: $t`Change password`,
             }} schema={{
                 type: 'object',
                 properties: {
                     currentPassword: {
-                        title: 'Current Password',
+                        title: $t`Current Password`,
                         type: 'string',
                         view: 'password'
                     },
                     newPassword: {
-                        title: 'New Password',
+                        title: $t`New Password`,
                         type: 'string',
                         view: 'password'
                     },
                     newPasswordRepeat: {
-                        title: 'New Password (repeat)',
+                        title: $t`New Password (repeat)`,
                         type: 'string',
                         view: 'password'
                     }
@@ -135,27 +136,27 @@
             ]} />
         </div>
 
-        <h2 class="manage-heading1">Delete Account</h2>
+        <h2 class="manage-heading1">{$t`Delete Account`}</h2>
         <div>
-            <div class="mb-4">If you delete your account, you will lose forever access to your DID.</div>
-            <button class="btn btn-error">Delete account</button>
+            <div class="mb-4">{$t`If you delete your account, you will lose forever access to your DID.`}</div>
+            <button class="btn btn-error">{$t`Delete account`}</button>
         </div>
 
     {/if}
 
     {#if selectedTab === 'preferences'}
 
-        <h2 class="manage-heading1">Date & Time</h2>
+        <h2 class="manage-heading1">{$t`Date & Time`}</h2>
         <div class="itembox mt-4">
             <Form item={$datePreferences} onSubmit={submitDatePreferencesForm} config={{
                 bordered: false,
                 user,
-                submitButton: 'Save',
+                submitButton: $t`Save`,
             }} schema={{
                 type: 'object',
                 properties: {
                     hoursFormat: {
-                        title: 'Time format',
+                        title: $t`Time format`,
                         type: 'string',
                         view: 'radio',
                         enum: [
@@ -164,7 +165,7 @@
                         ]
                     },
                     timezone: {
-                        title: 'Timezone',
+                        title: $t`Timezone`,
                         type: 'string',
                     }
                 }

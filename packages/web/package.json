@@ -3,10 +3,11 @@
 	"version": "0.1.0",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "bun run --bun vite build",
 		"preview": "vite preview",
 		"extract": "bun run --bun lingui extract",
-		"compile": "bun run --bun lingui compile --typescript"
+		"compile": "bun run --bun lingui compile --typescript",
+		"lint": "eslint \"src/**/*.{js,svelte}\""
 	},
 	"devDependencies": {
 		"@atproto/xrpc": "^0.5.0",
@@ -33,6 +34,8 @@
 		"date-fns-tz": "^3.1.3",
 		"dompurify": "^3.1.2",
 		"dotenv": "^16.4.5",
+		"eslint": "^9.1.1",
+		"eslint-plugin-svelte": "^2.38.0",
 		"flag-icons": "^7.2.1",
 		"i18n-iso-countries": "^7.11.1",
 		"isomorphic-dompurify": "^2.9.0",
@@ -54,13 +57,11 @@
 		"svelte-purify": "^1.1.22",
 		"tailwindcss": "^3.4.3",
 		"vite": "^5.2.10",
-		"yaml": "^2.4.2"
-	},
-	"license": "MIT",
-	"type": "module",
-	"dependencies": {
+		"yaml": "^2.4.2",
 		"carta-md": "^4.0.1",
 		"nats.ws": "^1.24.0",
 		"svelte-markdown": "^0.4.1"
-	}
+	},
+	"license": "MIT",
+	"type": "module"
 }

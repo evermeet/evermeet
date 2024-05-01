@@ -1,7 +1,9 @@
 <script>
 
     import { createDialog, createCombobox, melt } from '@melt-ui/svelte'
-    import {  MagnifyingGlass } from 'svelte-heros-v2';
+    import { MagnifyingGlass } from 'svelte-heros-v2';
+    import { Ticket, Calendar, Sparkles, PlusCircle, Document, 
+    ArrowLeftStartOnRectangle, ArrowRightEndOnRectangle, Cog6Tooth, Key, CloudArrowDown, ChatBubbleLeftRight } from 'svelte-heros-v2';
 
     import { fade } from 'svelte/transition';
     import { writable } from 'svelte/store';
@@ -11,14 +13,155 @@
     import { goto } from '$app/navigation';
     import CalendarAvatar from './CalendarAvatar.svelte';
     import { browser } from '$app/environment';
-    import { searchItemsBase } from '$lib/search';
+    import { t } from '$lib/i18n';
     
     let miniSearch;
     let miniSearchLoading = false;
-    let data = searchItemsBase()
+    //let data = searchItemsBase($t)
     const q = writable('')
     let suggest = ''
     let results = []
+
+    const data = [
+        {
+            id: 'events',
+            type: 'general',
+            name: $t`Events`,
+            handle: 'events',
+            baseUrl: '/events',
+            icon: Ticket,
+        },
+        {
+            id: 'calendars',
+            type: 'general',
+            name: $t`Calendars`,
+            baseUrl: '/calendars',
+            icon: Calendar,
+        },
+        {
+            id: 'chat',
+            type: 'general',
+            name: $t`Chats`,
+            baseUrl: '/chats',
+            icon: ChatBubbleLeftRight,
+        },
+        {
+            id: 'explore',
+            type: 'general',
+            name: $t`Explore`,
+            baseUrl: '/',
+            icon: Sparkles,
+        },
+        {
+            id: 'create-calendar',
+            type: 'general',
+            name: $t`Create Calendar`,
+            baseUrl: '/create-calendar',
+            icon: PlusCircle,
+            description: $t`Create a new Calendar`,
+            keywords: 'cc c c',
+        },
+        {
+            id: 'create-event',
+            type: 'general',
+            name: $t`Create Event`,
+            baseUrl: '/create',
+            icon: PlusCircle,
+            description: $t`Create a new Event`,
+            keywords: 'ce c e create create',
+        },
+        {
+            id: 'import-events',
+            type: 'general',
+            name: $t`Import Event(s)`,
+            baseUrl: '/import',
+            icon: CloudArrowDown,
+            description: $t`Import one or more events into calendar`,
+            keywords: 'load fetch',
+        },
+        {
+            id: 'documentation',
+            type: 'general',
+            name: $t`Documentation`,
+            baseUrl: 'https://docs.evermeet.app',
+            icon: Document,
+            description: $t`Read documentation of Evermeet`,
+            keywords: 'docs',
+        },
+        {
+            id: 'logout',
+            type: 'general',
+            name: $t`Sign Out`,
+            baseUrl: '/logout',
+            icon: ArrowLeftStartOnRectangle,
+            description: $t`Logout from current session`,
+            keywords: 'lo so logout signout exit',
+        },
+        {
+            id: 'login',
+            type: 'general',
+            name: $t`Sign In`,
+            baseUrl: '/login',
+            icon: ArrowRightEndOnRectangle,
+            description: $t`Login to current instance`,
+            keywords: 'li si sign in log in',
+        },
+        {
+            id: 'settings',
+            type: 'general',
+            name: $t`Settings`,
+            baseUrl: '/me/settings',
+            icon: Cog6Tooth,
+            description: $t`User settings and preferences`,
+            keywords: '',
+        },
+        {
+            id: 'settings-account',
+            type: 'general',
+            name: `${$t`Settings`} → ${$t`Account`}`,
+            baseUrl: '/me/settings/account',
+            icon: Cog6Tooth,
+            description: $t`User account & profile settings`,
+            keywords: 'profile password',
+        },
+        {
+            id: 'action-change-password',
+            type: 'general',
+            name: $t`Change Password`,
+            baseUrl: '/me/settings/account#password',
+            icon: Key,
+            description: $t`Change password`,
+            keywords: 'password',
+        },
+        {
+            id: 'action-update-profile',
+            type: 'general',
+            name: $t`Update Profile`,
+            baseUrl: '/me/settings/account#profile',
+            icon: Cog6Tooth,
+            description: $t`Update public profile or avatar`,
+            keywords: 'image avatar display name description change',
+        },
+        {
+            id: 'settings-preferences',
+            type: 'general',
+            name: `${$t`Settings`} → ${$t`Preferences`}`,
+            baseUrl: '/me/settings/preferences',
+            icon: Cog6Tooth,
+            description: $t`User preference`,
+            keywords: 'timezone tz',
+        },
+        {
+            id: 'settings-security',
+            type: 'general',
+            name: `${$t`Settings`} → ${$t`Security`}`,
+            baseUrl: '/me/settings/security',
+            icon: Cog6Tooth,
+            description: $t`User security options`,
+            keywords: '',
+        },
+    ]
+
 
     onMount(async () => {
         miniSearch = new MiniSearch({
@@ -167,7 +310,7 @@
                 <MagnifyingGlass class="opacity-50" />
                 <input type="input"
                     class="input input-ghost px-1.5 py-0 w-full focus:outline-none focus:border-none text-lg grow"
-                    placeholder="Search Evermeet" 
+                    placeholder={$t`Search ${$t`Evermeet`}`} 
                     on:click|preventDefault={(p) => {
                         setTimeout(() => {
                             console.log('.', $comboOpen)

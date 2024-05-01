@@ -2,6 +2,7 @@
     import { calendarSubscribe, calendarUnsubscribe } from '$lib/actions';
     import { getContext } from 'svelte';
     import CalendarAvatar from './CalendarAvatar.svelte';
+    import { t } from '$lib/i18n';
 
     export let item;
     export let preview = null;
@@ -25,7 +26,7 @@
                     {#if subscribed}
                         <button class="btn btn-sm" on:click|preventDefault={calendarUnsubscribe(c.id)}>Subscribed</button>
                     {:else}
-                        <button class="btn btn-sm btn-secondary opacity-35 hover:opacity-100 duration-200" on:click|preventDefault={calendarSubscribe(c.id)}>Subscribe</button>
+                        <button class="btn btn-sm btn-secondary opacity-35 hover:opacity-100 duration-200" on:click|preventDefault={calendarSubscribe(c.id)}>{$t`Subscribe`}</button>
                     {/if}
                 </div>
             {/if}

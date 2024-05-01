@@ -4,6 +4,7 @@
     import UserAvatar from './UserAvatar.svelte';
     import { blobUrl } from '$lib/api';
     import { Photo, Trash } from 'svelte-heros-v2';
+    import { t } from '$lib/i18n';
 
     import { Carta, MarkdownEditor } from 'carta-md';
 	import 'carta-md/default.css'; /* Default theme */
@@ -91,7 +92,7 @@
             </div>
             <div>
                 <div>
-                    <div>Type: {$formData[row.column] ? 'Custom' : 'Automatically generated'}</div>
+                    <div>{$t`Type`}: {$formData[row.column] ? $t`Custom` : $t`Automatically generated`}</div>
                     {#if $formData[row.column] && typeof($formData[row.column]) === 'object'}
                         <div class="mt-2 text-sm text-base-content/50">
                             <div>Mime Type: {$formData[row.column]?.data?.mimeType}</div>
@@ -105,9 +106,9 @@
                 </div>
                 <div class="mt-2">
                     {#if $formData[row.column]}
-                        <button type="button" class="btn btn-sm" on:click|preventDefault={image_onRemove}><Trash class="outline-none" size="15" /> Remove image</button>
+                        <button type="button" class="btn btn-sm" on:click|preventDefault={image_onRemove}><Trash class="outline-none" size="15" /> {$t`Remove image`}</button>
                     {:else}
-                        <button type="button" class="btn btn-sm btn-primary" on:click|preventDefault={() => document.getElementById(row.title).click()}>Add image</button>
+                        <button type="button" class="btn btn-sm btn-primary" on:click|preventDefault={() => document.getElementById(row.title).click()}>{$t`Add image`}</button>
                     {/if}
                 </div>
             </div>

@@ -13,22 +13,23 @@
     import Chat from './Chat.svelte';
     import ChatRoomSelect from './ChatRoomSelect.svelte';
     import { imgBlobUrl } from '$lib/api';
+    import { t } from '$lib/i18n';
     
     export let item
     export let selectedTab
     export let params = {}
 
     let tabs = [
-        { id: null, name: 'Events', ico: CalendarDays, bubble: item.events.length },
-        { id: 'concepts', name: 'Drafts', ico: Inbox, bubble: item.concepts.length, bubbleAccent: true },
-        { id: 'talks', name: 'Talks', ico: PresentationChartBar },
-        { id: 'contributors', name: 'People', ico: Users },
+        { id: null, name: $t`Events`, ico: CalendarDays, bubble: item.events.length },
+        { id: 'concepts', name: $t`Drafts`, ico: Inbox, bubble: item.concepts.length, bubbleAccent: true },
+        { id: 'talks', name: $t`Talks`, ico: PresentationChartBar },
+        { id: 'contributors', name: $t`People`, ico: Users },
         //{ id: 'about', name: 'About' },
-        { id: 'feed', name: 'Feed', ico: QueueList },
+        { id: 'feed', name: $t`Feed`, ico: QueueList },
     ]
 
     if (item.rooms && item.rooms.length > 0) {
-        tabs.push({ id: 'chat', name: 'Chat', ico: ChatBubbleLeft })
+        tabs.push({ id: 'chat', name: $t`Chat`, ico: ChatBubbleLeft })
     }
 
     $: subscribed = $user?.calendarSubscriptions?.find(sc => sc.ref === item.did)
@@ -76,15 +77,15 @@
                     <a href="/manage/calendar/{item.id}" class="btn btn-accent">Manage</a>
                 {:else}
                     {#if subscribed}
-                        <button class="btn btn-neutral" on:click={calendarUnsubscribe(item.id)}>Subscribed</button>
+                        <button class="btn btn-neutral" on:click={calendarUnsubscribe(item.id)}>{$t`Subscribed`}</button>
                     {:else}
-                        <button class="btn btn-secondary" on:click={calendarSubscribe(item.id)}>Subscribe</button>
+                        <button class="btn btn-secondary" on:click={calendarSubscribe(item.id)}>{$t`Subscribe`}</button>
                     {/if}
                 {/if}
             </div>
         {:else}
             <div>
-                <a href="/login?next={encodeURIComponent($page.url)}" class="btn btn-secondary">Subscribe</a>
+                <a href="/login?next={encodeURIComponent($page.url)}" class="btn btn-secondary">{$t`Subscribe`}</a>
             </div>
         {/if}
     </div>
@@ -136,14 +137,14 @@
 
 {#if selectedTab === "feed"}
     <div class="page-wide">
-        <h2 class="text-2xl font-medium mt-6">Feed</h2>
+        <h2 class="text-2xl font-medium mt-6">{$t`Feed`}</h2>
 
     </div>
 
 {:else if selectedTab === 'concepts'}
 
     <div class="page-wide">
-        <h2 class="text-2xl font-medium mt-6">Event Concepts</h2>
+        <h2 class="text-2xl font-medium mt-6">{$t`Event Concepts`}</h2>
 
         <div class="mt-6">
             {#each item.concepts as event}
@@ -155,7 +156,7 @@
 {:else if selectedTab === 'contributors'}
 
     <div class="page-wide">
-        <h2 class="text-2xl font-medium mt-6">Speakers</h2>
+        <h2 class="text-2xl font-medium mt-6">{$t`Speakers`}</h2>
 
         <div class="mt-6">
             Contributors
@@ -173,7 +174,7 @@
 
 {:else if selectedTab === null}
     <div class="page-wide">
-        <h2 class="text-2xl font-medium mt-6">Planned Events</h2>
+        <h2 class="text-2xl font-medium mt-6">{$t`Planned Events`}</h2>
 
         <div class="mt-6">
             <EventList events={item.events} />

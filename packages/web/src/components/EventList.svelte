@@ -1,8 +1,7 @@
 <script>
-    import { format } from 'date-fns'
+    import { format } from '$lib/date'
     import EventBox from './EventBox.svelte';
     export let events;
-
 
     function enhanced (arr) {
         for (const e of arr) {

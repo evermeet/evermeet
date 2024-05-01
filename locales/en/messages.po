@@ -13,36 +13,330 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/SearchDialog.svelte:121
+#: src/components/UserSettings.svelte:63
+msgid "Account"
+msgstr "Account"
+
+#: src/components/FormItem.svelte:111
+msgid "Add image"
+msgstr "Add image"
+
+#: src/components/UserMenu.svelte:56
+msgid "Administration"
+msgstr "Administration"
+
+#: src/components/SearchDialog.svelte:171
+#~ msgid "appName"
+#~ msgstr "appName"
+
+#: src/components/FormItem.svelte:95
+msgid "Automatically generated"
+msgstr "Automatically generated"
+
 #: src/routes/create-calendar/+page.svelte:199
 msgid "Calendar Name"
 msgstr "Calendar Name"
 
-#: src/routes/+layout.svelte:32
+#: src/components/SearchDialog.svelte:37
+#: src/routes/+layout.svelte:35
+#: src/routes/calendars/+page.svelte:19
 msgid "Calendars"
 msgstr "Calendars"
 
-#: src/routes/+layout.svelte:37
+#: src/components/SearchDialog.svelte:133
+#: src/components/UserSettings.svelte:112
+msgid "Change password"
+msgstr "Change password"
+
+#: src/components/SearchDialog.svelte:130
+msgid "Change Password"
+msgstr "Change Password"
+
+#: src/components/CalendarDetail.svelte:32
+msgid "Chat"
+msgstr "Chat"
+
+#: src/components/SearchDialog.svelte:44
+#: src/routes/+layout.svelte:40
 msgid "Chats"
 msgstr "Chats"
 
+#: src/components/SearchDialog.svelte:61
+msgid "Create a new Calendar"
+msgstr "Create a new Calendar"
+
+#: src/components/SearchDialog.svelte:70
+msgid "Create a new Event"
+msgstr "Create a new Event"
+
+#: src/components/SearchDialog.svelte:58
 #: src/routes/calendars/+page.svelte:24
 #: src/routes/create-calendar/+page.svelte:134
 #: src/routes/create-calendar/+page.svelte:218
 msgid "Create Calendar"
 msgstr "Create Calendar"
 
-#: src/routes/+layout.svelte:124
+#: src/components/SearchDialog.svelte:67
+#: src/routes/+layout.svelte:125
 msgid "Create Event"
 msgstr "Create Event"
 
-#: src/routes/+layout.svelte:27
+#: src/components/UserSettings.svelte:117
+msgid "Current Password"
+msgstr "Current Password"
+
+#: src/components/FormItem.svelte:95
+msgid "Custom"
+msgstr "Custom"
+
+#: src/components/UserSettings.svelte:149
+msgid "Date & Time"
+msgstr "Date & Time"
+
+#: src/components/UserSettings.svelte:142
+msgid "Delete account"
+msgstr "Delete account"
+
+#: src/components/UserSettings.svelte:139
+msgid "Delete Account"
+msgstr "Delete Account"
+
+#: src/components/UserSettings.svelte:95
+msgid "Description"
+msgstr "Description"
+
+#: src/components/UserSettings.svelte:85
+msgid "Display Name"
+msgstr "Display Name"
+
+#: src/routes/+layout.svelte:154
+#~ msgid "docs"
+#~ msgstr "docs"
+
+#: src/components/SearchDialog.svelte:85
+msgid "Documentation"
+msgstr "Documentation"
+
+#: src/components/CalendarDetail.svelte:24
+msgid "Drafts"
+msgstr "Drafts"
+
+#: src/components/CalendarDetail.svelte:147
+msgid "Event Concepts"
+msgstr "Event Concepts"
+
+#: src/components/CalendarDetail.svelte:23
+#: src/components/SearchDialog.svelte:29
+#: src/routes/+layout.svelte:30
+#: src/routes/events/+page.svelte:10
 msgid "Events"
 msgstr "Events"
 
-#: src/routes/+layout.svelte:42
+#: src/components/SearchDialog.svelte:313
+msgid "Evermeet"
+msgstr "Evermeet"
+
+#: src/components/SearchDialog.svelte:51
+#: src/routes/+layout.svelte:45
 msgid "Explore"
 msgstr "Explore"
 
-#: src/routes/+layout.svelte:126
+#: src/routes/+layout.svelte:127
 msgid "Explore events"
 msgstr "Explore events"
+
+#: src/components/CalendarDetail.svelte:140
+#: src/components/CalendarDetail.svelte:28
+msgid "Feed"
+msgstr "Feed"
+
+#: src/components/UserSettings.svelte:70
+msgid "Handle"
+msgstr "Handle"
+
+#: src/components/UserSettings.svelte:141
+msgid "If you delete your account, you will lose forever access to your DID."
+msgstr "If you delete your account, you will lose forever access to your DID."
+
+#: src/components/SearchDialog.svelte:76
+msgid "Import Event(s)"
+msgstr "Import Event(s)"
+
+#: src/components/SearchDialog.svelte:79
+msgid "Import one or more events into calendar"
+msgstr "Import one or more events into calendar"
+
+#: src/components/SearchDialog.svelte:106
+msgid "Login to current instance"
+msgstr "Login to current instance"
+
+#: src/components/SearchDialog.svelte:97
+msgid "Logout from current session"
+msgstr "Logout from current session"
+
+#: src/routes/calendars/+page.svelte:22
+msgid "My Calendars"
+msgstr "My Calendars"
+
+#: src/components/UserMenu.svelte:55
+msgid "My profile"
+msgstr "My profile"
+
+#: src/components/UserSettings.svelte:122
+msgid "New Password"
+msgstr "New Password"
+
+#: src/components/UserSettings.svelte:127
+msgid "New Password (repeat)"
+msgstr "New Password (repeat)"
+
+#: src/components/UserSettings.svelte:107
+msgid "Password"
+msgstr "Password"
+
+#: src/routes/events/+page.svelte:14
+msgid "Past"
+msgstr "Past"
+
+#: src/components/CalendarDetail.svelte:26
+msgid "People"
+msgstr "People"
+
+#: src/components/CalendarDetail.svelte:177
+msgid "Planned Events"
+msgstr "Planned Events"
+
+#: src/components/SearchDialog.svelte:148
+#: src/components/UserSettings.svelte:64
+msgid "Preferences"
+msgstr "Preferences"
+
+#: src/components/UserSettings.svelte:90
+msgid "Profile Image (avatar)"
+msgstr "Profile Image (avatar)"
+
+#: src/components/UserSettings.svelte:75
+msgid "Public Profile"
+msgstr "Public Profile"
+
+#: src/components/SearchDialog.svelte:88
+msgid "Read documentation of Evermeet"
+msgstr "Read documentation of Evermeet"
+
+#: src/components/FormItem.svelte:109
+msgid "Remove image"
+msgstr "Remove image"
+
+#: src/components/UserSettings.svelte:154
+msgid "Save"
+msgstr "Save"
+
+#: src/components/UserSettings.svelte:80
+msgid "Save profile"
+msgstr "Save profile"
+
+#: src/components/SearchDialog.svelte:313
+msgid "Search {0}"
+msgstr "Search {0}"
+
+#: src/components/SearchDialog.svelte:157
+#: src/components/UserSettings.svelte:65
+msgid "Security"
+msgstr "Security"
+
+#: src/components/SearchDialog.svelte:112
+#: src/components/SearchDialog.svelte:121
+#: src/components/SearchDialog.svelte:148
+#: src/components/SearchDialog.svelte:157
+#: src/components/UserMenu.svelte:57
+#: src/components/UserSettings.svelte:61
+msgid "Settings"
+msgstr "Settings"
+
+#: src/components/SearchDialog.svelte:103
+msgid "Sign In"
+msgstr "Sign In"
+
+#: src/components/SearchDialog.svelte:94
+#: src/components/UserMenu.svelte:58
+msgid "Sign Out"
+msgstr "Sign Out"
+
+#: src/components/CalendarDetail.svelte:159
+msgid "Speakers"
+msgstr "Speakers"
+
+#: src/components/CalendarBox.svelte:29
+#: src/components/CalendarDetail.svelte:82
+#: src/components/CalendarDetail.svelte:88
+msgid "Subscribe"
+msgstr "Subscribe"
+
+#: src/components/CalendarDetail.svelte:80
+msgid "Subscribed"
+msgstr "Subscribed"
+
+#: src/routes/calendars/+page.svelte:37
+msgid "Subscribed Calendars"
+msgstr "Subscribed Calendars"
+
+#: src/components/CalendarDetail.svelte:25
+msgid "Talks"
+msgstr "Talks"
+
+#: src/components/UserSettings.svelte:159
+msgid "Time format"
+msgstr "Time format"
+
+#: src/components/UserSettings.svelte:168
+msgid "Timezone"
+msgstr "Timezone"
+
+#: src/components/FormItem.svelte:95
+msgid "Type"
+msgstr "Type"
+
+#: src/routes/events/+page.svelte:12
+msgid "Upcoming"
+msgstr "Upcoming"
+
+#: src/routes/calendars/+page.svelte:53
+msgid "Upcoming Events"
+msgstr "Upcoming Events"
+
+#: src/components/UserSettings.svelte:112
+#~ msgid "Update password"
+#~ msgstr "Update password"
+
+#: src/components/SearchDialog.svelte:139
+msgid "Update Profile"
+msgstr "Update Profile"
+
+#: src/components/SearchDialog.svelte:142
+msgid "Update public profile or avatar"
+msgstr "Update public profile or avatar"
+
+#: src/components/SearchDialog.svelte:124
+msgid "User account & profile settings"
+msgstr "User account & profile settings"
+
+#: src/components/SearchDialog.svelte:151
+msgid "User preference"
+msgstr "User preference"
+
+#: src/components/SearchDialog.svelte:160
+msgid "User security options"
+msgstr "User security options"
+
+#: src/components/SearchDialog.svelte:115
+msgid "User settings and preferences"
+msgstr "User settings and preferences"
+
+#: src/routes/calendars/+page.svelte:50
+msgid "View calendar"
+msgstr "View calendar"
+
+#: src/components/UserSettings.svelte:72
+msgid "Your handle"
+msgstr "Your handle"

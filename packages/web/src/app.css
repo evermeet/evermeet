@@ -73,13 +73,12 @@
     .popup-menu li {
         @apply rounded-lg mx-1.5 data-[highlighted]:bg-base-content/10;
     }
-    .popup-menu li a {
-        @apply px-[1rem] py-[0.5rem] cursor-pointer flex items-center;
+    .popup-menu li a, .popup-menu li > button {
+        @apply w-full px-[1rem] py-[0.5rem] cursor-pointer flex items-center;
     }
     .popup-menu li .item {
         @apply px-[1rem] py-[0.5rem] cursor-pointer;
     }
-
     .manage-heading1 {
         @apply text-2xl font-semibold mt-8 mb-4;
     }

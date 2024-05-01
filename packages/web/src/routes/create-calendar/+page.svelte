@@ -9,7 +9,7 @@
     import CalendarAvatar from '../../components/CalendarAvatar.svelte';
     import VisibilitySelector from '../../components/VisibilitySelector.svelte';
     import { getContext, onMount } from 'svelte';
-    import { t } from 'svelte-i18n-lingui';
+    import { t } from '$lib/i18n';
 
     const user = getContext('user')
     const item = writable({ visibility: 'public' })

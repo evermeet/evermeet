@@ -1,8 +1,9 @@
 import { xrpcCall } from '$lib/api.js';
 import { loadConfig } from '$lib/config.js';
-import { t, locale } from 'svelte-i18n-lingui';
+import { t, locale } from '$lib/i18n';
+//import * as dateLocales from "date-fns/locale";
 
-export async function load({ fetch, cookies }) {
+export async function load({ fetch, cookies, request: { headers} }) {
 
     const config = await loadConfig();
     let user = false;
@@ -22,16 +23,17 @@ export async function load({ fetch, cookies }) {
             console.error(e)
         }
     }
-    const lang = "cs"
+    //"pseudo-LOCALE"
+    const lang = headers.get('accept-language') || 'en'
     const { messages } = await import(`../../../../locales/${lang}/messages.ts`)
-    locale.set(lang, messages)    
 
     return {
         user,
         config,
         locale: {
             lang,
-            messages
+            messages,
+            //date: dateLocales[lang],
         }
     }
 }

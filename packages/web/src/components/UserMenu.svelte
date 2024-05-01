@@ -7,6 +7,7 @@
     import { createDropdownMenu, melt } from '@melt-ui/svelte';
     import { writable } from 'svelte/store';
     import { fly } from 'svelte/transition';
+    import { t } from '$lib/i18n';
     
     import UserAvatar from './UserAvatar.svelte';
 
@@ -51,14 +52,13 @@
             </div>
 
         </li>
-        <li use:melt={$item}><a href="/me">My profile</a></li>
-        <li use:melt={$item}><a href="/admin">Administration</a></li>
-        <li use:melt={$item}><a href="/me/settings">Settings</a></li>
-        <li use:melt={$item}><a alt="Sign Out" on:click|preventDefault={doLogout}>Sign Out</a></li>
+        <li use:melt={$item}><a href="/me">{$t`My profile`}</a></li>
+        <li use:melt={$item}><a href="/admin">{$t`Administration`}</a></li>
+        <li use:melt={$item}><a href="/me/settings">{$t`Settings`}</a></li>
+        <li use:melt={$item}><button type="submit" alt="Sign Out" on:click|preventDefault={doLogout}>{$t`Sign Out`}</button></li>
     </ul>
 {/if}
 
 
     <!--ul tabindex="0" class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box w-44">
-
     </ul-->

@@ -7,13 +7,12 @@
     import { pkg } from '../lib/config.js';
     import { page } from '$app/stores';
     import { config, socket } from '$lib/stores';
-    import { t, locale } from 'svelte-i18n-lingui';
+    import { t, locale } from '$lib/i18n';
 
     import CurrentTime from "../components/CurrentTime.svelte";
     import UserMenu from "../components/UserMenu.svelte";
     import SearchDialog from "../components/SearchDialog.svelte";
     import { onMount, setContext } from "svelte";
-
     import { connect, StringCodec } from "nats.ws";
 
     const { data } = $props()
@@ -21,6 +20,10 @@
 
     const user = data.user
     setContext("user", user)
+
+    const { lang, messages } = data.locale
+    locale.set(lang, messages)
+    setContext("locale", data.locale)
 
     const menu = [
         {
@@ -52,8 +55,6 @@
 
     onMount(async () => {
 
-        const { lang, messages } = data.locale
-        locale.set(lang, messages)
 
         const nc = await connect({
             servers: ["ws://127.0.0.1:4223"]
@@ -107,7 +108,7 @@
                     <li class="group">
                         <a href={mi.url} class="{(mi.url === '/' ? $page.url.pathname === '/' : $page.url.pathname.match(new RegExp("^"+mi.url))) ? 'active' : ''} flex group-hover:gap-1.5 gap-0">
                             <div><svelte:component this={mi.ico} tabindex="-1" class="outline-none" /></div>
-                            <div class="group-hover:block group-hover:w-16 group-hover:opacity-100 w-0 h-auto opacity-0 transition-all outline-none">{mi.title}</div>
+                            <div class="group-hover:block group-hover:w-20 group-hover:opacity-100 w-0 h-auto opacity-0 transition-all outline-none">{mi.title}</div>
                         </a>
                     </li>
                 {/each}

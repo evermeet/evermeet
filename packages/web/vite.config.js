@@ -10,7 +10,7 @@ export default defineConfig({
 	build: {
 		commonjsOptions: {
 			dynamicRequireTargets: [
-				'langs/*.json'
+				'langs/*.json',
 			]
 		}
 	}

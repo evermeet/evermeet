@@ -1,5 +1,5 @@
 export async function load({ params, fetch }) {
-	return {
-        tab: params.tab,
-    }
+  return {
+    tab: params.tab,
+  };
 }

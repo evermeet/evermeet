@@ -1,7 +1,7 @@
 <script>
-    import Admin from "../../../components/Admin.svelte";
+  import Admin from "../../../components/Admin.svelte";
 
-    export let data;
+  export let data;
 </script>
 
 <Admin selectedTab={data.tab} />

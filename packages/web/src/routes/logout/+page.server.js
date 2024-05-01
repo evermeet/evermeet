@@ -1,4 +1,3 @@
-
 export function load({ locals, cookies }) {
-    cookies.delete('evermeet-session-id', { path: '/' });
+  cookies.delete("evermeet-session-id", { path: "/" });
 }

@@ -1,61 +1,56 @@
 <script>
-    import { format } from 'date-fns';
-    import { createDatePicker, melt } from '@melt-ui/svelte';
-    import { ChevronRight, ChevronLeft, Calendar } from 'svelte-heros-v2';
-    import { CalendarDate } from '@internationalized/date';
+  import { format } from "date-fns";
+  import { createDatePicker, melt } from "@melt-ui/svelte";
+  import { ChevronRight, ChevronLeft, Calendar } from "svelte-heros-v2";
+  import { CalendarDate } from "@internationalized/date";
 
-    import { fade } from 'svelte/transition';
+  import { fade } from "svelte/transition";
 
-    export let bind;
+  export let bind;
 
-    const {
-      elements: {
-        calendar,
-        cell,
-        content,
-        field,
-        grid,
-        heading,
-        label,
-        nextButton,
-        prevButton,
-        segment,
-        trigger,
-      },
-      states: { months, headingValue, weekdays, segmentContents, open },
-      helpers: { isDateDisabled, isDateUnavailable },
-      options: { locale },
-    } = createDatePicker({
-      locale: 'en-GB',
-      forceVisible: true,
-      defaultValue: new CalendarDate(2024, 1, 11),
-      preventDeselect: true,
-    });
+  const {
+    elements: {
+      calendar,
+      cell,
+      content,
+      field,
+      grid,
+      heading,
+      label,
+      nextButton,
+      prevButton,
+      segment,
+      trigger,
+    },
+    states: { months, headingValue, weekdays, segmentContents, open },
+    helpers: { isDateDisabled, isDateUnavailable },
+    options: { locale },
+  } = createDatePicker({
+    locale: "en-GB",
+    forceVisible: true,
+    defaultValue: new CalendarDate(2024, 1, 11),
+    preventDeselect: true,
+  });
 </script>
-
 
 <div class="h-8 -mt-1 -mb-1 bg-base-300 rounded flex items-center w-[10rem]">
   <div use:melt={$field} class="">
     {#key $locale}
-        {#each $segmentContents as seg}
-          <div use:melt={$segment(seg.part)}>
-            {seg.value}
-          </div>
-        {/each} 
-      {/key}
-      <div class="grow w-full justify-end">
-        <button use:melt={$trigger}>
-          <Calendar size={16} />
-        </button>
-      </div>
+      {#each $segmentContents as seg}
+        <div use:melt={$segment(seg.part)}>
+          {seg.value}
+        </div>
+      {/each}
+    {/key}
+    <div class="grow w-full justify-end">
+      <button use:melt={$trigger}>
+        <Calendar size={16} />
+      </button>
+    </div>
   </div>
 
   {#if $open}
-    <div
-      transition:fade={{ duration: 100 }}
-      use:melt={$content}
-      class=""
-    >
+    <div transition:fade={{ duration: 100 }} use:melt={$content} class="">
       <div use:melt={$calendar}>
         <header>
           <button use:melt={$prevButton}>
@@ -108,7 +103,6 @@
 </div>
 
 <style lang="postcss">
-
   [data-melt-datefield-field] div:last-of-type {
     @apply ml-4 flex w-full;
   }
@@ -141,7 +135,7 @@
     @apply text-red-500;
   }
 
-  [data-melt-datefield-segment]:not([data-segment='literal']) {
+  [data-melt-datefield-segment]:not([data-segment="literal"]) {
     @apply px-0.5;
   }
 

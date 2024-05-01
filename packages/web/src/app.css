@@ -3,83 +3,83 @@
 @tailwind utilities;
 
 :root {
-    --max-width: 820px;
-    --max-width-wide-page: 960px;
-    --max-width-extra-wide-page: 1080px;
+  --max-width: 820px;
+  --max-width-wide-page: 960px;
+  --max-width-extra-wide-page: 1080px;
 }
 
 @layer components {
+  .page-wide {
+    @apply max-w-[--max-width-wide-page] mx-auto mt-4 px-4;
+  }
+  .page-extra-wide {
+    @apply max-w-[--max-width-extra-wide-page] mx-auto px-4;
+  }
 
-    .page-wide {
-        @apply max-w-[--max-width-wide-page] mx-auto mt-4 px-4;
-    }
-    .page-extra-wide {
-        @apply max-w-[--max-width-extra-wide-page] mx-auto px-4;
-    }
+  .page-full {
+    @apply mx-auto px-4;
+  }
 
-    .page-full {
-        @apply mx-auto px-4;
-    }
+  .itembox {
+    @apply border border-neutral/15 bg-base-300 rounded-lg py-5 px-4 transition-all duration-0;
+  }
+  .itembox-hover {
+    @apply hover:border-neutral/50;
+  }
 
-    .itembox {
-        @apply border border-neutral/15 bg-base-300 rounded-lg py-5 px-4 transition-all duration-0;
-    }
-    .itembox-hover {
-        @apply hover:border-neutral/50;
-    }
+  .itembox.no-padding {
+    @apply py-0 px-0;
+  }
 
-    .itembox.no-padding {
-        @apply py-0 px-0;
-    }
+  .xtabs {
+    @apply flex items-end gap-2;
+  }
 
-    .xtabs {
-        @apply flex items-end gap-2;
-    }
+  .xtabs > a {
+    @apply py-2 px-2 text-base-content/75 hover:text-base-content hover:bg-base-300 rounded-t-lg;
+  }
+  .xtabs > a.active {
+    @apply border-2 border-t-0 border-l-0 border-r-0 text-base-content;
+  }
 
-    .xtabs > a {
-        @apply py-2 px-2 text-base-content/75 hover:text-base-content hover:bg-base-300 rounded-t-lg;
-    }
-    .xtabs > a.active {
-        @apply border-2 border-t-0 border-l-0 border-r-0 text-base-content;
-    }
+  .form > div:not(:last-child) {
+    @apply mb-4;
+  }
+  .form label {
+    @apply block font-semibold mb-2;
+  }
 
-    .form > div:not(:last-child) {
-        @apply mb-4;
-    }
-    .form label {
-        @apply block font-semibold mb-2;
-    }
+  .settings hr {
+    @apply border-neutral mt-8;
+  }
 
-    .settings hr {
-        @apply border-neutral mt-8;
-    }
+  .heading1 {
+    @apply text-3xl font-semibold mb-6;
+  }
+  .heading1.no-margin {
+    @apply mb-0;
+  }
+  .heading2 {
+    @apply text-xl font-semibold mb-3;
+  }
+  .heading2.no-margin {
+    @apply mb-0;
+  }
 
-    .heading1 {
-        @apply text-3xl font-semibold mb-6;
-    }
-    .heading1.no-margin {
-        @apply mb-0;
-    }
-    .heading2 {
-        @apply text-xl font-semibold mb-3;
-    }
-    .heading2.no-margin {
-        @apply mb-0;
-    }
-
-    .popup-menu {
-        @apply z-[1] bg-base-300 rounded-lg py-1.5;
-    }
-    .popup-menu li {
-        @apply rounded-lg mx-1.5 data-[highlighted]:bg-base-content/10;
-    }
-    .popup-menu li a, .popup-menu li > button {
-        @apply w-full px-[1rem] py-[0.5rem] cursor-pointer flex items-center;
-    }
-    .popup-menu li .item {
-        @apply px-[1rem] py-[0.5rem] cursor-pointer;
-    }
-    .manage-heading1 {
-        @apply text-2xl font-semibold mt-8 mb-4;
-    }
+  .popup-menu {
+    @apply z-[1] bg-base-300 rounded-lg py-1.5;
+  }
+  .popup-menu li {
+    @apply rounded-lg mx-1.5 data-[highlighted]:bg-base-content/10;
+  }
+  .popup-menu li a,
+  .popup-menu li > button {
+    @apply w-full px-[1rem] py-[0.5rem] cursor-pointer flex items-center;
+  }
+  .popup-menu li .item {
+    @apply px-[1rem] py-[0.5rem] cursor-pointer;
+  }
+  .manage-heading1 {
+    @apply text-2xl font-semibold mt-8 mb-4;
+  }
 }

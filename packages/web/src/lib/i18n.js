@@ -1,1 +1,1 @@
-export * from 'svelte-i18n-lingui'
+export * from "svelte-i18n-lingui";

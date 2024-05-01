@@ -1,8 +1,7 @@
-
-import { apiCall } from '../../lib/api.js';
+import { apiCall } from "../../lib/api.js";
 
 export function load({ params, fetch }) {
-	return {
-		events: []
-	} //apiCall(fetch, `events`);
+  return {
+    events: [],
+  }; //apiCall(fetch, `events`);
 }

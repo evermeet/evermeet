@@ -3,6 +3,11 @@ import { loadConfig } from "$lib/config.js";
 import { t, locale } from "$lib/i18n";
 //import * as dateLocales from "date-fns/locale";
 
+const supportedLanguages = {
+  cs: "Česky",
+  en: "English",
+};
+
 export async function load({ fetch, cookies, request: { headers } }) {
   const config = await loadConfig();
   let user = false;
@@ -28,8 +33,20 @@ export async function load({ fetch, cookies, request: { headers } }) {
     }
   }
   //"pseudo-LOCALE"
-  const lang = headers.get("accept-language") || "en";
-  const { messages } = await import(`../../../../locales/${lang}/messages.ts`);
+  const lang =
+    headers.get("accept-language")?.split(";")[0].split(",")[0] || "en";
+
+  let langFile = lang;
+  if (lang.substring(0, 2) === "en") {
+    langFile = "en";
+  }
+  if (!supportedLanguages[langFile]) {
+    langFile = "en";
+  }
+
+  const { messages } = await import(
+    `../../../../locales/${langFile}/messages.ts`
+  );
 
   return {
     user,

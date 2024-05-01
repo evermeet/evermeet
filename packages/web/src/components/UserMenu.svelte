@@ -44,7 +44,7 @@
 
 {#if $open}
   <ul
-    class="popup-menu text-sm max-w-96"
+    class="popup-menu text-sm max-w-96 z-50"
     use:melt={$menu}
     transition:fly={{ duration: 150, y: -10 }}
   >

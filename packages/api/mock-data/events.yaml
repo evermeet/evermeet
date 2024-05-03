@@ -71,6 +71,18 @@
       enabled: true
 
 - calendarId: 2e9e2199afca02
+  did: "did:plc:xxxxxxxxxxxx"
+  config:
+    slug: "24"
+    name: ETHPrague 2024
+    dateStart: 2024-05-31T12:00
+    dateEnd:  2024-06-02T15:00
+    placeName: TBD
+    placeCountry: cz
+    placeCity: Prague
+    img: https://pbs.twimg.com/profile_images/1761793077302157312/ZWMuqBeG_400x400.jpg
+
+- calendarId: 2e9e2199afca02
   concept: true
   did: "did:plc:34239992399"
   config:
@@ -83,12 +95,26 @@
     placeCountry: de
     placeCity: Berlin
 
+- calendarId: 2e9e2199afca02
+  config:
+    slug: m24dc
+    name: W3PN Meetup @ Devcon 7
+    dateStart: 2024-11-11T08:00Z
+    dateEnd: 2024-11-11T14:00Z
+    placeCountry: th
+    placeCity: Bangkok
+    img: https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,quality=75,width=400,height=400/event-covers/uq/487a6e04-6d50-4f50-8aa8-8148c7a807c4
+    description: |
+      Test text
+      http://localhost:3001/monerokon.org:2024
+    timezone: Asia/Bangkok
+
 - calendarId: b52cab85781d88
   config:
     slug: ethberlin4
     name: ETHBerlin04
-    dateStart: 2024-05-24T12:00
-    dateEnd: 2024-05-26T12:00
+    dateStart: 2024-05-24T17:00
+    dateEnd: 2024-05-26T20:00
     placeName: TBD (Kreuzberg)
     placeCountry: de
     placeCity: Berlin
@@ -166,8 +192,8 @@
   config:
     slug: 3
     name: ETHBrno 2024
-    dateStart: 2024-10-25T12:00
-    dateEnd: 2024-10-27T15:00
+    dateStart: 2024-10-25T14:00
+    dateEnd: 2024-10-27T19:00
     placeName: TBD
     placeCity: Brno
     placeCountry: cz

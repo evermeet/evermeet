@@ -1,12 +1,7 @@
 import { xrpcCall } from "$lib/api.js";
 import { loadConfig } from "$lib/config.js";
-import { t, locale } from "$lib/i18n";
+import { t, locale, detectLanguage } from "$lib/i18n";
 //import * as dateLocales from "date-fns/locale";
-
-const supportedLanguages = {
-  cs: "Česky",
-  en: "English",
-};
 
 export async function load({ fetch, cookies, request: { headers } }) {
   const config = await loadConfig();
@@ -33,16 +28,9 @@ export async function load({ fetch, cookies, request: { headers } }) {
     }
   }
   //"pseudo-LOCALE"
-  const lang =
-    headers.get("accept-language")?.split(";")[0].split(",")[0] || "en";
-
-  let langFile = lang;
-  if (lang.substring(0, 2) === "en") {
-    langFile = "en";
-  }
-  if (!supportedLanguages[langFile]) {
-    langFile = "en";
-  }
+  const { lang, langFile } = detectLanguage(
+    headers.get("accept-language")?.split(";")[0].split(",")[0],
+  );
 
   const { messages } = await import(
     `../../../../locales/${langFile}/messages.ts`

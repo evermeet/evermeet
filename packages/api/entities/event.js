@@ -13,12 +13,16 @@ export const EventConfig = new EntitySchema({
       type: 'string'
     },
     dateStart: {
-      type: 'string',
+      type: 'date',
       format: 'datetime'
     },
     dateEnd: {
-      type: 'strnig',
+      type: 'date',
       format: 'datetime'
+    },
+    timezone: {
+      type: 'string',
+      nullable: true,
     },
     img: {
       type: 'string',

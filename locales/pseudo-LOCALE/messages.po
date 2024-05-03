@@ -13,6 +13,14 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/EventDetail.svelte:174
+msgid "A confirmation email has been sent to your email."
+msgstr ""
+
+#: src/components/EventDetail.svelte:217
+msgid "About Event"
+msgstr ""
+
 #: src/components/SearchDialog.svelte:131
 #: src/components/UserSettings.svelte:73
 msgid "Account"
@@ -35,9 +43,13 @@ msgid "Calendar Name"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:47
-#: src/routes/+layout.svelte:44
+#: src/routes/+layout.svelte:46
 #: src/routes/calendars/+page.svelte:18
 msgid "Calendars"
+msgstr ""
+
+#: src/components/EventDetail.svelte:180
+msgid "canceling your registration"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:143
@@ -54,8 +66,12 @@ msgid "Chat"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:54
-#: src/routes/+layout.svelte:49
+#: src/routes/+layout.svelte:51
 msgid "Chats"
+msgstr ""
+
+#: src/components/EventDetail.svelte:115
+msgid "Contact the host"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:71
@@ -74,7 +90,7 @@ msgid "Create Calendar"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:77
-#: src/routes/+layout.svelte:158
+#: src/routes/+layout.svelte:160
 msgid "Create Event"
 msgstr ""
 
@@ -102,12 +118,24 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#: src/components/HandleBadge.svelte:61
+msgid "DID"
+msgstr ""
+
 #: src/components/UserSettings.svelte:99
 msgid "Display Name"
 msgstr ""
 
+#: src/components/HandleBadge.svelte:73
+msgid "DNS Record (proof)"
+msgstr ""
+
 #: src/components/SearchDialog.svelte:95
 msgid "Documentation"
+msgstr ""
+
+#: src/components/HandleBadge.svelte:58
+msgid "Domain"
 msgstr ""
 
 #: src/components/CalendarDetail.svelte:43
@@ -120,7 +148,7 @@ msgstr ""
 
 #: src/components/CalendarDetail.svelte:37
 #: src/components/SearchDialog.svelte:39
-#: src/routes/+layout.svelte:39
+#: src/routes/+layout.svelte:41
 #: src/routes/events/+page.svelte:9
 msgid "Events"
 msgstr ""
@@ -130,13 +158,13 @@ msgid "Evermeet"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:61
-#: src/routes/+layout.svelte:54
+#: src/routes/+layout.svelte:56
 #: src/routes/+page.svelte:12
 #: src/routes/+page.svelte:16
 msgid "Explore"
 msgstr ""
 
-#: src/routes/+layout.svelte:160
+#: src/routes/+layout.svelte:162
 msgid "Explore events"
 msgstr ""
 
@@ -177,6 +205,10 @@ msgstr ""
 msgid "Logout from current session"
 msgstr ""
 
+#: src/components/EventDetail.svelte:53
+msgid "Manage"
+msgstr ""
+
 #: src/routes/calendars/+page.svelte:22
 msgid "My Calendars"
 msgstr ""
@@ -191,6 +223,10 @@ msgstr ""
 
 #: src/components/UserSettings.svelte:142
 msgid "New Password (repeat)"
+msgstr ""
+
+#: src/components/EventDetail.svelte:
+msgid "No longer able to attend? Notify the host by #."
 msgstr ""
 
 #: src/components/UserSettings.svelte:119
@@ -214,6 +250,10 @@ msgstr ""
 msgid "Preferences"
 msgstr ""
 
+#: src/components/EventDetail.svelte:66
+msgid "Presented by"
+msgstr ""
+
 #: src/components/UserSettings.svelte:104
 msgid "Profile Image (avatar)"
 msgstr ""
@@ -224,6 +264,14 @@ msgstr ""
 
 #: src/components/SearchDialog.svelte:98
 msgid "Read documentation of Evermeet"
+msgstr ""
+
+#: src/components/EventDetail.svelte:205
+msgid "Register"
+msgstr ""
+
+#: src/components/EventDetail.svelte:160
+msgid "Registration"
 msgstr ""
 
 #: src/components/FormItem.svelte:150
@@ -287,6 +335,10 @@ msgstr ""
 msgid "Talks"
 msgstr ""
 
+#: src/components/HandleBadge.svelte:51
+msgid "This handle is verified"
+msgstr ""
+
 #: src/components/UserSettings.svelte:176
 msgid "Time format"
 msgstr ""
@@ -331,8 +383,32 @@ msgstr ""
 msgid "User settings and preferences"
 msgstr ""
 
+#: src/components/HandleBadge.svelte:68
+msgid "Verification Type"
+msgstr ""
+
+#: src/components/HandleBadge.svelte:38
+msgid "verified"
+msgstr ""
+
 #: src/routes/calendars/+page.svelte:57
 msgid "View calendar"
+msgstr ""
+
+#: src/components/EventDetail.svelte:185
+msgid "Welcome! To join the event, please register below."
+msgstr ""
+
+#: src/components/HandleBadge.svelte:55
+msgid "You can trust that the (sub)domain belongs to the same owner as this profile."
+msgstr ""
+
+#: src/components/EventDetail.svelte:51
+msgid "You have manage access for this event."
+msgstr ""
+
+#: src/components/EventDetail.svelte:172
+msgid "You’re In"
 msgstr ""
 
 #: src/components/UserSettings.svelte:81

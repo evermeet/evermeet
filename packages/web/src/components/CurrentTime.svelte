@@ -7,15 +7,14 @@
     timeZonesNames,
     abbreviations,
   } from "@vvo/tzdb";
-  import { formatInTimeZone } from "date-fns-tz";
-  import { enGB } from "date-fns/locale/en-GB";
+  import { formatInTimeZone } from "$lib/date";
 
+  const { dateLocale: locale } = getContext("locale");
   const user = getContext("user");
-
   const currentTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const tzData = getTimeZones().find((tz) => tz.name === currentTz);
   const tzInfo = formatInTimeZone(new Date(), currentTz, "zzzz (XXX)", {
-    locale: enGB,
+    locale,
   });
 
   let is12hours = user?.preferences?.date?.hoursFormat === "12-hour";
@@ -25,7 +24,7 @@
       date,
       currentTz,
       is12hours ? "hh:mm aa zzz" : "HH:mm zzz",
-      { locale: enGB },
+      { locale },
     );
   }
 

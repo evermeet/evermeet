@@ -16,7 +16,7 @@
   import { pkg } from "../lib/config.js";
   import { page } from "$app/stores";
   import { config, socket } from "$lib/stores";
-  import { t, locale } from "$lib/i18n";
+  import { t, locale, makeLocaleContext } from "$lib/i18n";
 
   import CurrentTime from "../components/CurrentTime.svelte";
   import UserMenu from "../components/UserMenu.svelte";
@@ -32,7 +32,7 @@
 
   const { lang, messages } = data.locale;
   locale.set(lang, messages);
-  setContext("locale", data.locale);
+  setContext("locale", makeLocaleContext(data.locale));
 
   const menu = [
     {

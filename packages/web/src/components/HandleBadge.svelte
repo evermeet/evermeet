@@ -3,6 +3,7 @@
   import { fade } from "svelte/transition";
   import { createTooltip, melt } from "@melt-ui/svelte";
   import { config } from "$lib/stores.js";
+  import { t } from "$lib/i18n";
 
   export let item;
   export let size = "normal";
@@ -34,7 +35,7 @@
     class="text-success opacity-50 flex gap-1 text-sm items-center hover:opacity-100 trigger cursor-help"
     use:melt={$trigger}
   >
-    <LockClosed class="w-[1em]" />verified
+    <LockClosed class="w-[1em]" />{$t`verified`}
   </div>
 </div>
 
@@ -47,30 +48,31 @@
     <div use:melt={$arrow} />
     <div class="">
       <div class="mb-2 flex gap-1.5 items-center text-success opacity-75">
-        This handle is verified <CheckCircle class="" />
+        {$t`This handle is verified`}
+        <CheckCircle class="" />
       </div>
 
       <div class="mb-4 text-base-content/75 text-sm">
-        You can trust that the (sub)domain belongs to the same owner as this
-        profile.
+        {$t`You can trust that the (sub)domain belongs to the same owner as this profile.`}
       </div>
       <div class="text-sm text-base-content/75 leading-7">
-        Domain: <span class="font-mono badge badge-neutral-300"
+        {$t`Domain`}:
+        <span class="font-mono badge badge-neutral-300"
           >{item.handle || item.calendar?.handle}</span
         ><br />
-        DID:
+        {$t`DID`}:
         <a
           href="{$config.plcServer}/{item.did ||
             'did:plc:h4c53spyxe6wab5j7jonafju'}"
           class="font-mono badge badge-neutral-300 hover:badge-accent"
           >{item.did || "did:plc:h4c53spyxe6wab5j7jonafju"}</a
         ><br />
-        Verification Type:
+        {$t`Verification Type`}:
         <a
           href="https://dns.google/query?name=_evermeet.{item.handle ||
             item.calendar?.handle}&rr_type=TXT&ecs="
           class="badge badge-neutral-300 hover:badge-accent"
-          >DNS Record (proof)</a
+          >{$t`DNS Record (proof)`}</a
         ><br />
       </div>
     </div>

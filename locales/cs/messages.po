@@ -13,16 +13,15 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: src/components/EventDetail.svelte:174
+#: src/components/EventDetail.svelte:236
 msgid "A confirmation email has been sent to your email."
 msgstr ""
 
-#: src/components/EventDetail.svelte:217
+#: src/components/EventDetail.svelte:281
 msgid "About Event"
 msgstr "O události"
 
-#: src/components/SearchDialog.svelte:131
-#: src/components/UserSettings.svelte:73
+#: src/components/SearchDialog.svelte:131 src/components/UserSettings.svelte:73
 msgid "Account"
 msgstr "Účet"
 
@@ -42,13 +41,12 @@ msgstr "Automaticky generovaný"
 msgid "Calendar Name"
 msgstr "Název kalendáře"
 
-#: src/components/SearchDialog.svelte:47
-#: src/routes/+layout.svelte:46
+#: src/components/SearchDialog.svelte:47 src/routes/+layout.svelte:44
 #: src/routes/calendars/+page.svelte:18
 msgid "Calendars"
 msgstr "Kalendáře"
 
-#: src/components/EventDetail.svelte:180
+#: src/components/EventDetail.svelte:243
 msgid "canceling your registration"
 msgstr ""
 
@@ -65,12 +63,11 @@ msgstr "Změnit heslo"
 msgid "Chat"
 msgstr "Konverzace"
 
-#: src/components/SearchDialog.svelte:54
-#: src/routes/+layout.svelte:51
+#: src/components/SearchDialog.svelte:54 src/routes/+layout.svelte:49
 msgid "Chats"
 msgstr "Konverzace"
 
-#: src/components/EventDetail.svelte:115
+#: src/components/EventDetail.svelte:126
 msgid "Contact the host"
 msgstr "Kontaktovat hostitele"
 
@@ -82,15 +79,13 @@ msgstr "Vytvořit nový kalendář"
 msgid "Create a new Event"
 msgstr "Vytvořit novou událost"
 
-#: src/components/SearchDialog.svelte:68
-#: src/routes/calendars/+page.svelte:26
+#: src/components/SearchDialog.svelte:68 src/routes/calendars/+page.svelte:26
 #: src/routes/create-calendar/+page.svelte:143
 #: src/routes/create-calendar/+page.svelte:302
 msgid "Create Calendar"
 msgstr "Vytvořit kalendář"
 
-#: src/components/SearchDialog.svelte:77
-#: src/routes/+layout.svelte:160
+#: src/components/SearchDialog.svelte:77 src/routes/+layout.svelte:158
 msgid "Create Event"
 msgstr "Vytvořit událost"
 
@@ -118,7 +113,7 @@ msgstr "Smazat účet"
 msgid "Description"
 msgstr "Popis"
 
-#: src/components/HandleBadge.svelte:61
+#: src/components/HandleBadge.svelte:63
 msgid "DID"
 msgstr ""
 
@@ -126,7 +121,7 @@ msgstr ""
 msgid "Display Name"
 msgstr "Jméno"
 
-#: src/components/HandleBadge.svelte:73
+#: src/components/HandleBadge.svelte:75
 msgid "DNS Record (proof)"
 msgstr ""
 
@@ -134,7 +129,7 @@ msgstr ""
 msgid "Documentation"
 msgstr "Dokumentace"
 
-#: src/components/HandleBadge.svelte:58
+#: src/components/HandleBadge.svelte:59
 msgid "Domain"
 msgstr ""
 
@@ -147,8 +142,7 @@ msgid "Event Concepts"
 msgstr "Koncepty událostí"
 
 #: src/components/CalendarDetail.svelte:37
-#: src/components/SearchDialog.svelte:39
-#: src/routes/+layout.svelte:41
+#: src/components/SearchDialog.svelte:39 src/routes/+layout.svelte:39
 #: src/routes/events/+page.svelte:9
 msgid "Events"
 msgstr "Události"
@@ -157,14 +151,12 @@ msgstr "Události"
 msgid "Evermeet"
 msgstr "Evermeet"
 
-#: src/components/SearchDialog.svelte:61
-#: src/routes/+layout.svelte:56
-#: src/routes/+page.svelte:12
-#: src/routes/+page.svelte:16
+#: src/components/SearchDialog.svelte:61 src/routes/+layout.svelte:54
+#: src/routes/+page.svelte:12 src/routes/+page.svelte:16
 msgid "Explore"
 msgstr "Prozkoumat"
 
-#: src/routes/+layout.svelte:162
+#: src/routes/+layout.svelte:160
 msgid "Explore events"
 msgstr "Prozkoumat události"
 
@@ -193,6 +185,10 @@ msgstr "Importovat událost(i)"
 msgid "Import one or more events into calendar"
 msgstr "Import jedné nebo více událostí do kalendáře"
 
+#: src/components/EventDetail.svelte:202
+msgid "Link not yet published"
+msgstr ""
+
 #: src/routes/+page.svelte:28
 msgid "Local Calendars"
 msgstr "Místní kalendáře"
@@ -205,7 +201,7 @@ msgstr "Přihlásit do současné instance"
 msgid "Logout from current session"
 msgstr "Odhlásit se z aktuální relace"
 
-#: src/components/EventDetail.svelte:53
+#: src/components/EventDetail.svelte:60
 msgid "Manage"
 msgstr ""
 
@@ -229,6 +225,18 @@ msgstr "Nové heslo (opakování)"
 msgid "No longer able to attend? Notify the host by #."
 msgstr ""
 
+#: src/components/EventBox.svelte:50
+msgid "Online"
+msgstr "Online"
+
+#: src/components/EventDetail.svelte:197
+msgid "Online Event"
+msgstr "Online událost"
+
+#: src/components/EventBox.svelte:44
+msgid "Only for Registered"
+msgstr "Jen pro registrované"
+
 #: src/components/UserSettings.svelte:119
 msgid "Password"
 msgstr "Heslo"
@@ -245,12 +253,11 @@ msgstr "Lidé"
 msgid "Planned Events"
 msgstr "Plánované události"
 
-#: src/components/SearchDialog.svelte:158
-#: src/components/UserSettings.svelte:74
+#: src/components/SearchDialog.svelte:158 src/components/UserSettings.svelte:74
 msgid "Preferences"
 msgstr "Předvolby"
 
-#: src/components/EventDetail.svelte:66
+#: src/components/EventDetail.svelte:73
 msgid "Presented by"
 msgstr "Představuje"
 
@@ -266,11 +273,15 @@ msgstr "Veřejný profil"
 msgid "Read documentation of Evermeet"
 msgstr "Přečtěte si dokumentaci Evermeet"
 
-#: src/components/EventDetail.svelte:205
+#: src/components/EventDetail.svelte:269
 msgid "Register"
 msgstr ""
 
-#: src/components/EventDetail.svelte:160
+#: src/components/EventDetail.svelte:190
+msgid "Register To See Address"
+msgstr "Zaregistrujte se pro zobrazení adresy"
+
+#: src/components/EventDetail.svelte:222
 msgid "Registration"
 msgstr ""
 
@@ -290,16 +301,14 @@ msgstr "Uložit profil"
 msgid "Search {0}"
 msgstr "Hledat na {0}"
 
-#: src/components/SearchDialog.svelte:167
-#: src/components/UserSettings.svelte:75
+#: src/components/SearchDialog.svelte:167 src/components/UserSettings.svelte:75
 msgid "Security"
 msgstr "Bezpečnost"
 
 #: src/components/SearchDialog.svelte:122
 #: src/components/SearchDialog.svelte:131
 #: src/components/SearchDialog.svelte:158
-#: src/components/SearchDialog.svelte:167
-#: src/components/UserMenu.svelte:62
+#: src/components/SearchDialog.svelte:167 src/components/UserMenu.svelte:62
 #: src/components/UserSettings.svelte:71
 msgid "Settings"
 msgstr "Nastavení"
@@ -308,8 +317,7 @@ msgstr "Nastavení"
 msgid "Sign In"
 msgstr "Přihlásit"
 
-#: src/components/SearchDialog.svelte:104
-#: src/components/UserMenu.svelte:65
+#: src/components/SearchDialog.svelte:104 src/components/UserMenu.svelte:65
 msgid "Sign Out"
 msgstr "Odhlásit"
 
@@ -347,6 +355,10 @@ msgstr "Formát času"
 msgid "Timezone"
 msgstr "Časová zóna"
 
+#: src/components/EventDetail.svelte:192
+msgid "To Be Determined (TBD)"
+msgstr ""
+
 #: src/components/FormItem.svelte:123
 msgid "Type"
 msgstr "Typ"
@@ -383,7 +395,7 @@ msgstr "Možnosti zabezpečení pro uživatele"
 msgid "User settings and preferences"
 msgstr "Uživatelská nastavení a předvolby"
 
-#: src/components/HandleBadge.svelte:68
+#: src/components/HandleBadge.svelte:70
 msgid "Verification Type"
 msgstr ""
 
@@ -395,22 +407,25 @@ msgstr "verifikovaný"
 msgid "View calendar"
 msgstr "Zobrazit kalendář"
 
-#: src/components/EventDetail.svelte:185
+#: src/components/EventDetail.svelte:249
 msgid "Welcome! To join the event, please register below."
 msgstr ""
 
-#: src/components/HandleBadge.svelte:55
+#: src/components/HandleBadge.svelte:56
 msgid "You can trust that the (sub)domain belongs to the same owner as this profile."
 msgstr ""
 
-#: src/components/EventDetail.svelte:51
+#: src/components/EventDetail.svelte:58
 msgid "You have manage access for this event."
 msgstr ""
 
-#: src/components/EventDetail.svelte:172
+#: src/components/EventDetail.svelte:234
 msgid "You’re In"
 msgstr ""
 
 #: src/components/UserSettings.svelte:81
 msgid "Your handle"
 msgstr "Váš handle"
+
+#~ msgid "Register To See"
+#~ msgstr "Zaregistrujte se pro zobrazení"

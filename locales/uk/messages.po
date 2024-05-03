@@ -6,12 +6,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: ua\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
-#: src/components/EventDetail.svelte:174
+#: src/components/EventDetail.svelte:236
 msgid "A confirmation email has been sent to your email."
 msgstr ""
 
-#: src/components/EventDetail.svelte:217
+#: src/components/EventDetail.svelte:281
 msgid "About Event"
 msgstr ""
 
@@ -37,12 +43,12 @@ msgid "Calendar Name"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:47
-#: src/routes/+layout.svelte:46
+#: src/routes/+layout.svelte:44
 #: src/routes/calendars/+page.svelte:18
 msgid "Calendars"
 msgstr "Календарі"
 
-#: src/components/EventDetail.svelte:180
+#: src/components/EventDetail.svelte:243
 msgid "canceling your registration"
 msgstr ""
 
@@ -60,11 +66,11 @@ msgid "Chat"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:54
-#: src/routes/+layout.svelte:51
+#: src/routes/+layout.svelte:49
 msgid "Chats"
 msgstr ""
 
-#: src/components/EventDetail.svelte:115
+#: src/components/EventDetail.svelte:126
 msgid "Contact the host"
 msgstr ""
 
@@ -84,7 +90,7 @@ msgid "Create Calendar"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:77
-#: src/routes/+layout.svelte:160
+#: src/routes/+layout.svelte:158
 msgid "Create Event"
 msgstr "Створити подію"
 
@@ -112,7 +118,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: src/components/HandleBadge.svelte:61
+#: src/components/HandleBadge.svelte:63
 msgid "DID"
 msgstr ""
 
@@ -120,7 +126,7 @@ msgstr ""
 msgid "Display Name"
 msgstr ""
 
-#: src/components/HandleBadge.svelte:73
+#: src/components/HandleBadge.svelte:75
 msgid "DNS Record (proof)"
 msgstr ""
 
@@ -128,7 +134,7 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: src/components/HandleBadge.svelte:58
+#: src/components/HandleBadge.svelte:59
 msgid "Domain"
 msgstr ""
 
@@ -142,7 +148,7 @@ msgstr ""
 
 #: src/components/CalendarDetail.svelte:37
 #: src/components/SearchDialog.svelte:39
-#: src/routes/+layout.svelte:41
+#: src/routes/+layout.svelte:39
 #: src/routes/events/+page.svelte:9
 msgid "Events"
 msgstr "Події"
@@ -152,13 +158,13 @@ msgid "Evermeet"
 msgstr ""
 
 #: src/components/SearchDialog.svelte:61
-#: src/routes/+layout.svelte:56
+#: src/routes/+layout.svelte:54
 #: src/routes/+page.svelte:12
 #: src/routes/+page.svelte:16
 msgid "Explore"
 msgstr ""
 
-#: src/routes/+layout.svelte:162
+#: src/routes/+layout.svelte:160
 msgid "Explore events"
 msgstr ""
 
@@ -187,6 +193,10 @@ msgstr ""
 msgid "Import one or more events into calendar"
 msgstr ""
 
+#: src/components/EventDetail.svelte:202
+msgid "Link not yet published"
+msgstr ""
+
 #: src/routes/+page.svelte:28
 msgid "Local Calendars"
 msgstr ""
@@ -199,7 +209,7 @@ msgstr ""
 msgid "Logout from current session"
 msgstr ""
 
-#: src/components/EventDetail.svelte:53
+#: src/components/EventDetail.svelte:60
 msgid "Manage"
 msgstr ""
 
@@ -223,6 +233,18 @@ msgstr ""
 msgid "No longer able to attend? Notify the host by #."
 msgstr ""
 
+#: src/components/EventBox.svelte:50
+msgid "Online"
+msgstr ""
+
+#: src/components/EventDetail.svelte:197
+msgid "Online Event"
+msgstr ""
+
+#: src/components/EventBox.svelte:44
+msgid "Only for Registered"
+msgstr ""
+
 #: src/components/UserSettings.svelte:119
 msgid "Password"
 msgstr ""
@@ -244,7 +266,7 @@ msgstr ""
 msgid "Preferences"
 msgstr ""
 
-#: src/components/EventDetail.svelte:66
+#: src/components/EventDetail.svelte:73
 msgid "Presented by"
 msgstr ""
 
@@ -260,11 +282,27 @@ msgstr ""
 msgid "Read documentation of Evermeet"
 msgstr ""
 
-#: src/components/EventDetail.svelte:205
+#: src/components/EventDetail.svelte:269
 msgid "Register"
 msgstr ""
 
-#: src/components/EventDetail.svelte:160
+#: src/components/EventBox.svelte:44
+#~ msgid "Register to see"
+#~ msgstr ""
+
+#: src/components/EventBox.svelte:44
+#~ msgid "Register To See"
+#~ msgstr ""
+
+#: src/components/EventDetail.svelte:190
+#~ msgid "Register to See Address"
+#~ msgstr ""
+
+#: src/components/EventDetail.svelte:190
+msgid "Register To See Address"
+msgstr ""
+
+#: src/components/EventDetail.svelte:222
 msgid "Registration"
 msgstr ""
 
@@ -341,6 +379,10 @@ msgstr ""
 msgid "Timezone"
 msgstr ""
 
+#: src/components/EventDetail.svelte:192
+msgid "To Be Determined (TBD)"
+msgstr ""
+
 #: src/components/FormItem.svelte:123
 msgid "Type"
 msgstr ""
@@ -377,7 +419,7 @@ msgstr ""
 msgid "User settings and preferences"
 msgstr ""
 
-#: src/components/HandleBadge.svelte:68
+#: src/components/HandleBadge.svelte:70
 msgid "Verification Type"
 msgstr ""
 
@@ -389,19 +431,24 @@ msgstr ""
 msgid "View calendar"
 msgstr ""
 
-#: src/components/EventDetail.svelte:185
+#: src/components/EventBox.svelte:50
+#: src/components/EventDetail.svelte:197
+#~ msgid "Virtual"
+#~ msgstr ""
+
+#: src/components/EventDetail.svelte:249
 msgid "Welcome! To join the event, please register below."
 msgstr ""
 
-#: src/components/HandleBadge.svelte:55
+#: src/components/HandleBadge.svelte:56
 msgid "You can trust that the (sub)domain belongs to the same owner as this profile."
 msgstr ""
 
-#: src/components/EventDetail.svelte:51
+#: src/components/EventDetail.svelte:58
 msgid "You have manage access for this event."
 msgstr ""
 
-#: src/components/EventDetail.svelte:172
+#: src/components/EventDetail.svelte:234
 msgid "You’re In"
 msgstr ""
 

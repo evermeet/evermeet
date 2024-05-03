@@ -93,6 +93,18 @@
       It includes events like conferences, hackathons, workshops, meetups, and
       parties from Jun 2 - 11.
 
+- id: chouwiwaiqu0iecae7thii1A
+  did: did:web:ducttape.events
+  handle: ducttape.events
+  config:
+    name: Duct Tape Events
+    img: https://pbs.twimg.com/profile_images/1537807486744502273/51LhZvEB_400x400.png
+    description: |
+      You name it, we'll fix it.
+    refs:
+      web: https://ducttape.events/
+      twitter: https://twitter.com/ducttape_events
+
 - id: 134025681d743f0
   did: did:web:beerfi.gwei.cz
   handle: beerfi.evermeet.local

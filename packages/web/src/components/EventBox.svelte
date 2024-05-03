@@ -1,22 +1,63 @@
 <script>
-  import { format } from "date-fns";
-  import { MapPin, Users } from "svelte-heros-v2";
+  import { getContext } from "svelte";
+  import { MapPin, Users, VideoCamera } from "svelte-heros-v2";
   import FlagIcon from "./FlagIcon.svelte";
   import { config } from "$lib/stores";
+  import { t } from "$lib/i18n";
+  import {
+    interval,
+    formatTimeInterval,
+    formatDurationInterval,
+    timezonesOffset,
+  } from "$lib/date";
 
-  export let item;
-  export let virtual = false;
+  const { item, virtual } = $props();
+  const { dateLocale: locale, timezone, lang } = getContext("locale");
+  const user = getContext("user");
+  const itemInterval = $derived(interval(item.dateStart, item.dateEnd));
+  const itemTimezonesOffset = $derived(
+    timezonesOffset(itemInterval.start, timezone, item.timezone),
+  );
+  //const duration = $derived(intervalToDuration(itemInterval))
 </script>
 
 <a href={item.baseUrl}>
   <div class="mb-3 itembox {!virtual && 'itembox-hover'} flex gap-8">
     <div class="grow">
-      <div class="text-base-content/75">{format(item.dateStart, "HH:mm")}</div>
+      <div class="text-base-content/75">
+        {formatTimeInterval(itemInterval, { locale, user, tz: timezone })}
+        {#if itemTimezonesOffset !== 0}
+          •
+          <span class="text-accent"
+            >{formatTimeInterval(itemInterval, {
+              locale,
+              user,
+              tz: item.timezone,
+            })}</span
+          >
+        {/if}
+        <span class="text-base-content/40">
+          •
+          {formatDurationInterval(itemInterval, { locale })}
+        </span>
+      </div>
       <div class="text-xl font-medium mt-1.5">{item.name}</div>
       <!--div class="text-base-content/75 mt-1.5">by CryptoCanal</div-->
       <div class="flex gap-1.5 mt-1.5 text-base-content/75 items-center">
-        <MapPin />
-        <div>{item.placeName}</div>
+        {#if item.mode === "offline"}
+          <MapPin />
+          {#if item.placeRestrictedToGuests}
+            <div>{$t`Only for Registered`}</div>
+          {:else}
+            <div>{item.placeName || "TBD"}</div>
+          {/if}
+        {:else if item.mode === "online"}
+          <VideoCamera />
+          <div>{$t`Online`}</div>
+        {:else}
+          <div>{item.placeName}</div>
+        {/if}
+
         <div class="ml-2 opacity-75">
           <FlagIcon country={item.placeCountry} />
         </div>

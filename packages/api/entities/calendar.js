@@ -97,7 +97,7 @@ export class Calendar {
     }
 
     const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
-    const url = `https://${ctx.api.config.domain}${c.baseUrl}`
+    const url = `https://${ctx.api.config.domain}${baseUrl}`
     const handleUrl = c.handle
 
     let userContext, managers

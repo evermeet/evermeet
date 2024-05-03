@@ -56,7 +56,7 @@ export function format(date, formatStr, opts = {}) {
   if (opts.timezone) {
     return _formatInTimeZone(date, opts.timezone, formatStr, opts);
   }
-  return _format(date, formatStr);
+  return _format(date, formatStr, opts);
 }
 
 export function formatInTimeZone(d, tz, str, opts = {}) {

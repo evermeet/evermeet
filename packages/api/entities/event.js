@@ -1,5 +1,6 @@
 import { EntitySchema, wrap } from '@mikro-orm/core'
 import { ObjectId } from '../lib/db.js'
+import { URI } from 'yaml-language-server'
 
 export const EventConfig = new EntitySchema({
   name: 'EventConfig',
@@ -11,6 +12,20 @@ export const EventConfig = new EntitySchema({
     },
     name: {
       type: 'string'
+    },
+    mode: {
+      type: 'string',
+      nullable: true,
+      enum: [
+        'offline',
+        'online',
+        'mixed',
+      ]
+    },
+    joinUrl: {
+      type: 'string',
+      format: 'url',
+      nullable: true,
     },
     dateStart: {
       type: 'date',
@@ -40,6 +55,10 @@ export const EventConfig = new EntitySchema({
       type: 'string',
       nullable: true
     },
+    placeRestrictedToGuests: {
+      type: 'boolean',
+      nullable: true,
+    },
     description: {
       type: 'string',
       nullable: true
@@ -54,6 +73,10 @@ export class Event {
       calendarId: this.calendarId,
       did: this.did,
       ...wrap(this.config).toJSON()
+    }
+
+    if (!json.mode) {
+      json.mode = json.placeCountry ? 'offline' : 'online'
     }
 
     const calendar = typeof (opts.calendar) === 'object'

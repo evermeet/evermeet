@@ -9,6 +9,7 @@
     placeName: Vrij Paleis
     placeCountry: nl
     placeCity: Amsterdam
+    placeRestrictedToGuests: true
     guestCount: 54
     guests:
       - name: jensei
@@ -71,16 +72,32 @@
       enabled: true
 
 - calendarId: 2e9e2199afca02
+  did: "did:plc:online-event"
+  config:
+    slug: "online"
+    name: "My Online Event"
+    dateStart: 2024-05-31T12:00
+    dateEnd:  2024-05-31T15:00
+    joinUrl: https://meet.jit.si/SuccessivePeasantsRealizeBlindly
+    img: https://pbs.twimg.com/profile_images/570059057197625344/h4Bvj_8p_400x400.png
+    description: |
+      Hello
+
+- calendarId: chouwiwaiqu0iecae7thii1A
   did: "did:plc:xxxxxxxxxxxx"
   config:
     slug: "24"
     name: ETHPrague 2024
     dateStart: 2024-05-31T12:00
     dateEnd:  2024-06-02T15:00
-    placeName: TBD
+    placeName: Holešovice Market
     placeCountry: cz
     placeCity: Prague
     img: https://pbs.twimg.com/profile_images/1761793077302157312/ZWMuqBeG_400x400.jpg
+    description: |
+      ETHPrague isn't looking for the next get rich quick scheme or groundbreaking DeFi apps. Instead, it's an event focused on the future of Ethereum and potential concepts or applications that don't yet exist.
+
+      We want to tackle challenges that could arise in the next decade because we believe Ethereum will play a major role in solving economic, social, and environmental problems. The future is in your hands, anon! You decide whether we end up living in a dark, authoritarian dystopia or a bright, solarpunk utopia.
 
 - calendarId: 2e9e2199afca02
   concept: true

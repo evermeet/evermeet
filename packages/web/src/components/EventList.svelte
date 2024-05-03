@@ -1,7 +1,10 @@
 <script>
+  import { getContext } from "svelte";
   import { format } from "$lib/date";
   import EventBox from "./EventBox.svelte";
-  export let events;
+
+  const { events } = $props();
+  const { dateLocale: locale, timezone, lang } = getContext("locale");
 
   function enhanced(arr) {
     for (const e of arr) {
@@ -10,7 +13,7 @@
     return arr;
   }
 
-  $: days = enhanced(events).map((e) => e.date);
+  let days = enhanced(events).map((e) => e.date);
 </script>
 
 {#if events.length > 0}
@@ -20,9 +23,11 @@
         <hr />
         <div class="timeline-start p-2 items-start flex w-full h-full">
           <div>
-            <div class="font-semibold">{format(new Date(day), "MMM d")}</div>
+            <div class="font-semibold">
+              {format(new Date(day), "MMM d", { locale })}
+            </div>
             <div class="text-base-content/75">
-              {format(new Date(day), "EEEE")}
+              {format(new Date(day), "EEEE", { locale })}
             </div>
           </div>
         </div>

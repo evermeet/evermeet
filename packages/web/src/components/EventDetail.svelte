@@ -1,6 +1,13 @@
 <script>
-  import { MapPin, CheckCircle } from "svelte-heros-v2";
-  import { Clock } from "lucide-svelte";
+  import { MapPin, CheckCircle, VideoCamera } from "svelte-heros-v2";
+  import {
+    Clock,
+    KeyRound,
+    UserCheck,
+    UserX,
+    EyeOff,
+    Webcam,
+  } from "lucide-svelte";
   import {
     format,
     interval,
@@ -145,10 +152,10 @@
           {formatDateInterval(itemInterval, { locale })}
         </div>
         <div class="text-sm text-base-content/75">
-          {formatTimeInterval(itemInterval, { locale, user, tz: timezone })} • {formatDurationInterval(
-            itemInterval,
-            { locale },
-          )}
+          {formatTimeInterval(itemInterval, { locale, user, tz: timezone })}
+          <span class="text-base-content/40"
+            >• {formatDurationInterval(itemInterval, { locale })}</span
+          >
         </div>
         {#if itemTimezonesOffset !== 0}
           <div class="text-sm text-accent/75">
@@ -174,11 +181,38 @@
       <div
         class="w-10 h-10 border rounded-lg border-neutral flex justify-center items-center"
       >
-        <MapPin />
+        {#if item.mode === "offline"}
+          <MapPin />
+        {:else if item.mode === "online"}
+          <VideoCamera />
+        {:else}{/if}
       </div>
       <div>
-        <div class="font-mono text-lg">{item.placeName}</div>
-        {#if item.placeCity && countryName}
+        <div class="font-mono text-lg">
+          {#if item.mode === "offline"}
+            <!-- OFFLINE EVENT -->
+            {#if item.placeRestrictedToGuests}
+              <EyeOff size={20} strokeWidth={1.25} class="inline-block" />
+              {$t`Register To See Address`}
+            {:else if item.placeName}{item.placeName}{:else}<span
+                class="opacity-75">{$t`To Be Determined (TBD)`}</span
+              >{/if}
+          {:else if item.mode === "online"}
+            <!-- ONLINE EVENT -->
+            {#if true}
+              {$t`Online Event`}
+            {:else if item.joinUrl}
+              <a href={item.joinUrl} class="text-sm hover:underline"
+                >{item.joinUrl.replace(/^https:\/\//, "")}</a
+              >
+            {:else}
+              <span class="opacity-75">{$t`Link not yet published`}</span>
+            {/if}
+          {:else}
+            {item.place}
+          {/if}
+        </div>
+        {#if item.placeCity && countryName && item.mode !== "online"}
           <div class="text-sm text-base-content/75 flex gap-2 items-center">
             <div>{item.placeCity}, {countryName}</div>
             <FlagIcon country={item.placeCountry} {countryName} />

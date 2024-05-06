@@ -1,7 +1,6 @@
+import { Connector, fetchNextPage } from "../lib/connector.js";
 
-import { Connector, fetchNextPage } from '../lib/connector.js'
-
-function processEvent (e) {
+function processEvent(e) {
   return {
     remoteId: e.id,
     name: e.title,
@@ -15,21 +14,19 @@ function processEvent (e) {
     img: e.featuredEventPhoto?.source,
     hosts: e.host ? [{ name: e.host.name }] : [],
     url: e.eventUrl,
-    _obj: e
-  }
+    _obj: e,
+  };
 }
 
-async function inspect (ctx, url) {
-  const pg = await fetchNextPage(url)
+async function inspect(ctx, url) {
+  const pg = await fetchNextPage(url);
 
   return {
-    events: [processEvent(pg.event)]
-  }
+    events: [processEvent(pg.event)],
+  };
 }
 
 export default new Connector({
-  urlPatterns: [
-    /^https:\/\/(www\.|)meetup\.com\/([^\/]+)\/events\/([\d]+)\//
-  ],
-  inspect
-})
+  urlPatterns: [/^https:\/\/(www\.|)meetup\.com\/([^\/]+)\/events\/([\d]+)\//],
+  inspect,
+});

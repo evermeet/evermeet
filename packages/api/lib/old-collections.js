@@ -1,232 +1,233 @@
-
-export function makeCollections (api) {
+export function makeCollections(api) {
   return {
     events: {
       schema: {
         version: 0,
-        primaryKey: 'id',
-        type: 'object',
+        primaryKey: "id",
+        type: "object",
         properties: {
           id: {
-            type: 'string',
-            maxLength: 32
+            type: "string",
+            maxLength: 32,
           },
           slug: {
-            type: 'string'
+            type: "string",
           },
           name: {
-            type: 'string'
+            type: "string",
           },
           calendarId: {
-            type: 'string'
+            type: "string",
           },
           guestsNative: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
                 ref: {
-                  type: 'string'
+                  type: "string",
                 },
                 rel: {
-                  type: 'string'
+                  type: "string",
                 },
                 time: {
-                  type: 'string'
-                }
-              }
-            }
-          }
+                  type: "string",
+                },
+              },
+            },
+          },
         },
-        encrypted: [
-          'name'
-        ]
+        encrypted: ["name"],
       },
       methods: {
-        async view (opts = {}) {
-          const json = JSON.parse(JSON.stringify(this.toJSON()))
+        async view(opts = {}) {
+          const json = JSON.parse(JSON.stringify(this.toJSON()));
           if (json.calendarId) {
-            const calendar = await api.cols.calendars.findOne({ selector: { id: json.calendarId } }).exec()
+            const calendar = await api.cols.calendars
+              .findOne({ selector: { id: json.calendarId } })
+              .exec();
             if (calendar && opts.calendar !== false) {
-              json.calendar = await calendar.view(opts)
+              json.calendar = await calendar.view(opts);
             }
           }
-          json.guestCountNative = (json.guestsNative || []).length
-          json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)
-          return json
+          json.guestCountNative = (json.guestsNative || []).length;
+          json.guestCountTotal = json.guestCountNative + (json.guestCount || 0);
+          return json;
         },
-        async view_audit () {
-          return []
-        }
-      }
+        async view_audit() {
+          return [];
+        },
+      },
     },
     remoteobjects: {
       schema: {
         version: 0,
-        primaryKey: 'id',
-        type: 'object',
+        primaryKey: "id",
+        type: "object",
         properties: {
           id: {
-            type: 'string',
-            maxLength: 32
-          }
-        }
-      }
+            type: "string",
+            maxLength: 32,
+          },
+        },
+      },
     },
     calendars: {
       schema: {
         version: 0,
-        primaryKey: 'id',
-        type: 'object',
+        primaryKey: "id",
+        type: "object",
         properties: {
           id: {
-            type: 'string',
-            maxLength: 32
+            type: "string",
+            maxLength: 32,
           },
           name: {
-            type: 'string'
+            type: "string",
           },
           slug: {
-            type: 'string'
+            type: "string",
           },
           personal: {
-            type: 'boolean'
+            type: "boolean",
           },
           managers: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
                 ref: {
-                  type: 'string'
+                  type: "string",
                 },
                 time: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
+                  type: "string",
+                },
+              },
+            },
+          },
+        },
       },
       methods: {
-        async view (opts = {}) {
-          const json = JSON.parse(JSON.stringify(this.toJSON()))
+        async view(opts = {}) {
+          const json = JSON.parse(JSON.stringify(this.toJSON()));
           if (opts.events !== false) {
-            json.events = []
-            const events = await api.cols.events.find({ selector: { calendarId: json.id } }).exec()
+            json.events = [];
+            const events = await api.cols.events
+              .find({ selector: { calendarId: json.id } })
+              .exec();
             for (const e of events) {
-              json.events.push(await e.view(Object.assign(opts, { calendar: false })))
+              json.events.push(
+                await e.view(Object.assign(opts, { calendar: false })),
+              );
             }
           }
-          return json
-        }
-      }
+          return json;
+        },
+      },
     },
     users: {
       schema: {
         version: 0,
-        primaryKey: 'id',
-        type: 'object',
+        primaryKey: "id",
+        type: "object",
         properties: {
           id: {
-            type: 'string',
-            maxLength: 32
+            type: "string",
+            maxLength: 32,
           },
           did: {
-            type: 'string'
+            type: "string",
           },
           name: {
-            type: 'string'
+            type: "string",
           },
           emails: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'string',
-              format: 'email'
-            }
+              type: "string",
+              format: "email",
+            },
           },
           emailShas: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'string'
-            }
+              type: "string",
+            },
           },
           calendarsManage: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
                 ref: {
-                  type: 'string'
+                  type: "string",
                 },
                 time: {
-                  type: 'string'
-                }
-              }
-            }
+                  type: "string",
+                },
+              },
+            },
           },
           subscribedCalendars: {
-            type: 'array',
+            type: "array",
             maxItems: 1000,
             items: {
-              type: 'object',
+              type: "object",
               properties: {
                 ref: {
-                  type: 'string'
+                  type: "string",
                 },
                 time: {
-                  type: 'string'
-                }
-              }
-            }
+                  type: "string",
+                },
+              },
+            },
           },
           personalCalendar: {
-            type: 'string'
+            type: "string",
           },
           events: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
                 ref: {
-                  type: 'string'
+                  type: "string",
                 },
                 rel: {
-                  type: 'string'
+                  type: "string",
                 },
                 time: {
-                  type: 'string'
-                }
-              }
-            }
-          }
+                  type: "string",
+                },
+              },
+            },
+          },
         },
-        encrypted: [
-          'emails'
-        ]
-      }
+        encrypted: ["emails"],
+      },
     },
     sessions: {
       schema: {
         version: 0,
-        primaryKey: 'id',
-        type: 'object',
+        primaryKey: "id",
+        type: "object",
         properties: {
           id: {
-            type: 'string',
-            maxLength: 42
+            type: "string",
+            maxLength: 42,
           },
           user: {
-            type: 'string'
+            type: "string",
           },
           expiry: {
-            type: 'string'
+            type: "string",
           },
           time: {
-            type: 'string'
-          }
-        }
-      }
-    }
-  }
+            type: "string",
+          },
+        },
+      },
+    },
+  };
 }

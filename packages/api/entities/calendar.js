@@ -1,113 +1,117 @@
-import { EntitySchema, wrap } from '@mikro-orm/core'
+import { EntitySchema, wrap } from "@mikro-orm/core";
 
 export const CalendarManager = new EntitySchema({
-  name: 'CalendarManager',
+  name: "CalendarManager",
   embeddable: true,
   properties: {
     ref: {
-      type: 'string'
+      type: "string",
     },
     t: {
-      type: 'string',
-      nullable: true
-    }
-  }
-})
+      type: "string",
+      nullable: true,
+    },
+  },
+});
 
 export const CalendarConfigEntity = new EntitySchema({
-  name: 'CalendarConfig',
+  name: "CalendarConfig",
   embeddable: true,
   properties: {
     name: {
-      type: 'string'
+      type: "string",
     },
     slug: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     subs: {
-      type: 'number',
-      nullable: true
+      type: "number",
+      nullable: true,
     },
     avatarBlob: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     img: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     backdropImg: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     headerBlob: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     description: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     refs: {
-      type: 'object',
-      nullable: true
-    }
-  }
-})
+      type: "object",
+      nullable: true,
+    },
+  },
+});
 
 export class Calendar {
-  async view (ctx, opts = {}) {
-    const c = wrap(this).toJSON()
+  async view(ctx, opts = {}) {
+    const c = wrap(this).toJSON();
 
-    let events
+    let events;
     if (opts.events !== false) {
-      events = []
+      events = [];
       for (const e of await ctx.db.events.find({ calendarDid: c.did })) {
-        events.push(await e.view(ctx, Object.assign(opts, { calendar: this })))
+        events.push(await e.view(ctx, Object.assign(opts, { calendar: this })));
       }
     }
-    let concepts
+    let concepts;
     if (opts.concepts !== false || opts.concepts !== false) {
       if (ctx.cache?.calendar[this.did]?.concepts) {
-        concepts = ctx.cache?.calendar[this.did]?.concepts
+        concepts = ctx.cache?.calendar[this.did]?.concepts;
       } else {
-        const conceptsArr = await ctx.db.concepts.find({ calendarDid: c.did })
+        const conceptsArr = await ctx.db.concepts.find({ calendarDid: c.did });
         if (conceptsArr) {
-          concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
+          concepts = await Promise.all(
+            conceptsArr.map((i) =>
+              i.view(ctx, Object.assign(opts, { calendar: this })),
+            ),
+          );
         }
       }
     }
 
-    let rooms
+    let rooms;
     if (ctx.cache?.calendar[this.did]?.rooms) {
-      rooms = ctx.cache?.calendar[this.did]?.rooms
+      rooms = ctx.cache?.calendar[this.did]?.rooms;
     } else {
-      const roomsQuery = await ctx.db.rooms.find({ repo: this.did })
+      const roomsQuery = await ctx.db.rooms.find({ repo: this.did });
       if (roomsQuery) {
-        rooms = await Promise.all(roomsQuery.map(r => r.view(ctx)))
+        rooms = await Promise.all(roomsQuery.map((r) => r.view(ctx)));
         if (!ctx.cache) {
-          ctx.cache = {}
+          ctx.cache = {};
         }
         if (!ctx.cache.calendar) {
-          ctx.cache.calendar = {}
+          ctx.cache.calendar = {};
         }
-        ctx.cache.calendar[this.did] = rooms
+        ctx.cache.calendar[this.did] = rooms;
       }
     }
 
-    const baseUrl = `/${c.handle?.replace('.' + ctx.api.config.domain, '') || c.id}`
-    const url = `https://${ctx.api.config.domain}${baseUrl}`
-    const handleUrl = c.handle
+    const baseUrl = `/${c.handle?.replace("." + ctx.api.config.domain, "") || c.id}`;
+    const url = `https://${ctx.api.config.domain}${baseUrl}`;
+    const handleUrl = c.handle;
 
-    let userContext, managers
+    let userContext, managers;
     if (ctx.user) {
-      const isManager = c.managersArray.includes(ctx.user.did)
+      const isManager = c.managersArray.includes(ctx.user.did);
       userContext = {
-        isManager
-      }
+        isManager,
+      };
       if (isManager) {
-        managers = c.managers
+        managers = c.managers;
       }
     }
 
@@ -125,42 +129,42 @@ export class Calendar {
       url,
       handleUrl,
       $userContext: userContext,
-      managers
-    }
+      managers,
+    };
   }
 }
 
 export const CalendarSchema = new EntitySchema({
   class: Calendar,
-  name: 'Calendar',
-  extends: 'BaseDidEntity',
+  name: "Calendar",
+  extends: "BaseDidEntity",
   properties: {
     visibility: {
-      type: 'string',
-      enum: ['public', 'unlisted', 'private'],
-      onCreate: (obj) => obj.visibility || 'public'
+      type: "string",
+      enum: ["public", "unlisted", "private"],
+      onCreate: (obj) => obj.visibility || "public",
     },
     personal: {
-      type: 'boolean',
+      type: "boolean",
       nullable: true,
-      onCreate: () => false
+      onCreate: () => false,
     },
     config: {
-      kind: 'embedded',
-      entity: 'CalendarConfig',
-      onCreate: () => new CalendarConfig()
+      kind: "embedded",
+      entity: "CalendarConfig",
+      onCreate: () => new CalendarConfig(),
     },
     managersArray: {
-      type: 'array',
+      type: "array",
       nullable: true,
-      onCreate: obj => (obj.managers || []).map(m => m.ref),
-      onUpdate: obj => (obj.managers || []).map(m => m.ref)
+      onCreate: (obj) => (obj.managers || []).map((m) => m.ref),
+      onUpdate: (obj) => (obj.managers || []).map((m) => m.ref),
     },
     managers: {
-      kind: 'embedded',
-      entity: 'CalendarManager',
+      kind: "embedded",
+      entity: "CalendarManager",
       onCreate: () => [],
-      array: true
-    }
-  }
-})
+      array: true,
+    },
+  },
+});

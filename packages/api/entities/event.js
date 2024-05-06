@@ -1,138 +1,135 @@
-import { EntitySchema, wrap } from '@mikro-orm/core'
-import { ObjectId } from '../lib/db.js'
-import { URI } from 'yaml-language-server'
+import { EntitySchema, wrap } from "@mikro-orm/core";
+import { ObjectId } from "../lib/db.js";
+import { URI } from "yaml-language-server";
 
 export const EventConfig = new EntitySchema({
-  name: 'EventConfig',
+  name: "EventConfig",
   embeddable: true,
   properties: {
     slug: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     name: {
-      type: 'string'
+      type: "string",
     },
     mode: {
-      type: 'string',
+      type: "string",
       nullable: true,
-      enum: [
-        'offline',
-        'online',
-        'mixed',
-      ]
+      enum: ["offline", "online", "mixed"],
     },
     joinUrl: {
-      type: 'string',
-      format: 'url',
+      type: "string",
+      format: "url",
       nullable: true,
     },
     dateStart: {
-      type: 'date',
-      format: 'datetime'
+      type: "date",
+      format: "datetime",
     },
     dateEnd: {
-      type: 'date',
-      format: 'datetime'
+      type: "date",
+      format: "datetime",
     },
     timezone: {
-      type: 'string',
+      type: "string",
       nullable: true,
     },
     img: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     placeName: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     placeCountry: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     placeCity: {
-      type: 'string',
-      nullable: true
+      type: "string",
+      nullable: true,
     },
     placeRestrictedToGuests: {
-      type: 'boolean',
+      type: "boolean",
       nullable: true,
     },
     description: {
-      type: 'string',
-      nullable: true
-    }
-  }
-})
+      type: "string",
+      nullable: true,
+    },
+  },
+});
 
 export class Event {
-  async view (ctx, opts = {}) {
+  async view(ctx, opts = {}) {
     const json = {
       id: this.id,
       calendarDid: this.calendarDid,
       did: this.did,
-      ...wrap(this.config).toJSON()
-    }
+      ...wrap(this.config).toJSON(),
+    };
 
     if (!json.mode) {
-      json.mode = json.placeCountry ? 'offline' : 'online'
+      json.mode = json.placeCountry ? "offline" : "online";
     }
 
-    const calendar = typeof (opts.calendar) === 'object'
-      ? opts.calendar
-      : await ctx.db.calendars.findOne({ did: this.calendarDid })
+    const calendar =
+      typeof opts.calendar === "object"
+        ? opts.calendar
+        : await ctx.db.calendars.findOne({ did: this.calendarDid });
 
-    if (typeof (opts.calendar) !== 'object') {
-      json.calendar = await calendar.view(ctx, { events: false })
+    if (typeof opts.calendar !== "object") {
+      json.calendar = await calendar.view(ctx, { events: false });
     }
 
-    json.handleUrl = calendar.handle + ':' + (json.slug || json.id)
-    json.baseUrl = '/' + json.handleUrl
+    json.handleUrl = calendar.handle + ":" + (json.slug || json.id);
+    json.baseUrl = "/" + json.handleUrl;
 
     // json.guestCountNative = (json.guestsNative || []).length
     // json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)
-    return json
+    return json;
   }
 }
 
 export const schema = new EntitySchema({
-  name: 'Event',
+  name: "Event",
   class: Event,
-  extends: 'BaseEntity',
+  extends: "BaseEntity",
   properties: {
     calendarDid: {
-      type: 'string',
+      type: "string",
     },
     slug: {
-      type: 'string',
+      type: "string",
       unique: true,
-      onCreate: obj => obj.config.slug,
-      onUpdate: obj => obj.config.slug,
-      nullable: true
+      onCreate: (obj) => obj.config.slug,
+      onUpdate: (obj) => obj.config.slug,
+      nullable: true,
     },
     config: {
-      kind: 'embedded',
-      entity: 'EventConfig'
+      kind: "embedded",
+      entity: "EventConfig",
     },
     did: {
-      type: 'string',
+      type: "string",
       unique: true,
-      nullable: true
+      nullable: true,
     },
     handle: {
-      type: 'string',
-      format: 'handle',
+      type: "string",
+      format: "handle",
       nullable: true,
-      unique: true
-    }
-  }
-})
+      unique: true,
+    },
+  },
+});
 
 class Concept extends Event {}
 
 export const ConceptSchema = new EntitySchema({
   class: Concept,
-  name: 'Concept',
-  extends: 'Event'
-})
+  name: "Concept",
+  extends: "Event",
+});

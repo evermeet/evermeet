@@ -1,28 +1,28 @@
-import { EntitySchema, wrap } from '@mikro-orm/core'
-import { ObjectId } from '../lib/db.js'
+import { EntitySchema, wrap } from "@mikro-orm/core";
+import { ObjectId } from "../lib/db.js";
 
 export class Session {}
 
 export const schema = new EntitySchema({
-  name: 'Session',
+  name: "Session",
   class: Session,
   properties: {
     _id: {
-      type: 'string',
+      type: "string",
       maxLength: 32,
       primary: true,
-      onCreate: () => ObjectId()
+      onCreate: () => ObjectId(),
     },
     userId: {
-      type: 'string'
+      type: "string",
     },
     token: {
-      type: 'string'
+      type: "string",
     },
     createdOn: {
-      type: 'string',
-      format: 'date-time',
-      onCreate: () => (new Date()).toISOString()
-    }
-  }
-})
+      type: "string",
+      format: "date-time",
+      onCreate: () => new Date().toISOString(),
+    },
+  },
+});

@@ -1,87 +1,82 @@
-import { parse, stringify } from 'yaml'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import _ from 'lodash'
+import { parse, stringify } from "yaml";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import _ from "lodash";
 import { WASMagic } from "wasmagic";
 const magic = await WASMagic.create();
 
-export function detect (buffer) {
-  return magic.detect(buffer)
+export function detect(buffer) {
+  return magic.detect(buffer);
 }
 
-export function loadFile (fn, enc = 'utf-8') {
-  return readFileSync(fn, enc === 'buffer' ? null : enc)
+export function loadFile(fn, enc = "utf-8") {
+  return readFileSync(fn, enc === "buffer" ? null : enc);
 }
 
-export function loadYaml (fn) {
-  return parse(loadFile(fn, 'utf-8'))
+export function loadYaml(fn) {
+  return parse(loadFile(fn, "utf-8"));
 }
 
-export function loadFileWithInfo (fn, enc) {
-  const stat = statSync(fn)
+export function loadFileWithInfo(fn, enc) {
+  const stat = statSync(fn);
   return {
     size: stat.size,
-    data: loadFile(fn, enc)
-  }
+    data: loadFile(fn, enc),
+  };
 }
 
-export function listDir (dir) {
-  return readdirSync(dir)
+export function listDir(dir) {
+  return readdirSync(dir);
 }
 
-export function loadYamlDir (dir) {
-  const data = {}
+export function loadYamlDir(dir) {
+  const data = {};
   for (const fn of readdirSync(dir)) {
-    const fp = join(dir, fn)
+    const fp = join(dir, fn);
     if (statSync(fp).isDirectory()) {
-      data[fn] = loadYamlDir(fp)
-      continue
+      data[fn] = loadYamlDir(fp);
+      continue;
     }
-    const haveExt = fn.match(/^(.+)\.([^\.]+)$/)
-    const [n, ext] = haveExt ? haveExt.slice(1) : [fn, null]
-    if (ext !== 'yaml') {
-      continue
+    const haveExt = fn.match(/^(.+)\.([^\.]+)$/);
+    const [n, ext] = haveExt ? haveExt.slice(1) : [fn, null];
+    if (ext !== "yaml") {
+      continue;
     }
-    data[n] = loadYaml(fp)
+    data[n] = loadYaml(fp);
   }
-  return data
+  return data;
 }
 
-export function loadYamlDirList (dir, arr = [], p = []) {
+export function loadYamlDirList(dir, arr = [], p = []) {
   for (const fn of readdirSync(dir)) {
-    const fp = join(dir, fn)
-    const isDirectory = statSync(fp).isDirectory()
+    const fp = join(dir, fn);
+    const isDirectory = statSync(fp).isDirectory();
     if (isDirectory) {
-      loadYamlDirList(fp, arr, [...p, fn])
-      continue
+      loadYamlDirList(fp, arr, [...p, fn]);
+      continue;
     }
-    const haveExt = fn.match(/^(.+)\.([^\.]+)$/)
-    const [n, ext] = haveExt ? haveExt.slice(1) : [fn, null]
-    if (ext !== 'yaml') {
-      continue
+    const haveExt = fn.match(/^(.+)\.([^\.]+)$/);
+    const [n, ext] = haveExt ? haveExt.slice(1) : [fn, null];
+    if (ext !== "yaml") {
+      continue;
     }
-    arr.push({ id: [...p, n].join('.'), data: loadYaml(fp) })
+    arr.push({ id: [...p, n].join("."), data: loadYaml(fp) });
   }
-  return arr
+  return arr;
 }
 
-export function base64ToBytes (base64) {
-  const binString = atob(base64)
-  return Uint8Array.from(binString, (m) => m.codePointAt(0))
+export function base64ToBytes(base64) {
+  const binString = atob(base64);
+  return Uint8Array.from(binString, (m) => m.codePointAt(0));
 }
 
-export function bytesToBase64 (bytes) {
+export function bytesToBase64(bytes) {
   const binString = Array.from(bytes, (byte) =>
-    String.fromCodePoint(byte)
-  ).join('')
-  return btoa(binString)
+    String.fromCodePoint(byte),
+  ).join("");
+  return btoa(binString);
 }
 
-export const defaultsDeep = _.defaultsDeep
+export const defaultsDeep = _.defaultsDeep;
 
-export {
-  stringify,
-  parse,
-  readdirSync,
-  join
-}
+export { stringify, parse, readdirSync, join };

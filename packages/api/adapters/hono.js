@@ -1,5 +1,5 @@
-import { Hono } from 'hono'
-import { swaggerUI } from '@hono/swagger-ui'
+import { Hono } from "hono";
+import { swaggerUI } from "@hono/swagger-ui";
 
 // app.get('/', (c) => c.text('Hono!'))
 
@@ -9,12 +9,12 @@ import { cors } from '@elysiajs/cors'
 import { logger as httpLogger } from '@bogeychan/elysia-logger' */
 
 export default function ({ evermeet }) {
-  let app
+  let app;
   return {
-    async init () {
-      const logger = evermeet.logger.child({ module: 'http', adapter: 'hono' })
+    async init() {
+      const logger = evermeet.logger.child({ module: "http", adapter: "hono" });
 
-      const app = new Hono()
+      const app = new Hono();
 
       // start adapter
       /* app = new Elysia({
@@ -51,67 +51,94 @@ export default function ({ evermeet }) {
           transport: evermeet.logTransport
         })) */
 
-      app.get('/_swagger', swaggerUI({ url: '/doc' }))
+      app.get("/_swagger", swaggerUI({ url: "/doc" }));
 
       for (const ep of evermeet.endpoints.list) {
-        const method = ep.lex.defs.main.type === 'procedure' ? 'post' : 'get'
+        const method = ep.lex.defs.main.type === "procedure" ? "post" : "get";
 
-        app[method](ep.id, async ({ error, query, body, headers, cookie, request, set }) => {
-          let out = {}
-          let input = ep.lex.defs.main.type === 'procedure' ? body : query
-          const encoding = headers['content-type'] || 'application/json'
+        app[method](
+          ep.id,
+          async ({ error, query, body, headers, cookie, request, set }) => {
+            let out = {};
+            let input = ep.lex.defs.main.type === "procedure" ? body : query;
+            const encoding = headers["content-type"] || "application/json";
 
-          if (input === undefined && ep.lex.defs.main.type === 'procedure' && ep.lex.defs.main.input.encoding === '*/*') {
-            // decode binary data
-            input = await request.arrayBuffer()
-          }
-
-          const session = headers.authorization?.replace(/^Bearer /, '') || cookie[evermeet.config.api.sessionName].value
-          out = await evermeet.request(ep.id, { input, encoding, headers, session })
-          if (out.error) {
-            return error(501, { error: out.error, message: out.message })
-          }
-          if (out.cookies) {
-            for (const cd of out.cookies) {
-              cookie[cd.key].set({ ...cd.config })
+            if (
+              input === undefined &&
+              ep.lex.defs.main.type === "procedure" &&
+              ep.lex.defs.main.input.encoding === "*/*"
+            ) {
+              // decode binary data
+              input = await request.arrayBuffer();
             }
-          }
-          if (out.encoding && out.encoding !== 'application/json') {
-            set.headers['content-type'] = out.encoding
 
-            return Buffer.from(out.body)
-          }
-          return out.body
-        }, {
-          query: ep.lex.defs.main.type === 'query' ? t.Any(ep.lex.defs.main.parameters) : null,
-          body: ep.lex.defs.main.type === 'procedure' ? t.Any(ep.lex.defs.main.input?.schema) : null,
-          response: {
-            200: t.Any(ep.lex.defs.main.output.schema),
-            501: t.Object({
-              error: t.String(),
-              message: t.Optional(t.String())
-            })
+            const session =
+              headers.authorization?.replace(/^Bearer /, "") ||
+              cookie[evermeet.config.api.sessionName].value;
+            out = await evermeet.request(ep.id, {
+              input,
+              encoding,
+              headers,
+              session,
+            });
+            if (out.error) {
+              return error(501, { error: out.error, message: out.message });
+            }
+            if (out.cookies) {
+              for (const cd of out.cookies) {
+                cookie[cd.key].set({ ...cd.config });
+              }
+            }
+            if (out.encoding && out.encoding !== "application/json") {
+              set.headers["content-type"] = out.encoding;
+
+              return Buffer.from(out.body);
+            }
+            return out.body;
           },
-          detail: {
-            summary: ep.id.replace('app.evermeet.', ''),
-            description: ep.lex.defs.main.description,
-            tags: ['app.evermeet.*']
-          }
-        })
-        logger.trace({ method: method.toUpperCase(), route: `${evermeet.config.api.prefix}/${ep.id}` }, 'Route created')
+          {
+            query:
+              ep.lex.defs.main.type === "query"
+                ? t.Any(ep.lex.defs.main.parameters)
+                : null,
+            body:
+              ep.lex.defs.main.type === "procedure"
+                ? t.Any(ep.lex.defs.main.input?.schema)
+                : null,
+            response: {
+              200: t.Any(ep.lex.defs.main.output.schema),
+              501: t.Object({
+                error: t.String(),
+                message: t.Optional(t.String()),
+              }),
+            },
+            detail: {
+              summary: ep.id.replace("app.evermeet.", ""),
+              description: ep.lex.defs.main.description,
+              tags: ["app.evermeet.*"],
+            },
+          },
+        );
+        logger.trace(
+          {
+            method: method.toUpperCase(),
+            route: `${evermeet.config.api.prefix}/${ep.id}`,
+          },
+          "Route created",
+        );
       }
       for (const ih of evermeet.internalEndpoints()) {
-        const url = ih.id
-        app.get(url, ih.handler)
-        logger.trace({ method: ih.id, route: url }, 'Internal route created')
+        const url = ih.id;
+        app.get(url, ih.handler);
+        logger.trace({ method: ih.id, route: url }, "Internal route created");
       }
-      return app
+      return app;
     },
-    async start () {
+    async start() {
       return app.listen({
         hostname: evermeet.config.api.host,
-        port: evermeet.config.api.port
-      })
-    }
-  }
+        port: evermeet.config.api.port,
+      });
+    },
+  };
 }

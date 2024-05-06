@@ -1,8 +1,7 @@
+import { Connector, fetchNextPage } from "../lib/connector.js";
 
-import { Connector, fetchNextPage } from '../lib/connector.js'
-
-function processEvent (d) {
-  const e = d.event
+function processEvent(d) {
+  const e = d.event;
   return {
     remoteId: e.api_id,
     name: e.name,
@@ -13,40 +12,38 @@ function processEvent (d) {
     placeCountry: e.geo_address_info?.country,
     placeCity: e.geo_address_info?.city,
     img: e.cover_url,
-    guests: d.featured_guests?.map(p => ({
+    guests: d.featured_guests?.map((p) => ({
       name: p.name,
       avatarUrl: p.avatar_url,
-      timezone: p.timezone
+      timezone: p.timezone,
     })),
-    hosts: d.hosts?.map(p => ({
+    hosts: d.hosts?.map((p) => ({
       name: p.name,
       avatarUrl: p.avatar_url,
-      timezone: p.timezone
+      timezone: p.timezone,
     })),
-    guestCount: d.guestCount
-  }
+    guestCount: d.guestCount,
+  };
 }
 
-async function inspect (ctx, url) {
-  const pg = await fetchNextPage(url)
-  const data = pg.initialData
+async function inspect(ctx, url) {
+  const pg = await fetchNextPage(url);
+  const data = pg.initialData;
 
-  const events = []
-  if (data.kind === 'event') {
-    events.push(processEvent(data.data))
-  } else if (data.kind === 'calendar') {
-    events.push(...data.data.featured_items.map(fi => processEvent(fi)))
+  const events = [];
+  if (data.kind === "event") {
+    events.push(processEvent(data.data));
+  } else if (data.kind === "calendar") {
+    events.push(...data.data.featured_items.map((fi) => processEvent(fi)));
   } else if (data.featured_items) {
-    events.push(...data.featured_items.map(fi => processEvent(fi)))
+    events.push(...data.featured_items.map((fi) => processEvent(fi)));
   }
   return {
-    events
-  }
+    events,
+  };
 }
 
 export default new Connector({
-  urlPatterns: [
-    /^https:\/\/lu\.ma\//
-  ],
-  inspect
-})
+  urlPatterns: [/^https:\/\/lu\.ma\//],
+  inspect,
+});

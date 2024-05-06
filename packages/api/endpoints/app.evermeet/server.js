@@ -1,9 +1,8 @@
-
-export function describeServer (server, { api }) {
+export function describeServer(server, { api }) {
   server.endpoint(async ({ user }) => {
-    const runtime = api.runtime
+    const runtime = api.runtime;
     return {
-      encoding: 'application/json',
+      encoding: "application/json",
       body: {
         did: `did:web:${api.config.domain}`,
         app: api.pkg.name,
@@ -12,9 +11,9 @@ export function describeServer (server, { api }) {
           adapter: api.config.api.adapter,
           runtime: runtime.name,
           runtimeVersion: runtime.version,
-          arch: runtime.arch
-        }
-      }
-    }
-  })
+          arch: runtime.arch,
+        },
+      },
+    };
+  });
 }

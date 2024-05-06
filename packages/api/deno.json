@@ -1,15 +1,15 @@
 {
-    "imports": {
-      "@evermeet/did-plc-lib": "../did-plc-lib/src/index.ts",
-      "axios": "npm:axios",
-      "@atproto/common": "npm:@atproto/common",
-      "uint8arrays": "npm:uint8arrays",
-      "@ipld/dag-cbor": "npm:@ipld/dag-cbor",
-      "zod": "npm:zod",
-      "ajv-formats": "npm:ajv-formats",
-      "libsq": "npm:libsql"
-    },
-    "tasks": {
-        "run": "deno run --unstable-sloppy-imports --allow-env --allow-sys --allow-read --allow-ffi --allow-write=../../data --allow-net index.js"
-    }
+  "imports": {
+    "@evermeet/did-plc-lib": "../did-plc-lib/src/index.ts",
+    "axios": "npm:axios",
+    "@atproto/common": "npm:@atproto/common",
+    "uint8arrays": "npm:uint8arrays",
+    "@ipld/dag-cbor": "npm:@ipld/dag-cbor",
+    "zod": "npm:zod",
+    "ajv-formats": "npm:ajv-formats",
+    "libsq": "npm:libsql"
+  },
+  "tasks": {
+    "run": "deno run --unstable-sloppy-imports --allow-env --allow-sys --allow-read --allow-ffi --allow-write=../../data --allow-net index.js"
   }
+}

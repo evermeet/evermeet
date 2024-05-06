@@ -1,7 +1,7 @@
-import evermeetApp from './app.evermeet/index.js'
+import evermeetApp from "./app.evermeet/index.js";
 
 const endpoints = {
-  'app.evermeet': evermeetApp
-}
+  "app.evermeet": evermeetApp,
+};
 
-export default endpoints
+export default endpoints;

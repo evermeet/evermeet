@@ -1,10 +1,10 @@
-import { EntitySchema, wrap } from '@mikro-orm/core'
-import { encrypt, decrypt, PrivateKey } from 'eciesjs'
-import { bytesToBase64 } from '../lib/utils.js'
+import { EntitySchema, wrap } from "@mikro-orm/core";
+import { encrypt, decrypt, PrivateKey } from "eciesjs";
+import { bytesToBase64 } from "../lib/utils.js";
 
 export class Message {
-  async view (ctx) {
-    const m = wrap(this).toJSON()
+  async view(ctx) {
+    const m = wrap(this).toJSON();
 
     /* const key = JSON.parse(ctx.user.signingKey)
     //const sk = new PrivateKey()
@@ -18,35 +18,35 @@ export class Message {
     //m.decrypted = decrypt(sk.secret, enc).toString()
 */
     // load author
-    const authorQuery = await ctx.api.objectGet(ctx, m.authorDid)
+    const authorQuery = await ctx.api.objectGet(ctx, m.authorDid);
     if (authorQuery) {
-      const a = authorQuery.item
+      const a = authorQuery.item;
       m.author = {
         type: authorQuery.type,
         did: a.did,
         handle: a.handle,
         name: a.name,
         avatarBlob: a.avatarBlob,
-        baseUrl: a.baseUrl
-      }
+        baseUrl: a.baseUrl,
+      };
     }
-    return m
+    return m;
   }
 }
 
 export const schema = new EntitySchema({
-  name: 'Message',
-  extends: 'BaseEntity',
+  name: "Message",
+  extends: "BaseEntity",
   class: Message,
   properties: {
     room: {
-      type: 'string'
+      type: "string",
     },
     authorDid: {
-      type: 'string'
+      type: "string",
     },
     msg: {
-      type: 'string'
-    }
-  }
-})
+      type: "string",
+    },
+  },
+});

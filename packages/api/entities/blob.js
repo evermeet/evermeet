@@ -1,53 +1,53 @@
-import { EntitySchema, wrap } from '@mikro-orm/core'
+import { EntitySchema, wrap } from "@mikro-orm/core";
 
 class Blob {
-  view () {
+  view() {
     return {
       cid: this.cid,
       mimeType: this.mimeType,
-      size: this.size
-    }
+      size: this.size,
+    };
   }
 
-  raw () {
-    return this.data
+  raw() {
+    return this.data;
   }
 
-  toResponse () {
+  toResponse() {
     return {
       encoding: this.mimeType,
-      body: this.data
-    }
+      body: this.data,
+    };
   }
 }
 
 export const schema = new EntitySchema({
-  name: 'Blob',
+  name: "Blob",
   class: Blob,
   properties: {
     cid: {
-      type: 'string',
-      primary: true
+      type: "string",
+      primary: true,
     },
     dids: {
-      type: 'array',
+      type: "array",
       nullable: true,
-      onCreate: () => []
+      onCreate: () => [],
     },
     mimeType: {
-      type: 'string'
+      type: "string",
     },
     size: {
-      type: 'number'
+      type: "number",
     },
     data: {
-      type: 'blob',
-      lazy: true
+      type: "blob",
+      lazy: true,
     },
     createdOn: {
-      type: 'string',
-      format: 'date-time',
-      onCreate: () => new Date().toISOString()
-    }
-  }
-})
+      type: "string",
+      format: "date-time",
+      onCreate: () => new Date().toISOString(),
+    },
+  },
+});

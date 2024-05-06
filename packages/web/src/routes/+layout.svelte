@@ -21,6 +21,8 @@
   import CurrentTime from "../components/CurrentTime.svelte";
   import UserMenu from "../components/UserMenu.svelte";
   import SearchDialog from "../components/SearchDialog.svelte";
+  import ProgressBar from "../components/ProgressBar.svelte";
+
   import { onMount, setContext } from "svelte";
   import { connect, StringCodec } from "nats.ws";
 
@@ -184,6 +186,8 @@
 </div>
 
 <div class="">
+  <ProgressBar class="text-neutral-content/50" />
+
   <slot />
 
   <div class="w-full">

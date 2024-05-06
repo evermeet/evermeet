@@ -253,8 +253,8 @@ export class Evermeet {
 
     // if have `/` we know its event
     if (id.match(/:/)) {
-      const [ calendarId, eventId ] = id.split(':')
-      const calendar = await ctx.db.calendars.findOne({ $or: [ { handle: calendarId }, { handle: `${calendarId}.${this.config.domain}` } ] })
+      const [ calendarDid, eventId ] = id.split(':')
+      const calendar = await ctx.db.calendars.findOne({ $or: [ { handle: calendarDid }, { handle: `${calendarDid}.${this.config.domain}` } ] })
       if (calendar) {
         const found = await ctx.db.events.findOne({ slug: eventId })
         if (found) {

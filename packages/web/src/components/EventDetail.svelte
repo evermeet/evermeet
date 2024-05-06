@@ -7,6 +7,8 @@
     UserX,
     EyeOff,
     Webcam,
+    Eye,
+    Check,
   } from "lucide-svelte";
   import {
     format,
@@ -25,6 +27,9 @@
   import CalendarAvatar from "./CalendarAvatar.svelte";
   import { t, T, getCountryName } from "$lib/i18n";
   import { getContext } from "svelte";
+  import confetti from "canvas-confetti";
+
+  console.log(confetti);
 
   const { item } = $props();
 
@@ -43,6 +48,31 @@
   let userRegistered = $derived(
     user && user.events?.find((e) => e.ref === item.id) ? true : false,
   );
+
+  function runConfetti() {
+    confetti({
+      particleCount: 200,
+      spread: 140,
+      decay: 0.95,
+      angle: 100,
+      scalar: 1.5,
+      origin: {
+        x: 0,
+        y: 0.8,
+      },
+    });
+    confetti({
+      particleCount: 200,
+      angle: 100,
+      spread: 140,
+      decay: 0.95,
+      scalar: 1.5,
+      origin: {
+        x: 1,
+        y: 0.8,
+      },
+    });
+  }
 </script>
 
 <svelte:head>
@@ -134,9 +164,19 @@
     </div>
   </div>
   <div class="w-full">
-    <div class="mb-6">
+    <div class="">
       <h1 class="text-5xl font-semibold font-mono">{item.name}</h1>
-      <HandleBadge {item} size="small" type="event" />
+      <HandleBadge {item} size="small" type="event" margin="mt-2 mb-2" />
+    </div>
+    <div class="mb-6 flex gap-1.5">
+      <button class="btn btn-sm btn-base-300" onclick={runConfetti}
+        ><Check size="18" class="text-success" />
+        {$t`Attending`} <span class="badge badge-sm">1</span></button
+      >
+      <button class="btn btn-sm btn-neutral" onclick={runConfetti}
+        ><Eye size="18" />
+        {$t`Watch`} <span class="badge badge-sm">10</span></button
+      >
     </div>
     <div class="flex gap-4 items-center">
       <div class="w-10 h-10 border rounded-lg border-neutral">

@@ -14,9 +14,9 @@
   img: https://cdn.lu.ma/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/avatars/39/1bf939a4-c139-4008-96d8-ad5f729d94c3
   personalCalendar: he5Chae4chae
   calendarSubscriptions:
-    - ref: did:plc:jxj3fiv6sapedgpz36umxsew
+    - ref: did:mock:ethbrno
       t: 2024-01-01T20:44
-    - ref: did:plc:h4c53spyxe6wab5j7jonafju
+    - ref: did:mock:dod
       t: 2024-01-01T01:00
   calendarsManage:
     - ref: 2e9e2199afca02

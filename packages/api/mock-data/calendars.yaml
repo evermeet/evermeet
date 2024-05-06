@@ -13,7 +13,7 @@
 
 - id: 2e9e2199afca02
   handle: web3privacy.info
-  did: did:plc:jxj3fiv6sapedgpz36umxsew
+  did: did:mock:web3privacy
   managers:
   - ref: did:plc:524tuhdhh3m7li5gycdn6boe
   config:
@@ -93,8 +93,7 @@
       It includes events like conferences, hackathons, workshops, meetups, and
       parties from Jun 2 - 11.
 
-- id: chouwiwaiqu0iecae7thii1A
-  did: did:web:ducttape.events
+- did: did:mock:ducttape
   handle: ducttape.events
   config:
     name: Duct Tape Events
@@ -105,8 +104,7 @@
       web: https://ducttape.events/
       twitter: https://twitter.com/ducttape_events
 
-- id: 134025681d743f0
-  did: did:web:beerfi.gwei.cz
+- did: did:mock:beerfi
   handle: beerfi.evermeet.local
   config:
     name: BeerFi Prague
@@ -118,7 +116,7 @@
       senior in the Web3 sphere, our meetup is for you!
 
 - handle: jednadvacet.org
-  did: did:web:jednadvacet.org
+  did: did:mock:jednadvacet
   config:
     name: Jednadvacet.org
     subs: 1450
@@ -126,9 +124,8 @@
     description: >-
       Jsme neformální síť lokálních bitcoinových komunit. Propojujeme bitcoinery a pomáháme s adopcí bitcoinu.
 
-- id: b52cab85781d88
-  handle: dod.ngo
-  did: did:web:dod.ngo
+- handle: dod.ngo
+  did: did:mock:dod
   config:
     slug: dod
     name: Department of Decentralization (DoD)
@@ -139,8 +136,7 @@
     backdropImg: |
       https://raw.githubusercontent.com/Department-of-Decentralization/pb23-photos/main/1289.jpg
 
-- id: df5744efdd3368
-  did: did:plc:h4c53spyxe6wab5j7jonafju
+- did: did:mock:ethbrno
   handle: ethbrno.eth
   config:
     name: ETHBrno
@@ -151,7 +147,7 @@
       twitter: https://twitter.com/ethbrno
 
 - handle: paralelnipolis.evermeet.local
-  did: did:web:paralelnipolis.cz
+  did: did:mock:pp
   config:
     name: Paralelní Polis
     subs: 0
@@ -160,7 +156,7 @@
       art - science - technology ▲ independent of state ▲ @institutecrypto, Coworking, A/V studio ▲ @pizzadayprague ▲ HCPP ► http://hcpp.cz
 
 - handle: utxoprague.evermeet.local
-  did: did:web:utxo.cz
+  did: did:mock:utxo
   config:
     name: UTXO Prague
     subs: 134
@@ -169,9 +165,8 @@
       Otevřená kryptoměnová konference. Propojujeme komunity. 💚💜
     headerBlob: bafkreieyhez4obu4x3aqywto57wfkxdccmy4tal4jqqmihabcgh2nfvfjy
 
-- id: aiTah6Ax8ayihe
-  handle: monerokon.org
-  did: did:web:monerokon.org
+- handle: monerokon.org
+  did: did:mock:monerokon
   config:
     name: MoneroKon
     subs: 133
@@ -180,7 +175,7 @@
       Annual meeting of privacy advocates, cypherpunks, researchers, and developers and is designed to disseminate scientific and technical results in privacy-enhancing technologies and distributed systems.
 
 - handle: holkyvkryptu.evermeet.local
-  did: did:web:holkyvkryptu.cz
+  did: did:mock:hvk
   config:
     name: Holky v kryptu
     subs: 0
@@ -189,7 +184,7 @@
       Pomáháme přiblížit krypto témata jednoduše a tak, aby jim rozuměl každý. Vzdělávání,eventy,články,rozhovory. Co-organizujeme @utxoprague
   
 - handle: ethereum.evermeet.local
-  did: did:web:ethereum.org
+  did: did:mock:ef
   config:
     name: Ethereum Foundation
     avatarBlob: bafkreicbobdc2q4tjj3kxabn2esbih5nqeesaz3zr7ikbk7jiurtodnixy

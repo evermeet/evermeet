@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "prettier --write ."
   },
   "author": "",
   "license": "MIT",

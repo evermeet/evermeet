@@ -247,6 +247,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.38)
+      canvas-confetti:
+        specifier: ^1.9.3
+        version: 1.9.3
       carta-md:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.0.0-next.114)
@@ -4008,6 +4011,10 @@ packages:
   /canonicalize@2.0.0:
     resolution: {integrity: sha512-ulDEYPv7asdKvqahuAY35c1selLdzDwHqugK92hfkzvlDCwXRRelDkR+Er33md/PtnpqHemgkuDPanZ4fiYZ8w==}
     dev: false
+
+  /canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
+    dev: true
 
   /carta-md@4.0.1(svelte@5.0.0-next.114):
     resolution: {integrity: sha512-DlQgDU198cvYzCFV34HjDziFtus5rRqp2F0kSmS6EgDxxZ2FVnRMniCdgkNSEq/QTkqL5c/+PRNZGKTRuDk04A==}

@@ -31,6 +31,7 @@
     "@tailwindcss/typography": "^0.5.13",
     "@vvo/tzdb": "^6.136.0",
     "autoprefixer": "^10.4.19",
+    "canvas-confetti": "^1.9.3",
     "carta-md": "^4.0.1",
     "daisyui": "^4.10.2",
     "date-fns": "^3.6.0",

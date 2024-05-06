@@ -1,5 +1,5 @@
 - id: 5d79e6cf6cba90
-  calendarId: 2e9e2199afca02
+  calendarDid: did:mock:web3privacy
   config:
     slug: m24ams
     name: W3PN Meetup @ ETHDam 2024
@@ -71,7 +71,7 @@
     registration:
       enabled: true
 
-- calendarId: 2e9e2199afca02
+- calendarDid: did:mock:web3privacy
   did: "did:plc:online-event"
   config:
     slug: "online"
@@ -83,7 +83,7 @@
     description: |
       Hello
 
-- calendarId: chouwiwaiqu0iecae7thii1A
+- calendarDid: did:mock:ducttape
   did: "did:plc:xxxxxxxxxxxx"
   config:
     slug: "24"
@@ -99,7 +99,7 @@
 
       We want to tackle challenges that could arise in the next decade because we believe Ethereum will play a major role in solving economic, social, and environmental problems. The future is in your hands, anon! You decide whether we end up living in a dark, authoritarian dystopia or a bright, solarpunk utopia.
 
-- calendarId: 2e9e2199afca02
+- calendarDid: did:mock:web3privacy
   concept: true
   did: "did:plc:34239992399"
   config:
@@ -112,7 +112,7 @@
     placeCountry: de
     placeCity: Berlin
 
-- calendarId: 2e9e2199afca02
+- calendarDid: did:mock:web3privacy
   config:
     slug: m24dc
     name: W3PN Meetup @ Devcon 7
@@ -126,7 +126,7 @@
       http://localhost:3001/monerokon.org:2024
     timezone: Asia/Bangkok
 
-- calendarId: b52cab85781d88
+- calendarDid: did:mock:dod
   config:
     slug: ethberlin4
     name: ETHBerlin04
@@ -153,7 +153,7 @@
       For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
     web: https://ethberlin.org/
 
-- calendarId: 2e9e2199afca02
+- calendarDid: did:mock:web3privacy
   config:
     slug: w3pn-s24prg
     name: Web3Privacy Now Summit @ ETHPrague 2024
@@ -205,7 +205,7 @@
 
       This is pre-registration.
 
-- calendarId: df5744efdd3368
+- calendarDid: did:mock:ethbrno
   config:
     slug: 3
     name: ETHBrno 2024
@@ -221,7 +221,7 @@
     registration:
       enabled: true
 
-- calendarId: 134025681d743f0
+- calendarDid: did:mock:beerfi
   config:
     slug: beerfi23
     name: "Beerfi Prague - Web3 on-chain dev Meetup #23"
@@ -272,7 +272,7 @@
 
       We look forward to seeing you all Tuesday, March 26th
 
-- calendarId: aiTah6Ax8ayihe
+- calendarDid: did:mock:monerokon
   config:
     slug: 2024
     name: MoneroKon 2024

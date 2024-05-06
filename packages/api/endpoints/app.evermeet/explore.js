@@ -15,11 +15,11 @@ export function getExplore (server) {
     }
 
     const rooms = await ctx.db.rooms.find({ repo: { $in: calendars.map(c => c.did) } })
-    const concepts = await ctx.db.concepts.find({ calendarId: { $in: calendars.map(c => c.id) } })
+    const concepts = await ctx.db.concepts.find({ calendarDid: { $in: calendars.map(c => c.did) } })
     for (const c of calendars) {
       ctx.cache.calendar[c.did] = {
         rooms: rooms.filter(r => r.repo === c.did),
-        concepts: concepts.filter(_c => _c.calendarId === c.id)
+        concepts: concepts.filter(_c => _c.calendarDid === c.did)
       }
     }
 

@@ -18,7 +18,7 @@
       { name: "Location", col: "placeCity", type: "location" },
       //{ name: 'Country', col: 'placeCountry' },
       { name: "Guests", col: "guestCount" },
-      { name: "Calendar", col: "calendarId" },
+      { name: "Calendar", col: "calendarDid" },
     ],
   };
 

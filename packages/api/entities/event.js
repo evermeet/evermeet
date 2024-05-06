@@ -70,7 +70,7 @@ export class Event {
   async view (ctx, opts = {}) {
     const json = {
       id: this.id,
-      calendarId: this.calendarId,
+      calendarDid: this.calendarDid,
       did: this.did,
       ...wrap(this.config).toJSON()
     }
@@ -81,7 +81,7 @@ export class Event {
 
     const calendar = typeof (opts.calendar) === 'object'
       ? opts.calendar
-      : await ctx.db.calendars.findOne({ id: this.calendarId })
+      : await ctx.db.calendars.findOne({ did: this.calendarDid })
 
     if (typeof (opts.calendar) !== 'object') {
       json.calendar = await calendar.view(ctx, { events: false })
@@ -101,8 +101,8 @@ export const schema = new EntitySchema({
   class: Event,
   extends: 'BaseEntity',
   properties: {
-    calendarId: {
-      type: 'string'
+    calendarDid: {
+      type: 'string',
     },
     slug: {
       type: 'string',

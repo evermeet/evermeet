@@ -63,7 +63,7 @@ export class Calendar {
     let events
     if (opts.events !== false) {
       events = []
-      for (const e of await ctx.db.events.find({ calendarId: c.id })) {
+      for (const e of await ctx.db.events.find({ calendarDid: c.did })) {
         events.push(await e.view(ctx, Object.assign(opts, { calendar: this })))
       }
     }
@@ -72,7 +72,7 @@ export class Calendar {
       if (ctx.cache?.calendar[this.did]?.concepts) {
         concepts = ctx.cache?.calendar[this.did]?.concepts
       } else {
-        const conceptsArr = await ctx.db.concepts.find({ calendarId: c.id })
+        const conceptsArr = await ctx.db.concepts.find({ calendarDid: c.did })
         if (conceptsArr) {
           concepts = await Promise.all(conceptsArr.map(i => i.view(ctx, Object.assign(opts, { calendar: this }))))
         }

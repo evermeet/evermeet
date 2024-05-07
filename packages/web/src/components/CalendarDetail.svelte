@@ -119,12 +119,12 @@
         {:else if subscribed}
           <button
             class="btn btn-neutral"
-            on:click={calendarUnsubscribe(item.id)}>{$t`Subscribed`}</button
+            onclick={calendarUnsubscribe(item.id)}>{$t`Subscribed`}</button
           >
         {:else}
           <button
             class="btn btn-secondary"
-            on:click={calendarSubscribe(item.id)}>{$t`Subscribe`}</button
+            onclick={calendarSubscribe(item.id)}>{$t`Subscribe`}</button
           >
         {/if}
       </div>
@@ -165,7 +165,7 @@
           class="{selectedTab === tab.id
             ? 'active'
             : ''} flex items-center gap-1.5"
-          on:click={changeTab(tab.id)}
+          onclick={changeTab(tab.id)}
         >
           {#if tab.ico}
             <svelte:component

@@ -29,8 +29,6 @@
   import { getContext } from "svelte";
   import confetti from "canvas-confetti";
 
-  console.log(confetti);
-
   const { item } = $props();
 
   const { dateLocale: locale, timezone, lang } = getContext("locale");
@@ -100,25 +98,34 @@
       </div>
     {/if}
 
-    {#if item.calendar}
+    {#snippet calendarMiniBox(c, series = false)}
       <div class="mt-6">
         <div class="flex gap-4 items-center">
           <div class="w-10 h-10 aspect-square">
-            <CalendarAvatar calendar={item.calendar} size="40" />
+            <CalendarAvatar calendar={c} size="40" />
           </div>
           <div>
-            <div class="text-sm">{$t`Presented by`}</div>
+            <div class="text-sm">
+              {#if series}{$t`Series`}{:else}{$t`Presented by`}{/if}
+            </div>
             <div class="font-medium">
-              <a href={item.calendar.baseUrl}>{item.calendar.name}</a>
+              <a href={c.baseUrl}>{c.name}</a>
             </div>
           </div>
         </div>
-        {#if item.calendar.description}
+        {#if c.description}
           <div class="mt-4 text-sm text-base-content/75">
-            {item.calendar.description}
+            {c.description}
           </div>
         {/if}
       </div>
+    {/snippet}
+
+    {#if item.calendar}
+      {@render calendarMiniBox(item.calendar, !!item.calendar.parent)}
+      {#if item.calendar.parent}
+        {@render calendarMiniBox(item.calendar.parent)}
+      {/if}
     {/if}
 
     {#if item.hosts}
@@ -132,7 +139,7 @@
           <div class="flex gap-2 mb-2">
             <div class="w-6 h-6">
               <img
-                class="rounded-full w-6 h-6 aspect-square"
+                class="rounded-full w-6 h-6 aspect-square object-cover"
                 src={host.img}
                 alt={host.name}
               />
@@ -324,11 +331,44 @@
       <div
         class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2"
       >
-        <div class="font-mono text-sm">{$t`About Event`}</div>
+        <h2 class="font-mono text-sm">{$t`About Event`}</h2>
       </div>
 
       <div class="mt-4 prose">
         {@html parse(item.description)}
+      </div>
+    {/if}
+    {#if item.peopleLists && item.peopleLists.length > 0}
+      <div
+        class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2"
+      >
+        <h2 class="font-mono text-sm">{$t`People`}</h2>
+      </div>
+      <div class="mt-4">
+        {#each item.peopleLists as pl}
+          <div class="mb-6 relative">
+            <h3 class="text-lg">{pl.name} ({pl.people.length})</h3>
+            <div class="mt-4 relative grid grid-cols-5 gap-1.5 overflow-x-auto">
+              {#each pl.people.map( (p) => item.people.find((i) => i.id === p), ) as p}
+                <div class="shrink-0 group hover:bg-base-300 rounded-xl p-1.5">
+                  <div>
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      class="rounded-xl aspect-square object-cover w-full bg-base-300 opacity-85 group-hover:grayscale-0 group-hover:opacity-100"
+                    />
+                  </div>
+                  <div class="text-center mt-1.5 text-sm text-base-content/75">
+                    {p.name}
+                  </div>
+                  <div class="text-xs text-base-content/50 text-center mt-1.5">
+                    {p.caption}
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/each}
       </div>
     {/if}
   </div>

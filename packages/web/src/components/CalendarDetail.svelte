@@ -27,9 +27,7 @@
   import { imgBlobUrl } from "$lib/api";
   import { t } from "$lib/i18n";
 
-  export let item;
-  export let selectedTab;
-  export let params = {};
+  const { item, selectedTab, params } = $props();
 
   let tabs = [
     {
@@ -55,21 +53,26 @@
     tabs.push({ id: "chat", name: $t`Chat`, ico: ChatBubbleLeft });
   }
 
-  $: subscribed = $user?.calendarSubscriptions?.find(
-    (sc) => sc.ref === item.did,
+  const subscribed = $derived(
+    $user?.calendarSubscriptions?.find((sc) => sc.ref === item.did),
   );
-  $: managed = $user
-    ? item.managers?.find((mi) => mi.ref === $user.did)
-    : false;
+  const managed = $derived(
+    $user ? item.managers?.find((mi) => mi.ref === $user.did) : false,
+  );
 
-  $: isFullPage = selectedTab === null && !params.expand;
-  $: backdropImg =
+  const isFullPage = $derived(selectedTab === null && !params.expand);
+  const backdropImg = $derived(
     isFullPage &&
-    ((item.headerBlob && imgBlobUrl(item.did, item.headerBlob, 1000)) ||
-      item.backdropImg);
+      ((item.headerBlob && imgBlobUrl(item.did, item.headerBlob, 1000)) ||
+        item.backdropImg),
+  );
 
-  $: currentRoom = typeof params.room === "string" ? params.room : "general";
-  $: currentRoomObj = item.rooms.find((r) => r.slug === currentRoom);
+  const currentRoom = $derived(
+    typeof params.room === "string" ? params.room : "general",
+  );
+  const currentRoomObj = $derived(
+    item.rooms.find((r) => r.slug === currentRoom),
+  );
 
   function changeTab() {}
 </script>
@@ -236,10 +239,38 @@
   </div>
 {:else if selectedTab === null}
   <div class="page-wide">
+    {#if item.childrens?.length > 0}
+      <h2 class="text-2xl font-medium mt-6">{$t`Series`}</h2>
+      <div class="flex gap-0.5 mt-3">
+        {#each item.childrens as c}
+          <a
+            href={c.baseUrl}
+            class="py-3 px-4 hover:bg-base-300 rounded-xl flex gap-3 items-center"
+          >
+            <div>
+              <img
+                src={c.img}
+                alt={c.name}
+                class="rounded-lg aspect-square object-cover w-16"
+              />
+            </div>
+            <div class="text-left">
+              <div class="text-lg">{c.name}</div>
+              <div class="text-base-content/75 text-sm">1 events</div>
+            </div>
+          </a>
+        {/each}
+      </div>
+    {/if}
     <h2 class="text-2xl font-medium mt-6">{$t`Planned Events`}</h2>
-
     <div class="mt-6">
       <EventList events={item.events} />
     </div>
+    {#if item.pastEvents && item.pastEvents.length > 0}
+      <h2 class="text-2xl font-medium mt-6">{$t`Past Events`}</h2>
+      <div class="mt-6 transition-opacity">
+        <EventList events={item.pastEvents} rowClass="" />
+      </div>
+    {/if}
   </div>
 {/if}

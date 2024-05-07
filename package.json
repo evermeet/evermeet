@@ -11,7 +11,7 @@
     "build": "pnpm run -r build",
     "format": "pnpm run -r format",
     "docker": "sudo docker build --platform linux/amd64 -t evermeet/evermeet . --progress=plain",
-    "docker-run": "sudo docker run -p 3030:3000 treecz/evermeet"
+    "docker-run": "sudo docker run -p 3030:3000 evermeet/evermeet"
   },
   "workspaces": [
     "./packages/api",

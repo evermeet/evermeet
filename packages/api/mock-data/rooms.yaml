@@ -1,8 +1,8 @@
 - id: testRoomId
-  repo: did:plc:jxj3fiv6sapedgpz36umxsew
+  repo: did:mock:web3privacy
   slug: general
 
-- repo: did:plc:jxj3fiv6sapedgpz36umxsew
+- repo: did:mock:web3privacy
   slug: support
 
 - id: n1w5lhdnpsujxz7kvd3a2tix

@@ -104,6 +104,34 @@
       web: https://ducttape.events/
       twitter: https://twitter.com/ducttape_events
 
+- did: did:mock:ethprague
+  handle: ethprague.com
+  parent: did:mock:ducttape
+  config:
+    name: ETHPrague
+    img: https://i.imgur.com/4VSptPe.jpg
+    description: |
+      Conference & Hackathon 🗓 May 31 - June 2, 2024 💬 https://t.me/ethprague
+    refs:
+      web: https://ethprague.com
+      twitter: https://twitter.com/ethprague
+
+- did: did:mock:ethzurich
+  handle: ethzurich.evermeet.local
+  parent: did:mock:ducttape
+  config:
+    name: EthereumZuri.ch
+    img: https://pbs.twimg.com/profile_images/1755880822551285760/kO3ktuLW_400x400.jpg
+    description: |
+      Community Conference by @uzh_blockchain & @ducttape_events ✨ 🗓 April 5-7, 2024 📍 University of Zurich, Irchel Campus
+
+- did: did:mock:dcxprague
+  handle: dcxprague.evermeet.local
+  parent: did:mock:ducttape
+  config:
+    name: DCxPrague
+    img: https://dcxprague.org/_nuxt/Logo.6a27c276.svg
+
 - did: did:mock:beerfi
   handle: beerfi.evermeet.local
   config:
@@ -135,6 +163,22 @@
       Collective of people from various crypto, decentralization and peer-to-peer communities in and around Berlin.
     backdropImg: |
       https://raw.githubusercontent.com/Department-of-Decentralization/pb23-photos/main/1289.jpg
+
+- handle: ethberlin.dod.ngo
+  did: did:mock:ethberlin
+  parent: did:mock:dod
+  config:
+    slug: ethberlin
+    name: ETHBerlin
+    img: https://media.licdn.com/dms/image/C4D0BAQEXDF1-J2AW3A/company-logo_200_200/0/1630458958790/ethberlin_logo?e=2147483647&v=beta&t=5VrZvUH5jsbW6iKDgVI76NK-2W1JKZOsLLDiECw6lEY
+
+- handle: protocolberg.dod.ngo
+  did: did:mock:protocolberg
+  parent: did:mock:dod
+  config:
+    slug: protocolberg
+    name: Protocol Berg
+    img: https://protocol.berlin/static/protocolBerg-149fefe892d6b8be11c85aecb66f274c.png
 
 - did: did:mock:ethbrno
   handle: ethbrno.eth

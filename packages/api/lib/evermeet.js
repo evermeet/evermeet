@@ -307,7 +307,10 @@ export class Evermeet {
         ],
       });
       if (calendar) {
-        const found = await ctx.db.events.findOne({ slug: eventId });
+        const found = await ctx.db.events.findOne({
+          slug: eventId,
+          calendarDid: calendar.did,
+        });
         if (found) {
           return {
             type: "event",

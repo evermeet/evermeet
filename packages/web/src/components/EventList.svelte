@@ -1,33 +1,45 @@
 <script>
   import { getContext } from "svelte";
-  import { format } from "$lib/date";
+  import { format, isSameYear } from "$lib/date";
   import EventBox from "./EventBox.svelte";
 
-  const { events } = $props();
+  const { events, rowClass } = $props();
   const { dateLocale: locale, timezone, lang } = getContext("locale");
 
-  function enhanced(arr) {
+  function getDays(arr) {
+    const out = [];
     for (const e of arr) {
-      e.date = format(new Date(e.dateStart), "yyyy-MM-dd");
+      const dt = format(new Date(e.dateStart), "yyyy-MM-dd");
+      let day = out.find((d) => d.day === dt);
+      if (!day) {
+        day = { day: dt, items: [] };
+        out.push(day);
+      }
+      day.items.push(e);
     }
-    return arr;
+    return out;
   }
 
-  let days = enhanced(events).map((e) => e.date);
+  let days = $derived(getDays(events));
 </script>
 
 {#if events.length > 0}
   <ul class="timeline timeline-vertical timeline-snap-icon">
     {#each days as day}
-      <li class="">
+      <li class={rowClass}>
         <hr />
         <div class="timeline-start p-2 items-start flex w-full h-full">
           <div>
             <div class="font-semibold">
-              {format(new Date(day), "MMM d", { locale })}
+              {format(
+                new Date(day.day),
+                "MMM d" +
+                  (!isSameYear(new Date(day.day), new Date()) ? ", y" : ""),
+                { locale },
+              )}
             </div>
             <div class="text-base-content/75">
-              {format(new Date(day), "EEEE", { locale })}
+              {format(new Date(day.day), "EEEE", { locale })}
             </div>
           </div>
         </div>
@@ -43,8 +55,8 @@
           </div>
         </div>
         <div class="timeline-end ml-4 w-full">
-          {#each events.filter((e) => e.date === day) as item}
-            <EventBox {item} />
+          {#each day.items as item}
+            <EventBox {item} id={item.id} />
           {/each}
         </div>
         <hr />

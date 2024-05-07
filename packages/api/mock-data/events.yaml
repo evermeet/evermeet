@@ -83,10 +83,21 @@
     description: |
       Hello
 
-- calendarDid: did:mock:ducttape
+- calendarDid: did:mock:ethzurich
+  config:
+    slug: "2024"
+    name: EthereumZuri.ch 2024
+    dateStart: 2024-04-05T12:00Z
+    dateEnd: 2024-04-07T16:00Z
+    placeName: University of Zürich
+    placeCity: Zurich
+    placeCountry: ch
+    img: https://pbs.twimg.com/profile_images/1755880822551285760/kO3ktuLW_400x400.jpg
+
+- calendarDid: did:mock:ethprague
   did: "did:plc:xxxxxxxxxxxx"
   config:
-    slug: "24"
+    slug: "2024"
     name: ETHPrague 2024
     dateStart: 2024-05-31T12:00
     dateEnd:  2024-06-02T15:00
@@ -98,6 +109,803 @@
       ETHPrague isn't looking for the next get rich quick scheme or groundbreaking DeFi apps. Instead, it's an event focused on the future of Ethereum and potential concepts or applications that don't yet exist.
 
       We want to tackle challenges that could arise in the next decade because we believe Ethereum will play a major role in solving economic, social, and environmental problems. The future is in your hands, anon! You decide whether we end up living in a dark, authoritarian dystopia or a bright, solarpunk utopia.
+    hosts:
+      - name: Josef J
+        img: https://images.ctfassets.net/6j1me6tz5h39/5X9wAif6zHdyIKQDyfwvDt/6770d2f4111cbdddc02fd8f882545c8c/Josef_J.jpg
+      - name: Dan
+        img: https://ducttape.events/wp-content/uploads/2023/02/ezgif.com-optimize-420.gif
+      - name: Vojta
+        img: https://ducttape.events/wp-content/uploads/2023/02/ezgif.com-optimize-42.gif
+      - name: Dominik
+        img: https://ducttape.events/wp-content/uploads/2023/02/giphy-3.gif
+    people:
+      - id: vlad-zamfir
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2WrZ7NSe70cfRMBwMnyQBy/573f20ee1b4e71e681e83bdb7f4b88bf/Vlad_Zamfir.jpg
+        ref:
+          twitter: https://twitter.com/VladZamfir
+        name: Vlad Zamfir
+        roles:
+          - speaker
+        caption: null
+      - id: cathie
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2MGkGj2osn0cTi4u3lFtWE/db14e16a0e7fa63c6aeb55b1c4fdd638/Cathie.jpg
+        ref:
+          twitter: https://twitter.com/drCathieSo_eth
+        name: Cathie
+        roles:
+          - speaker
+        caption: ORA
+      - id: josef-j
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5X9wAif6zHdyIKQDyfwvDt/6770d2f4111cbdddc02fd8f882545c8c/Josef_J.jpg
+        ref:
+          twitter: https://twitter.com/JosefJ_
+        name: Josef J
+        roles:
+          - speaker
+        caption: PWN DAO
+      - id: avihu-levy
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5lbufI6L4Nmemm4nmNQCnU/3c9c803d4e33877739a96ba3cd25c8a4/Avihu_Levy.jpeg
+        ref:
+          twitter: https://twitter.com/avihu28
+        name: Avihu Levy
+        roles:
+          - speaker
+        caption: 'StarkWare '
+      - id: stella-schaller
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6LNzhKpQTRYiZQ3nZitiNN/2de530bf67a5231f0b96df50fb5e8d18/image.png
+        ref:
+          twitter: https://stellaschaller.de
+        name: Stella Schaller
+        roles:
+          - speaker
+        caption: Reinventing Society
+      - id: nuno-loureiro
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6tlCfA5gVZHyJ0VGLnlBC7/2bcf323298021b7ee19e9828c5fb6fed/Nuno_Loureiro.jpg
+        ref:
+          twitter: https://twitter.com/nloureiro
+        name: Nuno Loureiro
+        roles:
+          - speaker
+        caption: Ethereum Foundation
+      - id: martina-bauerová
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4BLp6ZQ2dbHY7xJzK39zc0/b4beed80504af4373ccf1b5758b8995e/image.png
+        ref:
+          twitter: https://www.linkedin.com/in/bauermartina?originalSubdomain=cz
+        name: Martina Bauerová
+        roles:
+          - speaker
+        caption: 'Prague Institute of Planning & Development '
+      - id: qi-zhou
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3zzW7js3idDm6ed46Qc88/441cff9830bb184167fdf7eee18c2e93/Qi_Zhou.jpg
+        ref:
+          twitter: https://twitter.com/qc_qizhou
+        name: Qi Zhou
+        roles:
+          - speaker
+        caption: eth storage
+      - id: dcbuilder.eth
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1MuhUeaD9waY7xTjPnVJKB/182b8b58187a2c52e4f9d1b4103a5808/DCBuilder.png
+        ref:
+          twitter: https://twitter.com/dcbuild3r
+        name: dcbuilder.eth
+        roles:
+          - speaker
+        caption: WORLDCOIN
+      - id: kolby-ml
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/11wp6s9qWg2fIqoymvdcOp/8e2c9a81740d33c4dad4810a72cd051d/Kolby_ML.jpg
+        ref:
+          twitter: https://twitter.com/Kolby_ML
+        name: Kolby ML
+        roles:
+          - speaker
+        caption: 'Ethereum Foundation '
+      - id: dr.-hyun-joo-lim
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5Xnsis75otliQ9RYv3Gcda/77b727cc0ea9353ecfd35332c3fc7fcc/image.png
+        ref:
+          twitter: https://staffprofiles.bournemouth.ac.uk/display/hlim
+        name: Dr. Hyun-Joo Lim
+        roles:
+          - speaker
+        caption: Bournemouth University
+      - id: nick-gheorghita
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4aYiGgbGloK4qT2A6F5FwL/79024e6d585f8345aa4e6d6b71d3d8e6/Nick_Gheorghita.jpeg
+        ref:
+          twitter: https://www.linkedin.com/in/njgheorghita/
+        name: Nick Gheorghita
+        roles:
+          - speaker
+        caption: 'Ethereum Foundation '
+      - id: michal-převrátil
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/58phByQaYSUf4maJUSo5Ue/436e954ea7a5541964880d8f68fd57eb/Michal_P_evr_til.jpg
+        ref:
+          twitter: https://twitter.com/michprev
+        name: Michal Převrátil
+        roles:
+          - speaker
+        caption: Ackee Blockchain Security
+      - id: grace-rachmany
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/VHDskawzuG7aCJk6a2RuE/1725e8e321968b539591a7da3abb4423/Grace_Rachmany.jpg
+        ref:
+          twitter: https://twitter.com/GraceRachmany
+        name: Grace Rachmany
+        roles:
+          - speaker
+          - mentor
+        caption: 'SingularityNet DAO '
+      - id: kartik-talwar
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5wF21xXR7EzMvGeqxTVvoL/2640391ebc7ecc28ca80873b528cc02e/Kartik_Talwar.jpeg
+        ref:
+          twitter: https://twitter.com/TheRealKartik
+        name: Kartik Talwar
+        roles:
+          - judge
+        caption: ETHGlobal
+      - id: yulia-korovina
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1IXAOE1bSUs2GdG52tLhFY/77277f5a697d0e0ad7c419326373623c/Yulia_Korovina.jpeg
+        ref:
+          twitter: https://twitter.com/YuliaKorovina1
+        name: Yulia Korovina
+        roles:
+          - speaker
+          - mentor
+        caption: BEAST DAO
+      - id: mario-havel
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/7qkSw5hgEHZHfz47IOoPb5/b41c4fc2c6c2db93c629207c81f7d5b6/3FeDe54c_400x400_iyV3h1o.jpg
+        ref:
+          twitter: https://twitter.com/TMIYChao
+        name: Mario Havel
+        roles:
+          - speaker
+        caption: Ethereum Foundation
+      - id: stanley-qiufan-chen
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4QE04NYLm4PBY4aF7bTUp/87ea71aee190de6ae49c8b3a798feb95/image.png
+        ref:
+          twitter: https://twitter.com/chenqiufan?lang=en
+        name: Stanley Qiufan Chen
+        roles:
+          - speaker
+        caption: chenqiufan.cn
+      - id: tereza-bízková
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1W4MkHAY2WGpS6qQdJ3Aj0/f17f63b1872b70c427485e957223c507/Tereza_B_zkov_.jpg
+        ref:
+          twitter: https://twitter.com/TerezaBizkova
+        name: Tereza Bízková
+        roles:
+          - speaker
+        caption: Refi medelín
+      - id: stephen-ajayi
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5XtgQcfnC6C10k9aQE1mJ/f622fbeb6fbf38eeb97cbb1bae3a919b/Stephen_Ajayi.jpg
+        ref:
+          twitter: null
+        name: Stephen Ajayi
+        roles:
+          - speaker
+        caption: Hacken
+      - id: alexander-forshtat
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/0nmfrEduP84VzvTGfAFEC/8a1a0bf6ce88b7affb09919a148a65a8/alex.jpeg
+        ref:
+          twitter: https://twitter.com/erc4337
+        name: Alexander Forshtat
+        roles:
+          - speaker
+        caption: ERC-4337
+      - id: dr.-stefan-van-der-spek
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3DjkC78wSj6HotsBy4KcBt/c5049244e8efe835066e65ee76bc5a1e/image.png
+        ref:
+          twitter: https://www.linkedin.com/in/stefanvanderspek/?originalSubdomain=nl
+        name: Dr. Stefan van der Spek
+        roles:
+          - speaker
+          - mentor
+        caption: Delft University of Technology
+      - id: victor-munoz
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/430mFRb6H1AUOQQkI1PPO9/912cc8b768eb9b2ca241d8e41d1636d9/Victor_Munoz.png
+        ref:
+          twitter: https://twitter.com/Quantic___
+        name: Victor Munoz
+        roles:
+          - speaker
+        caption: metis
+      - id: helena-good
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5kIVz2V2a8DpMQgoBmn9Hf/d6c94bdcf266acd91cd6b4501b1ebc9e/image.png
+        ref:
+          twitter: https://twitter.com/helenamgood
+        name: Helena Good
+        roles:
+          - speaker
+        caption: 'Daydream Believers '
+      - id: thiago-brezinski
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6KG8liNJPh5RFISMj6BpGT/25ba7df10d878ea223851ad84ccf7f67/Thiago_Brezinski.jpeg
+        ref:
+          twitter: https://twitter.com/thiagobrez
+        name: Thiago Brezinski
+        roles:
+          - speaker
+        caption: 'Callstack '
+      - id: ben-greenberg
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/45iHX0UHOUHbsWigoe8GhD/9d3bc243e99879d7620278d6f9fd91b3/Ben_Greenberg.jpg
+        ref:
+          twitter: https://twitter.com/hummusonrails
+        name: Ben Greenberg
+        roles:
+          - speaker
+        caption: Fuel Labs
+      - id: brenda-loya
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4o08XupwV7ztyvSvd1JjGw/0c70c91e1068a6edd530dea6489270dc/Brenda_Loya.jpeg
+        ref:
+          twitter: https://twitter.com/JustBrendax
+        name: Brenda Loya
+        roles:
+          - speaker
+        caption: Tellor
+      - id: kaan-uzdogan
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6iV46GukwtORqHAoeScgYj/ed619776602efb7840f953ee9c452da9/Kaan_Uzdogan.JPEG
+        ref:
+          twitter: https://twitter.com/kaanuzdogan
+        name: Kaan Uzdogan
+        roles:
+          - speaker
+        caption: Ethereum Foundation
+      - id: sandusky
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/67dnHGcvt8IA1vp3N1kVjv/012c03e7cf6bc3c227a4d776f1f4f2ac/sandusky.png
+        ref:
+          twitter: https://twitter.com/sandusky_eth
+        name: sandusky
+        roles:
+          - speaker
+        caption: Fuel Labs
+      - id: daniel-ivanco
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3oLD2x1rFKyroGtc6coFRa/787f22a0e5a7e7abef8521a001c4cdda/Daniel_Ivanco.png
+        ref:
+          twitter: null
+        name: Daniel Ivanco
+        roles:
+          - speaker
+        caption: Node rpc
+      - id: laurence-kirk
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4v90YQ1odZdJL7qvFvLK5u/2caf5e2b76d4e00d1fa87a82974aadf3/e5ecaf7b4fa490013bd899069491c5d2.jpeg
+        ref:
+          twitter: https://twitter.com/extropyLaurence
+        name: Laurence Kirk
+        roles:
+          - speaker
+          - judge
+        caption: 'Extropy.IO '
+      - id: ventali-tan
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5LkHyGwsZpdDRfRyzaA24Z/4c1f483d8f536b6be8113b2f708c087e/Ventali_Tan.jpeg
+        ref:
+          twitter: https://twitter.com/Ventali_T
+        name: Ventali Tan
+        roles:
+          - speaker
+        caption: Delendum & Lita
+      - id: francesco-andreoli
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/15NonzYLxeHXUkfw7sFT0W/0a957b1e5a3a20c2e0edb6dda2820935/1669755252753.jpeg
+        ref:
+          twitter: https://twitter.com/francescoswiss
+        name: Francesco Andreoli
+        roles:
+          - speaker
+        caption: MetaMask
+      - id: eomji-park
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3nTzOcNQpM0X44FxXpbuHQ/c6d5b75015fe66e9e9717cde04b12162/Eomji_Park.jpg
+        ref:
+          twitter: https://twitter.com/eomjipark
+        name: Eomji Park
+        roles:
+          - judge
+          - speaker
+        caption: Encode Club
+      - id: baran-tekin
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4AIdue8maV3pmixiPa2vmK/8e9d76d97e1d492fb35319d7e4cac1f0/Baran_Tekin.jpg
+        ref:
+          twitter: https://twitter.com/tekin_io
+        name: Baran Tekin
+        roles:
+          - speaker
+        caption: Mento Labs
+      - id: martin-derka
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6R6fvt1sAnS8xFx0IqGwAd/ad5b805d5e4184842dccd7fe6b4fa949/Martin_Derka.jpeg
+        ref:
+          twitter: https://www.linkedin.com/in/mderka/?originalSubdomain=ca
+        name: Martin Derka
+        roles:
+          - speaker
+        caption: Zircuit
+      - id: adam-schinzel
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2ixqvB9vrbqxBcF6XQdgGY/74b8f326f5cb9bfe3e7511633122cb74/Adam_Schinzel.jpeg
+        ref:
+          twitter: https://twitter.com/0xadams_
+        name: Adam Schinzel
+        roles:
+          - speaker
+        caption: Trezor
+      - id: bernd-riedel
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4o5eMydWNdDyJlbzbqmCCS/8fb17d25f6fb1e84f2dc5fdaffc9c322/image.png
+        ref:
+          twitter: https://ellerystudio.com
+        name: Bernd Riedel
+        roles:
+          - speaker
+        caption: ELLERY STUDIO
+      - id: franzi
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1DNwhy0pVQlagUgbzMA6iD/6d9601982577c2b577f5d5da52cec715/Franziska_Heintel.jpeg
+        ref:
+          twitter: https://twitter.com/_franzihei
+        name: Franzi
+        roles:
+          - judge
+        caption: Ethereum Foundation
+      - id: gajesh-naik
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/45rrui6dOX4lJLuChI9Cjk/3e7e9f1bb99d5f9ccd6797c86922d1bd/Gajesh_Naik.png
+        ref:
+          twitter: https://twitter.com/gajeshnaik
+        name: Gajesh Naik
+        roles:
+          - speaker
+        caption: Eigen Labs
+      - id: yulu-pi
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3LewLZfdN2jLQeYIyRZIab/a2f435de0015de6a6601360c74b08c58/Yulu_Pi.jpeg
+        ref:
+          twitter: https://twitter.com/yulu_pi
+        name: Yulu Pi
+        roles:
+          - speaker
+        caption: University of Warwick & Cambridge
+      - id: larry-čermák
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/QvHx7hZgwcsFZ0uenzRey/88f38c484c52bcd71732bb5ccd0ecedc/Larry__erm_k.jpg
+        ref:
+          twitter: https://twitter.com/lawmaster
+        name: Larry Čermák
+        roles:
+          - judge
+        caption: The Block
+      - id: dr.-martin-warnke-
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2pAZ2LwsjnWbpG0oZMyHyb/e9879fc235d096242342477a27b7c6d5/image.png
+        ref:
+          twitter: https://www.leuphana.de/en/institutes/icam/team/martin-warnke.html
+        name: 'Dr. Martin Warnke '
+        roles:
+          - speaker
+        caption: University of Lüneburg
+      - id: eda-akturk
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1KtcVkjPVTn77JpSf8v31n/8d0c5015dfaab3e082cb8ba910d43e04/Eda_Akturk.jpg
+        ref:
+          twitter: https://twitter.com/edatweets_
+        name: Eda Akturk
+        roles:
+          - speaker
+        caption: BuidlGuidl
+      - id: marcin
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/AvHgRi8od7diSvgLJgWGU/0a84ea3b3e5630bef8dcdc347e603121/Marcin_Kazmierczak_picture_Q94HPer.jpg
+        ref:
+          twitter: https://twitter.com/Marcin_Kaz13
+        name: Marcin
+        roles:
+          - speaker
+        caption: RedStone
+      - id: javier-ron
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1AfxBHezK0KcXUk1SRuwvv/f61f1f5d9c2645773747f0e176021f73/Javier_Ron.jpeg
+        ref:
+          twitter: https://twitter.com/JavierRon
+        name: Javier Ron
+        roles:
+          - speaker
+        caption: KTH Royal Institute of Technology
+      - id: barbora-lišková
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/38aDt8FeKpqpp5nPiBacvk/b09674b20692819abf28e480a19cbe0e/Screenshot_2024-04-23_at_17.36.17.png
+        ref:
+          twitter: null
+        name: Barbora Lišková
+        roles:
+          - speaker
+        caption: 'Prague Institute of Planning & Development '
+      - id: devansh-mehta
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4qdWOk9bG3xEqeeOBuP9g4/a914529a0daf1d5b72099051e2870c34/Devansh_Mehta.jpg
+        ref:
+          twitter: https://twitter.com/TheDevanshMehta
+        name: Devansh Mehta
+        roles:
+          - speaker
+        caption: 'Ethereum Foundation '
+      - id: hanna-hadik
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2y0SiggVLuy9XB8tlCMGFi/b28fe06b9bc7ca6e1df1d51d7cab0e17/Hanna_Hadik.jpeg
+        ref:
+          twitter: https://twitter.com/ikbenhan
+        name: Hanna Hadik
+        roles:
+          - speaker
+        caption: Guild.xyz
+      - id: radek-svarz
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/7kEUgiMmdmpJZfTGXYORtf/636417c01d57a3dfd5c12ee950bd089c/Radek_Svarz.jpg
+        ref:
+          twitter: https://www.linkedin.com/in/radeksvarz/?originalSubdomain=cz
+        name: Radek Svarz
+        roles:
+          - speaker
+        caption: 'AlzheimerChain '
+      - id: regina-kanyu-wang-
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/7IPx3i4m6PDvaDs3HEFYDa/7e1952675d8abbc10b9b4f7606be23ed/image.png
+        ref:
+          twitter: >-
+            https://twitter.com/Regina_Kanyu?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor
+        name: 'Regina Kanyu Wang '
+        roles:
+          - speaker
+        caption: CoFutures/ UiO Humanities
+      - id: billy-rennekamp
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/59DPH7I9YCcSdMfKCBabIl/e80c7bfb115b693499138f9e0a878f7c/Billy_Rennekamp.jpg
+        ref:
+          twitter: https://twitter.com/billyrennekamp
+        name: Billy Rennekamp
+        roles:
+          - speaker
+        caption: Trifle Labs
+      - id: kassandra.eth
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1rbOUfyGMdjEGgX5D8w7Kq/f656708f57439efb23576ea279056d64/kassandra.eth.jpg
+        ref:
+          twitter: https://twitter.com/kassandraETH
+        name: kassandra.eth
+        roles:
+          - speaker
+        caption: Arrakis Finance
+      - id: asynchronous-phil
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4fPHqKehsb9kgWSoP61IET/364e8f9da48468327c04ef9c3e2ef235/Asynchronous_Phil.jpg
+        ref:
+          twitter: https://x.com/ph_lux
+        name: Asynchronous Phil
+        roles:
+          - speaker
+        caption: Lastic
+      - id: ali-nuraldin
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5moI4bPXyON3Tl4qEqp9Nw/40db08162f86faf82b8088369739da37/Ali_Nuraldin.jpg
+        ref:
+          twitter: https://twitter.com/Ali_run
+        name: Ali Nuraldin
+        roles:
+          - mentor
+        caption: Opium.Team
+      - id: paweł-zaremba
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3BmCKodNkySFGAzSApKv56/8133087487cd9b0f914ae93e5f393a33/Pawe__Zaremba.jpg
+        ref:
+          twitter: https://twitter.com/teghnet
+        name: Paweł Zaremba
+        roles:
+          - speaker
+        caption: ETHWarsaw / Chronicle.
+      - id: ondřej-sojka
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6nRJS0fHaT3t1ekCNcsy7T/2fcab2d7990581a20b6bb2f770be323e/Ond_ej_Sojka.jpg
+        ref:
+          twitter: https://twitter.com/nenosipapuce
+        name: Ondřej Sojka
+        roles:
+          - speaker
+        caption: Carmine Finance
+      - id: clara-gromaches
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4r56Xx6tRWh0qjyWT6AqEf/6f1a74c3ebc525c23a236035b50df973/Clara_Gromaches.jpg
+        ref:
+          twitter: https://twitter.com/claragromaches
+        name: Clara Gromaches
+        roles:
+          - speaker
+        caption: dOrg & ACT
+      - id: flynn
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/29Zobse0lfq2SiSLCfyhjF/a29a5b8dc5d6192ed197ab4840d3dfd3/Flynn.jpeg
+        ref:
+          twitter: https://twitter.com/Quix_xyz
+        name: Flynn
+        roles:
+          - speaker
+        caption: GitPaid
+      - id: tibor-tribus
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/348akYuw0gPLa5TsNtVtCT/311b4b1784217b34f4bf5d0dd3244159/Tibor_Tribus.png
+        ref:
+          twitter: https://twitter.com/TiborTribus
+        name: Tibor Tribus
+        roles:
+          - speaker
+        caption: Maya-ZK
+      - id: tim-robinson
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3qFIjqWkGCwJxCKYqNz7et/f2a7ee21464f95602ad64b2226b3c79c/Tim_Robinson.png
+        ref:
+          twitter: https://twitter.com/timjrobinson
+        name: Tim Robinson
+        roles:
+          - speaker
+        caption: BlueYard Capital
+      - id: diogo
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5PJwpyu4SpEpems9w5D8wf/9c97756ed582b92335f2b9c521bdb5b3/Diogo.jpg
+        ref:
+          twitter: https://twitter.com/diogo_balmeida
+        name: Diogo
+        roles:
+          - speaker
+        caption: Lightshift / ETHLisbon
+      - id: jayaditya-gupta
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3QZJVngcvW51F4LVwI1Ntl/b3015575460c8ea9480367eb4c6387dc/Jayaditya_Gupta.png
+        ref:
+          twitter: https://twitter.com/jayssj1
+        name: Jayaditya Gupta
+        roles:
+          - speaker
+        caption: PSE - Ethereum Foundation
+      - id: lauri-peltonen
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/4F5lMJmPXRbLkepeFkT05N/32e53b9c0bf7d47d8b7e79c51c961c27/Lauri_Peltonen.JPG
+        ref:
+          twitter: https://twitter.com/LauriPelto
+        name: Lauri Peltonen
+        roles:
+          - speaker
+        caption: Freelancer
+      - id: margrethe-kolstad-brekke-
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/heAjx2ozWhIRjUF5657Ej/9c53b59b9fb5e54a32730b92f7d65333/image.png
+        ref:
+          twitter: https://www.rjukansolarpunkacademy.com
+        name: 'Margrethe Kolstad Brekke '
+        roles:
+          - speaker
+        caption: Rjukan Solarpunk Academy
+      - id: scott-moore
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/25LKTpeYGI1cmiWrESQP9h/dd84e6df50c748418d992585078ffb7e/Scott_Moore.jpg
+        ref:
+          twitter: https://twitter.com/notscottmoore?s=21
+        name: Scott Moore
+        roles:
+          - judge
+        caption: open source enthusiast
+      - id: thomas-zeinzinger
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/aDeHF1AYGjLnjbSxdUpyu/689d930a3f37a8ecc83212bfbbec308b/Thomas_Zeinzinger.jpg
+        ref:
+          twitter: https://twitter.com/tze42
+        name: Thomas Zeinzinger
+        roles:
+          - speaker
+        caption: 'LAB10 COLLECTIVE / 7Energy '
+      - id: peter-grassberger
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/1rfixIStuM7whMOxitlCEm/1eb65418ed806f85b80206d1bfcc407a/Peter_Grassberger.jpeg
+        ref:
+          twitter: https://twitter.com/PeterTheOne
+        name: Peter Grassberger
+        roles:
+          - speaker
+        caption: lab10 collective
+      - id: akram-el-milligy
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/39DoTHyDyRCSjWGziguy6q/5ebe88b98b204043fd5db12eee7f7e76/Akram_El_Milligy.png
+        ref:
+          twitter: https://twitter.com/liquid4teur
+        name: Akram El Milligy
+        roles:
+          - speaker
+        caption: ledger
+      - id: eric-marti-haynes
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/2QXxwv9k0Wf1InLVE71vWf/7c5dcf50da9e53c9816fa101b1217046/Eric_Marti_Haynes.jpg
+        ref:
+          twitter: https://twitter.com/ericmartihaynes
+        name: Eric Marti Haynes
+        roles:
+          - speaker
+        caption: Nethermind
+      - id: tomo-tagami
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/78zprbliPiw3XBJEwfyWjg/e2704b17125b0a123a3683dcfde56c44/Tomo_Tagami.jpg
+        ref:
+          twitter: https://twitter.com/tomohiro_tagami
+        name: Tomo Tagami
+        roles:
+          - speaker
+        caption: Pheasant Network
+      - id: richard
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/7JDYAoXEmrAYaJktPFHdIG/70eb39ff5b848807798cadfb85e271fc/Richard_Liu.jpg
+        ref:
+          twitter: https://twitter.com/richardyliu
+        name: Richard
+        roles:
+          - mentor
+        caption: 0xParc // ZuPass
+      - id: silvan-andermatt
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/6mj4ubydNJCpbwNJ8Arlzf/a525d1c98a73fe859b775de38173e44c/Silvan_Andermatt.jpg
+        ref:
+          twitter: https://www.linkedin.com/in/silvanandermatt/?originalSubdomain=ch
+        name: Silvan Andermatt
+        roles:
+          - speaker
+        caption: Sielva Management AG; Greener tokens; Carrot Fndn.
+      - id: lukasz
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/26zNpnAJ9ITlXqiNjY5NS4/a206e23cefea9ca7a209b7c3187ba134/Lukasz.jpg
+        ref:
+          twitter: https://twitter.com/stoczek_eth
+        name: Lukasz
+        roles:
+          - speaker
+        caption: Mimic Finance / ETHWarsaw
+      - id: filip-rezabek
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/3oNaa1HKSU8t8OJhUeo9YR/2649418c194734128432ae6f5ae55975/Filip_Rezabek.png
+        ref:
+          twitter: https://twitter.com/rezabfil
+        name: Filip Rezabek
+        roles:
+          - judge
+        caption: Technical University of Munich
+      - id: anthony-beaumont
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/5SGMWr3bXm6Uhh2eeiQ5Nd/c4ff946f2a7defe89323886f495197e5/Anthony_Beaumont.jpg
+        ref:
+          twitter: https://twitter.com/anth0nybeaumont
+        name: Anthony Beaumont
+        roles:
+          - judge
+        caption: Encode Club
+      - id: pauline-barnades
+        img: >-
+          https://images.ctfassets.net/6j1me6tz5h39/691fnypiVZMmBXxmxxq2Au/3d9269cd334a9b8da557dec7a3a58c6a/Pauline_Barnades.jpeg
+        ref:
+          twitter: https://www.linkedin.com/in/pauline-barnades-moore/?originalSubdomain=se
+        name: Pauline Barnades
+        roles:
+          - mentor
+        caption: Mantle
+    peopleLists:
+      - id: speaker
+        name: Speakers
+        people:
+          - vlad-zamfir
+          - cathie
+          - josef-j
+          - avihu-levy
+          - stella-schaller
+          - nuno-loureiro
+          - martina-bauerová
+          - qi-zhou
+          - dcbuilder.eth
+          - kolby-ml
+          - dr.-hyun-joo-lim
+          - nick-gheorghita
+          - michal-převrátil
+          - grace-rachmany
+          - yulia-korovina
+          - mario-havel
+          - stanley-qiufan-chen
+          - tereza-bízková
+          - stephen-ajayi
+          - alexander-forshtat
+          - dr.-stefan-van-der-spek
+          - victor-munoz
+          - helena-good
+          - thiago-brezinski
+          - ben-greenberg
+          - brenda-loya
+          - kaan-uzdogan
+          - sandusky
+          - daniel-ivanco
+          - laurence-kirk
+          - ventali-tan
+          - francesco-andreoli
+          - baran-tekin
+          - martin-derka
+          - adam-schinzel
+          - bernd-riedel
+          - gajesh-naik
+          - yulu-pi
+          - dr.-martin-warnke-
+          - eda-akturk
+          - marcin
+          - javier-ron
+          - barbora-lišková
+          - devansh-mehta
+          - hanna-hadik
+          - radek-svarz
+          - regina-kanyu-wang-
+          - billy-rennekamp
+          - kassandra.eth
+          - asynchronous-phil
+          - paweł-zaremba
+          - ondřej-sojka
+          - clara-gromaches
+          - flynn
+          - tibor-tribus
+          - tim-robinson
+          - diogo
+          - jayaditya-gupta
+          - lauri-peltonen
+          - margrethe-kolstad-brekke-
+          - thomas-zeinzinger
+          - peter-grassberger
+          - akram-el-milligy
+          - eric-marti-haynes
+          - tomo-tagami
+          - silvan-andermatt
+          - lukasz
+      - id: judge
+        name: Judges
+        people:
+          - kartik-talwar
+          - eomji-park
+          - franzi
+          - larry-čermák
+          - scott-moore
+          - filip-rezabek
+          - anthony-beaumont
+      - id: mentor
+        name: Mentors
+        people:
+          - ali-nuraldin
+          - richard
+          - pauline-barnades
+
 
 - calendarDid: did:mock:web3privacy
   concept: true
@@ -126,9 +934,9 @@
       http://localhost:3001/monerokon.org:2024
     timezone: Asia/Bangkok
 
-- calendarDid: did:mock:dod
+- calendarDid: did:mock:ethberlin
   config:
-    slug: ethberlin4
+    slug: "4"
     name: ETHBerlin04
     dateStart: 2024-05-24T17:00
     dateEnd: 2024-05-26T20:00
@@ -155,7 +963,7 @@
 
 - calendarDid: did:mock:web3privacy
   config:
-    slug: w3pn-s24prg
+    slug: s24prg
     name: Web3Privacy Now Summit @ ETHPrague 2024
     dateStart: 2024-05-30T07:00
     dateEnd: 2024-05-31T04:00
@@ -221,9 +1029,88 @@
     registration:
       enabled: true
 
+- calendarDid: did:mock:ethbrno
+  config:
+    slug: 1
+    name: ETHBrno 2021
+    dateStart: 2021-10-09T07:00Z
+    dateEnd: 2021-10-09T18:20Z
+    placeName: KC Skála
+    placeCity: Brno
+    placeCountry: cz
+    img: https://docs.ethbrno.cz/_astro/avatar-univerzal.VDIORddO_18ykbB.webp
+    description: |
+      Otevřená komunitní konference a setkání příznivců decentralizovaných financí a smart-kontraktů.
+
+      Hlavní program plný přednášek a workshopů bude probíhat v sobotu 9. října v Komunitním centru Skála, ale doprovodný program připravujeme na celý víkend (8 - 10. října).
+
+- calendarDid: did:mock:ethbrno
+  config:
+    slug: 2
+    name:  ETHBrno² (2022)
+    dateStart: 2022-11-11T14:00Z
+    dateEnd: 2022-11-13T20:00Z
+    placeName: Impact Hub
+    placeCity: Brno
+    placeCountry: cz
+    timezone: Europe/Prague
+    img: https://2022.ethbrno.cz/cam2.png
+    people:
+      - id: nick-almond
+        name: Nick Almond
+        img: https://2022.ethbrno.cz/photos/contributors/nick-almond.jpg
+        caption: Building the next generation of DAOs with FactoryDAO
+      - id: owen-barnes
+        name: Owen Barnes
+        img: https://2022.ethbrno.cz/photos/contributors/owen-barnes.jpg
+        caption: Independent freedom adviser
+      - id: dcbuilder
+        name: dcbuilder.eth
+        img: https://2022.ethbrno.cz/photos/contributors/dcbuilder.jpg
+        caption: WorldCoin, devpill.me
+      - id: mykola-siusko
+        name: Mykola Siusko
+        img: https://2022.ethbrno.cz/photos/contributors/mykola-siusko.jpg
+        caption: Web3 fixer | Curing surveillance capitalism
+      - id: six
+        name: Six
+        img: https://2022.ethbrno.cz/photos/contributors/six.jpg
+        caption: CCTF founder
+      - id: lauri-peltonen
+        name: Lauri Peltonen
+        img: https://2022.ethbrno.cz/photos/contributors/lauri-peltonen.jpg
+        caption: Ethereum & StarkNet @ Equilibrium
+      - id: radek-svarz
+        name: Radek Švarz
+        img: https://2022.ethbrno.cz/photos/contributors/radek-svarz.jpg
+        caption: dCZK, Apus.finance
+      - id: danish-shabbir
+        name: Danish Shabbir
+        img: https://2022.ethbrno.cz/photos/contributors/danish-shabbir.jpg
+        caption: Privacy researcher and a fiction writer
+    peopleLists:
+      - name: Speakers
+        people:
+          - nick-almond
+          - owen-barnes
+          - dcbuilder
+          - mykola-siusko
+          - six
+          - lauri-peltonen
+          - radek-svarz
+          - danish-shabbir
+    description: |
+      ETHBrno² is an annual independent & open community hackathon for supporters of decentralised finance, smart contracts and Web3 happening in Brno, Czech Republic. ETHBrno² is the second, and we believe the best yet, edition.
+
+      This year we are focusing on privacy and security topics.
+
+      You can read more in the article "Announcing ETHBrno²" on Mirror.
+
+      #freedom #anonymity #non-kyc #encryption #selfsovereignty #p2p #opensource #web3 #smartcontracts #audits #vulnerabilities #analytics #wallets #scams #darkforest #mev #zeroknowledgeproofs #cypherpunk #lunarpunk #hackathon
+
 - calendarDid: did:mock:beerfi
   config:
-    slug: beerfi23
+    slug: "23"
     name: "Beerfi Prague - Web3 on-chain dev Meetup #23"
     dateStart: 2024-03-26T18:00
     dateEnd: 2024-03-26T21:00

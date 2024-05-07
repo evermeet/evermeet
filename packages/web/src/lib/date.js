@@ -12,7 +12,7 @@ import {
   getTimezoneOffset,
 } from "date-fns-tz";
 
-export { interval } from "date-fns";
+export { interval, isSameDay, isSameMonth, isSameYear } from "date-fns";
 
 // https://github.com/date-fns/date-fns/blob/main/src/locale/cs/_lib/formatLong/index.ts
 // https://github.com/date-fns/date-fns/blob/main/src/locale/en-US/_lib/formatLong/index.ts

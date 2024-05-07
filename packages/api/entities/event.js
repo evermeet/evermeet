@@ -59,6 +59,75 @@ export const EventConfig = new EntitySchema({
       type: "string",
       nullable: true,
     },
+    people: {
+      kind: "embedded",
+      entity: "EventPeople",
+      array: true,
+      onCreate: () => [],
+    },
+    peopleLists: {
+      kind: "embedded",
+      entity: "EventPeopleList",
+      array: true,
+      onCreate: () => [],
+    },
+    hosts: {
+      kind: "embedded",
+      entity: "EventHost",
+      array: true,
+      onCreate: () => [],
+    },
+  },
+});
+
+export const EventHost = new EntitySchema({
+  name: "EventHost",
+  embeddable: true,
+  properties: {
+    name: {
+      type: "string",
+    },
+    img: {
+      type: "string",
+      nullable: true,
+    },
+  },
+});
+
+export const EventPeople = new EntitySchema({
+  name: "EventPeople",
+  embeddable: true,
+  properties: {
+    id: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    img: {
+      type: "string",
+      nullable: true,
+    },
+    caption: {
+      type: "string",
+      nullable: true,
+    },
+  },
+});
+
+export const EventPeopleList = new EntitySchema({
+  name: "EventPeopleList",
+  embeddable: true,
+  properties: {
+    id: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    people: {
+      type: "array",
+    },
   },
 });
 
@@ -93,7 +162,7 @@ export class Event {
   }
 }
 
-export const schema = new EntitySchema({
+export const EventEntity = new EntitySchema({
   name: "Event",
   class: Event,
   extends: "BaseEntity",
@@ -103,7 +172,6 @@ export const schema = new EntitySchema({
     },
     slug: {
       type: "string",
-      unique: true,
       onCreate: (obj) => obj.config.slug,
       onUpdate: (obj) => obj.config.slug,
       nullable: true,

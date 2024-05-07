@@ -1,4 +1,5 @@
 import { EntitySchema, wrap } from "@mikro-orm/core";
+import { sortBy } from "lodash";
 
 export const CalendarManager = new EntitySchema({
   name: "CalendarManager",
@@ -60,13 +61,67 @@ export class Calendar {
   async view(ctx, opts = {}) {
     const c = wrap(this).toJSON();
 
+    let parent;
+    if (typeof opts.parent === "object") {
+      //parent = await opts.parent.view(ctx, Object.assign(opts, { childrens: false, parent: false }))
+    } else if (opts.parent !== false && c.parent) {
+      const pc = await ctx.db.calendars.findOne({ did: c.parent });
+      if (pc) {
+        parent = await pc.view(ctx, Object.assign(opts, { childrens: false }));
+      }
+    }
+
+    let childrens;
+    if (opts.childrens !== false) {
+      childrens = [];
+      for (const e of await ctx.db.calendars.find({ parent: c.did })) {
+        childrens.push(
+          await e.view(ctx, Object.assign(opts, { parent: this })),
+        );
+      }
+    }
+
+    const cals = [c.did];
+    if (childrens?.length > 0) {
+      cals.push(childrens.map((c) => c.did));
+    }
+
     let events;
     if (opts.events !== false) {
       events = [];
-      for (const e of await ctx.db.events.find({ calendarDid: c.did })) {
-        events.push(await e.view(ctx, Object.assign(opts, { calendar: this })));
+      for (const e of await ctx.db.events.find(
+        {
+          calendarDid: { $in: cals },
+          config: { dateEnd: { $gt: new Date().toISOString() } },
+        },
+        { orderBy: { config: { dateStart: 1 } } },
+      )) {
+        events.push(
+          await e.view(
+            ctx,
+            Object.assign(opts, {
+              calendar: childrens?.find((c) => c.did === e.calendarDid) || this,
+            }),
+          ),
+        );
       }
     }
+    let pastEvents;
+    if (opts.pastEvents !== false) {
+      pastEvents = [];
+      for (const e of await ctx.db.events.find(
+        {
+          calendarDid: { $in: cals },
+          config: { dateEnd: { $lt: new Date().toISOString() } },
+        },
+        { orderBy: { config: { dateEnd: -1 } } },
+      )) {
+        pastEvents.push(
+          await e.view(ctx, Object.assign(opts, { calendar: this })),
+        );
+      }
+    }
+
     let concepts;
     if (opts.concepts !== false || opts.concepts !== false) {
       if (ctx.cache?.calendar[this.did]?.concepts) {
@@ -122,7 +177,10 @@ export class Calendar {
       visibility: c.visibility,
       personal: c.personal,
       ...c.config,
+      parent,
+      childrens,
       events,
+      pastEvents,
       concepts,
       rooms,
       baseUrl,
@@ -148,6 +206,10 @@ export const CalendarSchema = new EntitySchema({
       type: "boolean",
       nullable: true,
       onCreate: () => false,
+    },
+    parent: {
+      type: "string",
+      nullable: true,
     },
     config: {
       kind: "embedded",

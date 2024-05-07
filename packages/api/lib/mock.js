@@ -12,6 +12,7 @@ export async function loadMockData(api) {
     ["messages.yaml", "Message"],
     ["blobs.yaml", "Blob"],
     ["rooms.yaml", "Room"],
+    ["watches.yaml", "Watch"],
   ];
 
   const loadBlob = (cid) => {

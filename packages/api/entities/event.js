@@ -153,8 +153,25 @@ export class Event {
       json.calendar = await calendar.view(ctx, { events: false });
     }
 
+    json.watchCount = await ctx.db.watches.count({
+      calendarDid: this.calendarDid,
+      eventId: this.id,
+    });
+
     json.handleUrl = calendar.handle + ":" + (json.slug || json.id);
     json.baseUrl = "/" + json.handleUrl;
+
+    if (ctx.user) {
+      json.$userContext = {
+        watching: Boolean(
+          await ctx.db.watches.count({
+            calendarDid: this.calendarDid,
+            eventId: this.id,
+            authorDid: ctx.user.did,
+          }),
+        ),
+      };
+    }
 
     // json.guestCountNative = (json.guestsNative || []).length
     // json.guestCountTotal = json.guestCountNative + (json.guestCount || 0)

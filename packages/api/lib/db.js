@@ -29,6 +29,7 @@ export async function initDatabase(api, conf) {
         blobs: em.getRepository("Blob"),
         messages: em.getRepository("Message"),
         rooms: em.getRepository("Room"),
+        watches: em.getRepository("Watch"),
         wrap,
       };
     },

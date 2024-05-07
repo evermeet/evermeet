@@ -117,14 +117,12 @@
         {#if item.$userContext?.isManager}
           <a href="/manage/calendar/{item.id}" class="btn btn-accent">Manage</a>
         {:else if subscribed}
-          <button
-            class="btn btn-neutral"
-            onclick={calendarUnsubscribe(item.id)}>{$t`Subscribed`}</button
+          <button class="btn btn-neutral" onclick={calendarUnsubscribe(item.id)}
+            >{$t`Subscribed`}</button
           >
         {:else}
-          <button
-            class="btn btn-secondary"
-            onclick={calendarSubscribe(item.id)}>{$t`Subscribe`}</button
+          <button class="btn btn-secondary" onclick={calendarSubscribe(item.id)}
+            >{$t`Subscribe`}</button
           >
         {/if}
       </div>

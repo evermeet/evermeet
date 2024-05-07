@@ -1,5 +1,4 @@
 import { EntitySchema, wrap } from "@mikro-orm/core";
-import { ObjectId } from "../lib/db.js";
 
 export const UserDatePreferences = new EntitySchema({
   name: "UserDatePreferences",

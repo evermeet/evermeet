@@ -28,6 +28,7 @@
   import { t, T, getCountryName } from "$lib/i18n";
   import { getContext } from "svelte";
   import confetti from "canvas-confetti";
+  import { xrpcCall } from "$lib/api";
 
   const { item } = $props();
 
@@ -70,6 +71,25 @@
         y: 0.8,
       },
     });
+  }
+
+  let toggleWatchLoading = $state(false);
+  async function toggleWatch() {
+    const method = `app.evermeet.event.${item.$userContext?.watching ? "unwatch" : "watch"}Event`;
+    let resp;
+    toggleWatchLoading = true;
+    try {
+      resp = await xrpcCall({ fetch, user }, method, null, {
+        eventHandle: item.handleUrl,
+      });
+    } catch (e) {
+      console.error(e);
+      toggleWatchLoading = false;
+      return false;
+    }
+    item.watchCount = resp.event.watchCount;
+    item.$userContext = resp.event.$userContext;
+    toggleWatchLoading = false;
   }
 </script>
 
@@ -180,10 +200,20 @@
         ><Check size="18" class="text-success" />
         {$t`Attending`} <span class="badge badge-sm">1</span></button
       >
-      <button class="btn btn-sm btn-neutral" onclick={runConfetti}
-        ><Eye size="18" />
-        {$t`Watch`} <span class="badge badge-sm">10</span></button
+      <button
+        class="btn btn-sm {item.$userContext?.watching === true
+          ? 'btn-base-300'
+          : 'btn-neutral'}"
+        onclick={toggleWatch}
+        disabled={toggleWatchLoading}
       >
+        <Eye size="18" />
+        {item.$userContext?.watching === true ? $t`Unwatch` : $t`Watch`}
+        <span class="badge badge-sm">{item.watchCount || 0}</span>
+        {#if toggleWatchLoading}<span
+            class="loading loading-infinity opacity-50"
+          ></span>{/if}
+      </button>
     </div>
     <div class="flex gap-4 items-center">
       <div class="w-10 h-10 border rounded-lg border-neutral">

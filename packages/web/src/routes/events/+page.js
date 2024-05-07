@@ -1,7 +1,12 @@
-import { apiCall } from "../../lib/api.js";
+import { xrpcCall } from "$lib/api";
 
-export function load({ params, fetch }) {
+export async function load({ params, fetch, parent }) {
+  const data = await parent();
+
   return {
-    events: [],
-  }; //apiCall(fetch, `events`);
+    events: await xrpcCall(
+      { fetch, user: data.user },
+      "app.evermeet.event.getUserEvents",
+    ),
+  };
 }

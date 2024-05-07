@@ -1,7 +1,8 @@
 <script>
   import EventList from "../../components/EventList.svelte";
   import { t } from "$lib/i18n";
-  export let data;
+
+  const { data } = $props();
 </script>
 
 <div class="page-wide">

@@ -1,4 +1,4 @@
-import { xrpcCall } from "../../lib/api.js";
+import { xrpcCall } from "$lib/api";
 
 export async function load({ params, fetch, parent }) {
   const data = await parent();

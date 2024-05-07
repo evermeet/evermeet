@@ -117,7 +117,12 @@ export class Calendar {
         { orderBy: { config: { dateEnd: -1 } } },
       )) {
         pastEvents.push(
-          await e.view(ctx, Object.assign(opts, { calendar: this })),
+          await e.view(
+            ctx,
+            Object.assign(opts, {
+              calendar: childrens?.find((c) => c.did === e.calendarDid) || this,
+            }),
+          ),
         );
       }
     }

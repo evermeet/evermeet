@@ -95,6 +95,20 @@
     img: https://pbs.twimg.com/profile_images/1755880822551285760/kO3ktuLW_400x400.jpg
 
 - calendarDid: did:mock:ethprague
+  config:
+    slug: "2023"
+    name: ETHPrague 2023
+    dateStart: 2023-06-09T08:00Z
+    dateEnd: 2023-06-11T13:00Z
+    placeName: Paralení Polis, La Fabrika, Vnitroblock
+    placeCity: Prague
+    placeCountry: cz
+    img: https://data.prgblockweek.com/23/assets/events/ethprague/logo.webp
+    description: |
+      ETHPrague isn’t looking for the next get rich quickly scheme or groundbreaking DeFi apps, instead it’s an event focusing on the future potential of Ethereum and concepts or applications which don’t yet exist. We want to tackle challenges which will or might arise in the next decade and we believe Ethereum will play a major role in solving these. The future is in your hands, anon! You decide whether we end up living in a dark authoritarian dystopia or a bright solarpunk utopia.
+
+- id: vrkrr7i7e0ll4mi3069jfsz2
+  calendarDid: did:mock:ethprague
   did: "did:plc:xxxxxxxxxxxx"
   config:
     slug: "2024"
@@ -961,7 +975,8 @@
       For this year's ETHBerlin hackathon, we invite you to join the discourse and hack on anti-identity features instead of identity anti-features that boost the individual's privacy.
     web: https://ethberlin.org/
 
-- calendarDid: did:mock:web3privacy
+- id: lxhg5q6jxvuywy98s8fclt2m
+  calendarDid: did:mock:web3privacy
   config:
     slug: s24prg
     name: Web3Privacy Now Summit @ ETHPrague 2024

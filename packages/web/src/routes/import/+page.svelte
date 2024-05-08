@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
   import { xrpcCall } from "../../lib/api";
   import EventBox from "../../components/EventBox.svelte";
   import { fly } from "svelte/transition";
@@ -9,6 +9,8 @@
   let results;
   let selected = [];
   let error;
+
+  const user = getContext("user");
 
   onMount(() => {
     document.getElementById("url").focus();
@@ -20,9 +22,14 @@
     isLoading = true;
     let res;
     try {
-      res = await xrpcCall({ fetch }, "app.evermeet.event.importEvents", null, {
-        url,
-      });
+      res = await xrpcCall(
+        { fetch, user },
+        "app.evermeet.event.importEvents",
+        null,
+        {
+          url,
+        },
+      );
     } catch (e) {
       error = e.message;
     }
@@ -98,7 +105,7 @@
           <div class="flex gap-4 items-center" id={e.remoteId}>
             <div>
               <input
-                id={e.name + "-input"}
+                id={e.remoteId + "-input"}
                 type="checkbox"
                 class="checkbox"
                 bind:group={selected}
@@ -106,8 +113,10 @@
               />
             </div>
             <div
+              aria-hidden="true"
               class="grow cursor-pointer"
-              on:click={document.getElementById(e.name + "-input").click()}
+              onclick={() =>
+                document.getElementById(e.remoteId + "-input").click()}
             >
               <EventBox item={e} virtual="true" />
             </div>

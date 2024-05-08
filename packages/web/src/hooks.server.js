@@ -5,9 +5,3 @@ export async function handle({ event, resolve }) {
 
   return response;
 }
-
-export async function handleFetch({ event, request, fetch }) {
-  console.log(event.request.headers);
-
-  return fetch(request);
-}

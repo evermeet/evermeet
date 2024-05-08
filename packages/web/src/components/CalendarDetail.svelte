@@ -88,6 +88,19 @@
 
 <div class="page-wide {backdropImg ? '-mt-12' : ''} z-0">
   <div class="flex items-center mb-2 gap-4">
+    {#snippet nameRenderer()}
+      {item.name}
+      {#if item.parent}
+        <div class="text-xl inline-block">
+          <span class="opacity-50">by</span>
+          <a
+            class="hover:underline opacity-75"
+            href={item.parent.baseUrl}
+            alt={item.parent.name}>{item.parent.name}</a
+          >
+        </div>
+      {/if}
+    {/snippet}
     <div
       class="{backdropImg ? 'mb-6' : !isFullPage ? '' : 'mt-10'} {isFullPage
         ? 'grow'
@@ -101,7 +114,7 @@
     </div>
     {#if !isFullPage}
       <div class="grow">
-        <h1 class="text-3xl font-medium">{item.name}</h1>
+        <h1 class="text-3xl font-medium">{@render nameRenderer()}</h1>
         <HandleBadge {item} margin="mt-1.5" size="small" />
       </div>
       <div class="">
@@ -112,7 +125,7 @@
   {#if isFullPage}
     <div class="flex {item.backdropImg ? '' : 'mt-6'}">
       <h1 class="grow text-4xl font-medium">
-        {item.name}
+        {@render nameRenderer()}
       </h1>
       <div>
         <CalendarSubscribeButton {item} {user} />

@@ -27,7 +27,7 @@
     <div class="grow">
       <div class="font-mono breadcrumbs mb-2">
         <ul>
-          <li><a>{room.repo}</a></li>
+          <li><a href="/" alt={room.id}>{room.repo}</a></li>
           <li>#{room.slug}</li>
         </ul>
       </div>

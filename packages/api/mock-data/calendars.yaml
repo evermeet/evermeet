@@ -17,7 +17,7 @@
   managers:
   - ref: did:plc:524tuhdhh3m7li5gycdn6boe
   config:
-    name: Web3Privacy Now Events
+    name: Web3Privacy Now
     subs: 256
     img: >-
       https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=48,height=48/calendars/97/99ef3056-7787-4e83-9247-fca4d4fa948d

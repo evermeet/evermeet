@@ -15,7 +15,7 @@
 
   let titleElement = $state();
 
-  const { item, virtual } = $props();
+  const { item, virtual = false } = $props();
   const { dateLocale: locale, timezone, lang } = getContext("locale");
   const user = getContext("user");
   const itemInterval = $derived(interval(item.dateStart, item.dateEnd));
@@ -26,7 +26,11 @@
 
   function handleClick(url) {
     return (e) => {
-      if (e.target.nodeName === "BUTTON" || e.target.nodeName === "A") {
+      if (
+        e.target.nodeName === "BUTTON" ||
+        e.target.nodeName === "A" ||
+        e.target.parentElement.nodeName === "BUTTON"
+      ) {
         return false;
       }
       goto(url);
@@ -36,8 +40,8 @@
 
 <div
   aria-hidden="true"
-  onclick={handleClick(item.baseUrl)}
-  class="cursor-pointer"
+  onclick={!virtual ? handleClick(item.baseUrl) : () => {}}
+  class={!virtual ? "cursor-pointer" : ""}
 >
   <div class="mb-3 itembox {!virtual && 'itembox-hover'} flex gap-8">
     <div class="grow">
@@ -97,9 +101,11 @@
           {item._remote}
         </div>
       {/if}
-      <div class="flex gap-1.5 mt-6">
-        <EventPrimaryButtons {item} {user} btnClass="btn-sm" isShort="true" />
-      </div>
+      {#if !virtual}
+        <div class="flex gap-1.5 mt-6">
+          <EventPrimaryButtons {item} {user} btnClass="btn-sm" isShort="true" />
+        </div>
+      {/if}
     </div>
     <div class="w-[120px] h-[120px]">
       <img

@@ -110,6 +110,7 @@
   config:
     name: ETHPrague
     img: https://i.imgur.com/4VSptPe.jpg
+    backdropImg: https://pbs.twimg.com/media/GJmLrq6WIAAcPZe?format=jpg&name=large
     description: |
       Conference & Hackathon 🗓 May 31 - June 2, 2024 💬 https://t.me/ethprague
     refs:

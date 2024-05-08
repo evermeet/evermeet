@@ -6,11 +6,13 @@ defs:
       encoding: application/json
       schema:
         type: object
-        required: ["eventHandle"]
+        required: ["did"]
         properties:
-          eventHandle:
+          did:
             type: string
-            example: web3privacy.info:s24prg
+            format: did
+            example: did:mock:web3privacy
+
     output:
       encoding: application/json
       schema:

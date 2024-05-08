@@ -164,13 +164,22 @@ export class Calendar {
     const url = `https://${ctx.api.config.domain}${baseUrl}`;
     const handleUrl = c.handle;
 
+    let subsCount = await ctx.db.subscribes.count({
+      calendarDid: this.did,
+    });
+
     let userContext, managers;
     if (ctx.user) {
-      const isManager = c.managersArray.includes(ctx.user.did);
       userContext = {
-        isManager,
+        isManager: c.managersArray.includes(ctx.user.did),
+        isSubscribed: Boolean(
+          await ctx.db.subscribes.count({
+            calendarDid: this.did,
+            authorDid: ctx.user.did,
+          }),
+        ),
       };
-      if (isManager) {
+      if (userContext.isManager) {
         managers = c.managers;
       }
     }
@@ -191,8 +200,9 @@ export class Calendar {
       baseUrl,
       url,
       handleUrl,
-      $userContext: userContext,
       managers,
+      subsCount,
+      $userContext: userContext,
     };
   }
 }

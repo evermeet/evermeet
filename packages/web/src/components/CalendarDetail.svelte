@@ -1,9 +1,6 @@
 <script>
   import EventList from "./EventList.svelte";
   import { parse } from "marked";
-  import { user } from "$lib/stores";
-  import { page } from "$app/stores";
-  import { calendarSubscribe, calendarUnsubscribe } from "$lib/actions";
   import { config } from "$lib/stores";
   import {
     CheckCircle,
@@ -24,10 +21,13 @@
   import Refs from "./Refs.svelte";
   import Chat from "./Chat.svelte";
   import ChatRoomSelect from "./ChatRoomSelect.svelte";
+  import CalendarSubscribeButton from "./CalendarSubscribeButton.svelte";
   import { imgBlobUrl } from "$lib/api";
-  import { t } from "$lib/i18n";
+  import { t, plural } from "$lib/i18n";
+  import { getContext } from "svelte";
 
   const { item, selectedTab, params } = $props();
+  const user = getContext("user");
 
   let tabs = [
     {
@@ -52,13 +52,6 @@
   if (item.rooms && item.rooms.length > 0) {
     tabs.push({ id: "chat", name: $t`Chat`, ico: ChatBubbleLeft });
   }
-
-  const subscribed = $derived(
-    $user?.calendarSubscriptions?.find((sc) => sc.ref === item.did),
-  );
-  const managed = $derived(
-    $user ? item.managers?.find((mi) => mi.ref === $user.did) : false,
-  );
 
   const isFullPage = $derived(selectedTab === null && !params.expand);
   const backdropImg = $derived(
@@ -94,7 +87,7 @@
 {/if}
 
 <div class="page-wide {backdropImg ? '-mt-12' : ''} z-0">
-  <div class="flex items-end mb-2 gap-4">
+  <div class="flex items-center mb-2 gap-4">
     <div
       class="{backdropImg ? 'mb-6' : !isFullPage ? '' : 'mt-10'} {isFullPage
         ? 'grow'
@@ -111,34 +104,20 @@
         <h1 class="text-3xl font-medium">{item.name}</h1>
         <HandleBadge {item} margin="mt-1.5" size="small" />
       </div>
-    {/if}
-    {#if $user}
-      <div>
-        {#if item.$userContext?.isManager}
-          <a href="/manage/calendar/{item.id}" class="btn btn-accent">Manage</a>
-        {:else if subscribed}
-          <button class="btn btn-neutral" onclick={calendarUnsubscribe(item.id)}
-            >{$t`Subscribed`}</button
-          >
-        {:else}
-          <button class="btn btn-secondary" onclick={calendarSubscribe(item.id)}
-            >{$t`Subscribe`}</button
-          >
-        {/if}
-      </div>
-    {:else}
-      <div>
-        <a
-          href="/login?next={encodeURIComponent($page.url)}"
-          class="btn btn-secondary">{$t`Subscribe`}</a
-        >
+      <div class="">
+        <CalendarSubscribeButton {item} {user} btnClass="btn-sm" />
       </div>
     {/if}
   </div>
   {#if isFullPage}
-    <h1 class="text-4xl font-medium {item.backdropImg ? '' : 'mt-6'}">
-      {item.name}
-    </h1>
+    <div class="flex {item.backdropImg ? '' : 'mt-6'}">
+      <h1 class="grow text-4xl font-medium">
+        {item.name}
+      </h1>
+      <div>
+        <CalendarSubscribeButton {item} {user} />
+      </div>
+    </div>
     <HandleBadge {item} />
 
     {#if item.description}
@@ -239,11 +218,11 @@
   <div class="page-wide">
     {#if item.childrens?.length > 0}
       <h2 class="text-2xl font-medium mt-6">{$t`Series`}</h2>
-      <div class="flex gap-0.5 mt-3">
+      <div class="flex gap-3 mt-3">
         {#each item.childrens as c}
           <a
             href={c.baseUrl}
-            class="py-3 px-4 hover:bg-base-300 rounded-xl flex gap-3 items-center"
+            class="py-3 px-4 bg-base-300/50 hover:bg-base-300 rounded-xl flex gap-4 items-center"
           >
             <div>
               <img
@@ -254,7 +233,12 @@
             </div>
             <div class="text-left">
               <div class="text-lg">{c.name}</div>
-              <div class="text-base-content/75 text-sm">1 events</div>
+              <div class="text-base-content/75 text-sm">
+                {$plural(c.subsCount, {
+                  one: "# subscriber",
+                  other: "# subscribers",
+                })}
+              </div>
             </div>
           </a>
         {/each}

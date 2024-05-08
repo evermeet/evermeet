@@ -2,19 +2,13 @@
   import { calendarSubscribe, calendarUnsubscribe } from "$lib/actions";
   import { getContext } from "svelte";
   import CalendarAvatar from "./CalendarAvatar.svelte";
+  import CalendarSubscribeButton from "./CalendarSubscribeButton.svelte";
   import { t } from "$lib/i18n";
 
-  export let item;
-  export let preview = null;
+  const { item, preview = null } = $props();
 
   const user = getContext("user");
-
-  const c = item;
-
-  $: subscribed = user?.subscribedCalendars?.find(
-    (sc) => sc.ref === c.id || sc.ref === c.slug,
-  );
-  $: managed = user ? item.managers?.find((mi) => mi.ref === user.did) : false;
+  const c = $derived(item);
 </script>
 
 <a href={c.baseUrl}>
@@ -23,22 +17,13 @@
       <div class="w-12 h-12 mb-2 grow">
         <CalendarAvatar calendar={item} size="48" />
       </div>
-      {#if user && !c.personal && !managed && !user.calendarSubscriptions?.find((cm) => cm.ref === item.did)}
-        <div class="">
-          {#if subscribed}
-            <button
-              class="btn btn-sm"
-              on:click|preventDefault={calendarUnsubscribe(c.id)}
-              >Subscribed</button
-            >
-          {:else}
-            <button
-              class="btn btn-sm btn-secondary opacity-35 hover:opacity-100 duration-200"
-              on:click|preventDefault={calendarSubscribe(c.id)}
-              >{$t`Subscribe`}</button
-            >
-          {/if}
-        </div>
+      {#if preview}
+        <CalendarSubscribeButton
+          {item}
+          {user}
+          btnClass="btn-sm"
+          isCompact="true"
+        />
       {/if}
     </div>
     <div class="text-lg font-semibold">{c.name}</div>

@@ -163,6 +163,9 @@ export class Event {
 
     if (ctx.user) {
       json.$userContext = {
+        isManager: Boolean(
+          calendar.managers?.find((m) => m.ref === ctx.user.did),
+        ),
         watching: Boolean(
           await ctx.db.watches.count({
             calendarDid: this.calendarDid,

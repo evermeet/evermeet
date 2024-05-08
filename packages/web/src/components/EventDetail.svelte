@@ -25,9 +25,10 @@
   import FlagIcon from "./FlagIcon.svelte";
   import HandleBadge from "./HandleBadge.svelte";
   import CalendarAvatar from "./CalendarAvatar.svelte";
+  import EventPrimaryButtons from "./EventPrimaryButtons.svelte";
+  import CalendarSubscribeButton from "./CalendarSubscribeButton.svelte";
   import { t, T, getCountryName } from "$lib/i18n";
   import { getContext } from "svelte";
-  import confetti from "canvas-confetti";
   import { xrpcCall } from "$lib/api";
 
   const { item } = $props();
@@ -47,50 +48,6 @@
   let userRegistered = $derived(
     user && user.events?.find((e) => e.ref === item.id) ? true : false,
   );
-
-  function runConfetti() {
-    confetti({
-      particleCount: 200,
-      spread: 140,
-      decay: 0.95,
-      angle: 100,
-      scalar: 1.5,
-      origin: {
-        x: 0,
-        y: 0.8,
-      },
-    });
-    confetti({
-      particleCount: 200,
-      angle: 100,
-      spread: 140,
-      decay: 0.95,
-      scalar: 1.5,
-      origin: {
-        x: 1,
-        y: 0.8,
-      },
-    });
-  }
-
-  let toggleWatchLoading = $state(false);
-  async function toggleWatch() {
-    const method = `app.evermeet.event.${item.$userContext?.watching ? "unwatch" : "watch"}Event`;
-    let resp;
-    toggleWatchLoading = true;
-    try {
-      resp = await xrpcCall({ fetch, user }, method, null, {
-        eventHandle: item.handleUrl,
-      });
-    } catch (e) {
-      console.error(e);
-      toggleWatchLoading = false;
-      return false;
-    }
-    item.watchCount = resp.event.watchCount;
-    item.$userContext = resp.event.$userContext;
-    toggleWatchLoading = false;
-  }
 </script>
 
 <svelte:head>
@@ -107,7 +64,7 @@
       />
     </div>
 
-    {#if user}
+    {#if item.$userContext?.isManager}
       <div class="mt-6">
         <div class="itembox text-base-content/75 flex gap-3">
           <div>{$t`You have manage access for this event.`}</div>
@@ -120,17 +77,25 @@
 
     {#snippet calendarMiniBox(c, series = false)}
       <div class="mt-6">
-        <div class="flex gap-4 items-center">
+        <div class="flex gap-3 items-center">
           <div class="w-10 h-10 aspect-square">
             <CalendarAvatar calendar={c} size="40" />
           </div>
-          <div>
+          <div class="grow">
             <div class="text-sm">
               {#if series}{$t`Series`}{:else}{$t`Presented by`}{/if}
             </div>
             <div class="font-medium">
               <a href={c.baseUrl}>{c.name}</a>
             </div>
+          </div>
+          <div>
+            <CalendarSubscribeButton
+              item={item.calendar}
+              {user}
+              isCompact="true"
+              btnClass="btn-sm"
+            />
           </div>
         </div>
         {#if c.description}
@@ -196,24 +161,7 @@
       <HandleBadge {item} size="small" type="event" margin="mt-2 mb-2" />
     </div>
     <div class="mb-6 flex gap-1.5">
-      <button class="btn btn-sm btn-base-300" onclick={runConfetti}
-        ><Check size="18" class="text-success" />
-        {$t`Attending`} <span class="badge badge-sm">1</span></button
-      >
-      <button
-        class="btn btn-sm {item.$userContext?.watching === true
-          ? 'btn-base-300'
-          : 'btn-neutral'}"
-        onclick={toggleWatch}
-        disabled={toggleWatchLoading}
-      >
-        <Eye size="18" />
-        {item.$userContext?.watching === true ? $t`Unwatch` : $t`Watch`}
-        <span class="badge badge-sm">{item.watchCount || 0}</span>
-        {#if toggleWatchLoading}<span
-            class="loading loading-infinity opacity-50"
-          ></span>{/if}
-      </button>
+      <EventPrimaryButtons {item} {user} />
     </div>
     <div class="flex gap-4 items-center">
       <div class="w-10 h-10 border rounded-lg border-neutral">

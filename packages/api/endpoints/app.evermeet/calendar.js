@@ -128,3 +128,54 @@ export function getConcepts(server) {
     };
   });
 }
+
+async function toggleSubscribe(ctx, isRemove = false) {
+  const {
+    db,
+    input: { did },
+    user,
+  } = ctx;
+  const cal = await db.calendars.findOne({ did });
+  if (!cal) {
+    return { error: "CalendarNotFound " };
+  }
+
+  const subBase = {
+    calendarDid: did,
+    authorDid: user.did,
+  };
+  let subscribe = await db.subscribes.findOne(subBase);
+
+  if (isRemove) {
+    if (!subscribe) {
+      return { error: "SubscriptionNotFound" };
+    }
+    await db.em.remove(subscribe).flush();
+    subscribe = undefined;
+  } else if (!subscribe) {
+    subscribe = db.subscribes.create(subBase);
+    await db.em.persist(subscribe).flush();
+  }
+
+  return {
+    body: {
+      ok: true,
+      subscribe: subscribe && db.wrap(subscribe).toJSON(),
+      calendar: await cal.view(ctx),
+    },
+  };
+}
+
+export function subscribeCalendar(server, { api: { authVerifier } }) {
+  server.endpoint({
+    auth: authVerifier.accessUser,
+    handler: async (ctx) => toggleSubscribe(ctx),
+  });
+}
+
+export function unsubscribeCalendar(server, { api: { authVerifier } }) {
+  server.endpoint({
+    auth: authVerifier.accessUser,
+    handler: async (ctx) => toggleSubscribe(ctx, true),
+  });
+}

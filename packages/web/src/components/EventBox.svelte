@@ -1,6 +1,7 @@
 <script>
   import { getContext } from "svelte";
   import { MapPin, Users, VideoCamera } from "svelte-heros-v2";
+  import EventPrimaryButtons from "./EventPrimaryButtons.svelte";
   import FlagIcon from "./FlagIcon.svelte";
   import { config } from "$lib/stores";
   import { t } from "$lib/i18n";
@@ -74,11 +75,15 @@
           {item._remote}
         </div>
       {/if}
+      <div class="flex gap-1.5 mt-6">
+        <EventPrimaryButtons {item} {user} btnClass="btn-sm" isShort="true" />
+      </div>
     </div>
     <div class="w-[120px] h-[120px]">
       <img
         class="w-[120px] h-[120px] aspect-square rounded-lg"
         src={item.img}
+        alt={item.name}
       />
     </div>
   </div>

@@ -30,6 +30,7 @@ export async function initDatabase(api, conf) {
         messages: em.getRepository("Message"),
         rooms: em.getRepository("Room"),
         watches: em.getRepository("Watch"),
+        subscribes: em.getRepository("Subscribe"),
         wrap,
       };
     },

@@ -68,7 +68,6 @@ export default function ({ evermeet }) {
               // decode binary data
               input = await request.arrayBuffer();
             }
-
             const session =
               headers.authorization?.replace(/^Bearer /, "") ||
               cookie[evermeet.config.api.sessionName].value;

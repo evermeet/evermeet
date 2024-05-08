@@ -38,7 +38,9 @@
     class="mt-8 mb-6 w-full h-1 border border-neutral border-l-0 border-r-0 border-b-0"
   ></div>
 
-  <h2 class="heading2 grow">{$t`Subscribed Calendars`}</h2>
+  <h2 class="heading2 grow">
+    {$t`Subscribed Calendars`} ({subscribed.length})
+  </h2>
 
   <div class="mt-6">
     {#each subscribed as c}

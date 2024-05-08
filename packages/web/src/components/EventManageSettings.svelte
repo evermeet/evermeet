@@ -212,7 +212,7 @@
           class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box"
         >
           {#each syncMethods as sm}
-            <li><a>{sm.name}</a></li>
+            <li><a href="#">{sm.name}</a></li>
           {/each}
         </ul>
       </div>

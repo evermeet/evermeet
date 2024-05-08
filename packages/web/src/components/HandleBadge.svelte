@@ -7,7 +7,7 @@
 
   export let item;
   export let size = "normal";
-  export let type = null;
+  export const type = null;
   export let margin = "mb-4 mt-2";
 
   const {
@@ -45,7 +45,7 @@
     transition:fade={{ duration: 100 }}
     class="itembox py-3 w-[25em] shadow-xl"
   >
-    <div use:melt={$arrow} />
+    <div use:melt={$arrow}></div>
     <div class="">
       <div class="mb-2 flex gap-1.5 items-center text-success opacity-75">
         {$t`This handle is verified`}

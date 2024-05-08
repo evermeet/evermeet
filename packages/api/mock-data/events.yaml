@@ -93,6 +93,8 @@
     placeCity: Zurich
     placeCountry: ch
     img: https://pbs.twimg.com/profile_images/1755880822551285760/kO3ktuLW_400x400.jpg
+    description: |
+      For over a decade, Switzerland has been renowned as one of the most forward-thinking and innovative epicenters for blockchain technology. We invite all blockchain professionals, researchers, and enthusiasts to the heart of this innovation, Zürich, to learn, connect, experiment, and engage with the vibrant and passionate Swiss blockchain community.
 
 - calendarDid: did:mock:ethprague
   config:

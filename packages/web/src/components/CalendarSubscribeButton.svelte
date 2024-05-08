@@ -88,9 +88,10 @@
   </div>
 {:else}
   <div>
-    <a
-      href="/login?next={encodeURIComponent($page.url)}"
-      class="btn {btnClass} btn-secondary">{$t`Subscribe`}</a
-    >
+    {@render button(
+      $t`Subscribe`,
+      !isCompact ? item.subsCount : null,
+      "/login",
+    )}
   </div>
 {/if}

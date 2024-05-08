@@ -1,0 +1,28 @@
+{
+  "name": "@evermeet/xrpc",
+  "version": "0.5.0",
+  "license": "MIT",
+  "description": "atproto HTTP API (XRPC) client library",
+  "keywords": [
+    "atproto",
+    "xrpc"
+  ],
+  "homepage": "https://atproto.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluesky-social/atproto",
+    "directory": "packages/xrpc"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json"
+  },
+  "dependencies": {
+    "@atproto/lexicon": "^0.4.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

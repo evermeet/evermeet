@@ -74,26 +74,14 @@ export function getUserCalendars(server, { api: { authVerifier } }) {
   server.endpoint({
     auth: authVerifier.accessUser,
     handler: async (ctx) => {
+      const { db, user } = ctx;
+
       // subscribed calendars
-      const subs = ctx.user.calendarSubscriptions.map((cs) => cs.ref);
-      const localSubscribed = await ctx.db.calendars.find({
-        did: { $in: subs },
+      const subs = await db.subscribes.find({ authorDid: user.did });
+      const subsCals = await db.calendars.find({
+        did: { $in: subs.map((s) => s.calendarDid) },
       });
-
-      const subscribed = [];
-      await Promise.all(
-        subs.map(async (did) => {
-          let cal;
-          const local = localSubscribed.find((c) => c.did === did);
-          if (local) {
-            cal = await local.view(ctx, {});
-          } else {
-            // implement remote fetching
-          }
-          subscribed.push(cal);
-        }),
-      );
-
+      const subscribed = await Promise.all(subsCals.map((c) => c.view(ctx)));
       // owned calendars
       const ownLocal = await ctx.db.calendars.find({
         managersArray: { $in: [ctx.user.did] },

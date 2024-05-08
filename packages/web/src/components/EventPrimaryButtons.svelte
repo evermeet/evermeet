@@ -26,6 +26,8 @@
     item.watchCount = resp.event.watchCount;
     item.$userContext = resp.event.$userContext;
     toggleWatchLoading = false;
+
+    return false;
   }
 
   function runConfetti(e) {
@@ -63,7 +65,8 @@
   >{#if item.$userContext?.isAttending}<Check
       size="18"
       class="text-success"
-    />{:else}<PencilSquare size="18" />{/if}
+      tabindex="-1"
+    />{:else}<PencilSquare size="18" tabindex="-1" />{/if}
   {item.$userContext?.isAttending ? $t`Attending` : $t`Attend`}</button
 >
 <button

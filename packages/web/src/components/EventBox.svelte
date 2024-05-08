@@ -5,12 +5,15 @@
   import FlagIcon from "./FlagIcon.svelte";
   import { config } from "$lib/stores";
   import { t } from "$lib/i18n";
+  import { goto } from "$app/navigation";
   import {
     interval,
     formatTimeInterval,
     formatDurationInterval,
     timezonesOffset,
   } from "$lib/date";
+
+  let titleElement = $state();
 
   const { item, virtual } = $props();
   const { dateLocale: locale, timezone, lang } = getContext("locale");
@@ -20,9 +23,22 @@
     timezonesOffset(itemInterval.start, timezone, item.timezone),
   );
   //const duration = $derived(intervalToDuration(itemInterval))
+
+  function handleClick(url) {
+    return (e) => {
+      if (e.target.nodeName === "BUTTON" || e.target.nodeName === "A") {
+        return false;
+      }
+      goto(url);
+    };
+  }
 </script>
 
-<a href={item.baseUrl}>
+<div
+  aria-hidden="true"
+  onclick={handleClick(item.baseUrl)}
+  class="cursor-pointer"
+>
   <div class="mb-3 itembox {!virtual && 'itembox-hover'} flex gap-8">
     <div class="grow">
       <div class="text-base-content/75">
@@ -42,11 +58,17 @@
           {formatDurationInterval(itemInterval, { locale })}
         </span>
       </div>
-      <div class="text-xl font-medium mt-1.5">{item.name}</div>
+      <div class="mt-1.5">
+        <a
+          href={item.baseUrl}
+          class="text-xl font-medium"
+          bind:this={titleElement}>{item.name}</a
+        >
+      </div>
       <!--div class="text-base-content/75 mt-1.5">by CryptoCanal</div-->
       <div class="flex gap-1.5 mt-1.5 text-base-content/75 items-center">
         {#if item.mode === "offline"}
-          <MapPin />
+          <MapPin tabindex="-1" />
           {#if item.placeRestrictedToGuests}
             <div>{$t`Only for Registered`}</div>
           {:else}
@@ -87,4 +109,4 @@
       />
     </div>
   </div>
-</a>
+</div>

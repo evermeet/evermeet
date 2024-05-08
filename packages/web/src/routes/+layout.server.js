@@ -3,10 +3,20 @@ import { loadConfig } from "$lib/config.js";
 import { t, locale, detectLanguage } from "$lib/i18n";
 //import * as dateLocales from "date-fns/locale";
 
-export async function load({ fetch, cookies, request: { headers } }) {
+export async function load({
+  fetch,
+  cookies,
+  request: { headers },
+  setHeaders,
+}) {
   const config = await loadConfig();
   let user = false;
   const sessionId = cookies.get("evermeet-session-id");
+
+  setHeaders({
+    authorization: "Bearer " + sessionId,
+  });
+
   if (sessionId) {
     try {
       const session = await xrpcCall(

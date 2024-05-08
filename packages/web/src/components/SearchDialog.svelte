@@ -336,7 +336,7 @@
     <div
       use:melt={$overlay}
       class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
-    />
+    ></div>
     <div
       use:melt={$content}
       class="fixed left-1/2 top-[10vh] z-50 max-h-[85vh] w-[90vw]

@@ -113,7 +113,7 @@
       {/if}
     {/if}
 
-    {#if item.hosts}
+    {#if item.hosts?.length > 0}
       <div
         class="mt-6 border-t-0 border-l-0 border-r-0 border border-neutral pb-2"
       >

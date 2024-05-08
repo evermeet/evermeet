@@ -4,14 +4,28 @@
   import CalendarAvatar from "./CalendarAvatar.svelte";
   import CalendarSubscribeButton from "./CalendarSubscribeButton.svelte";
   import { t } from "$lib/i18n";
+  import { goto } from "$app/navigation";
 
   const { item, preview = null } = $props();
 
   const user = getContext("user");
   const c = $derived(item);
+
+  function handleClick(url) {
+    return (e) => {
+      if (e.target.nodeName === "BUTTON" || e.target.nodeName === "A") {
+        return false;
+      }
+      goto(url);
+    };
+  }
 </script>
 
-<a href={c.baseUrl}>
+<div
+  aria-hidden="true"
+  onclick={handleClick(item.baseUrl)}
+  class="cursor-pointer"
+>
   <div class="itembox itembox-hover h-full group">
     <div class="flex">
       <div class="w-12 h-12 mb-2 grow">
@@ -26,7 +40,9 @@
         />
       {/if}
     </div>
-    <div class="text-lg font-semibold">{c.name}</div>
+    <div class="text-lg font-semibold">
+      <a href={c.baseUrl} title={c.name}>{c.name}</a>
+    </div>
     {#if c._remote}
       <div class="badge badge-neutral font-mono text-xs my-2">{c._remote}</div>
     {/if}
@@ -43,4 +59,4 @@
       </div>
     {/if}
   </div>
-</a>
+</div>

@@ -1,6 +1,6 @@
 import { browser } from "$app/environment";
 import { env } from "$env/dynamic/public";
-import { Client } from "@atproto/xrpc";
+import { Client } from "@evermeet/xrpc";
 //import { session as origSession } from '$lib/stores'
 import { getContext } from "svelte";
 
@@ -46,15 +46,15 @@ export async function xrpcCall({ fetch, user }, id, params, data, opts = {}) {
   }
   const headers = {};
   if (opts.token) {
-    headers.Authorization = "Bearer " + opts.token;
+    headers.authorization = "Bearer " + opts.token;
   } else if (user?.token) {
-    headers.Authorization = "Bearer " + user.token;
+    headers.authorization = "Bearer " + user.token;
   }
   if (opts.mimeType) {
-    headers["Content-Type"] = opts.mimeType;
+    headers["content-type"] = opts.mimeType;
   }
   const resp = await xrpcClient
-    .service(apiHost + "/xrpc")
+    .service(apiHost + "/xrpc", null)
     .call(id, params, data, { headers, ...opts });
   return resp.data;
 }

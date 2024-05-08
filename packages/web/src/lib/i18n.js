@@ -15,6 +15,7 @@ const supportedLanguages = {
   en: "English",
   es: "Español",
   uk: "Українська",
+  zu: "Pseudolocale",
 };
 
 export * from "svelte-i18n-lingui";

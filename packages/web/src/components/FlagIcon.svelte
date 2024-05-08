@@ -11,4 +11,4 @@
   title={countryName}
   class="fi fi-{country} fis rounded-full"
   style="line-height: {size}; width: {size};"
-/>
+></span>

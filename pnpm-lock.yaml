@@ -190,9 +190,9 @@ importers:
 
   packages/web:
     devDependencies:
-      '@atproto/xrpc':
-        specifier: ^0.5.0
-        version: 0.5.0
+      '@evermeet/xrpc':
+        specifier: file:../xrpc
+        version: file:packages/xrpc
       '@internationalized/date':
         specifier: ^3.5.3
         version: 3.5.3
@@ -359,6 +359,19 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
 
+  packages/xrpc:
+    dependencies:
+      '@atproto/lexicon':
+        specifier: ^0.4.0
+        version: 0.4.0
+      zod:
+        specifier: ^3.21.4
+        version: 3.23.6
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+
 packages:
 
   /@alloc/quick-lru@5.2.0:
@@ -380,7 +393,7 @@ packages:
       graphemer: 1.4.0
       multiformats: 9.9.0
       uint8arrays: 3.0.0
-      zod: 3.22.4
+      zod: 3.23.6
 
   /@atproto/common@0.3.0:
     resolution: {integrity: sha512-R5d50Da63wQdAYaHe+rne5nM/rSYIWBaDZtVKpluysG86U1rRIgrG4qEQ/tNDt6WzYcxKXkX4EOeVvGtav2twg==}
@@ -417,6 +430,7 @@ packages:
     dependencies:
       '@atproto/lexicon': 0.4.0
       zod: 3.23.6
+    dev: false
 
   /@babel/code-frame@7.24.2:
     resolution: {integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==}
@@ -11397,6 +11411,7 @@ packages:
 
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    dev: false
 
   /zod@3.23.6:
     resolution: {integrity: sha512-RTHJlZhsRbuA8Hmp/iNL7jnfc4nZishjsanDAfEY1QpDQZCahUp3xDzl+zfweE9BklxMUcgBgS1b7Lvie/ZVwA==}
@@ -11446,3 +11461,11 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: false
+
+  file:packages/xrpc:
+    resolution: {directory: packages/xrpc, type: directory}
+    name: '@evermeet/xrpc'
+    dependencies:
+      '@atproto/lexicon': 0.4.0
+      zod: 3.23.6
+    dev: true

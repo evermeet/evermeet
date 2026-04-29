@@ -1,0 +1,543 @@
+package store
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"time"
+)
+
+// ---- Key event log ----
+
+type KELOp struct {
+	Hash      string
+	DID       string
+	Type      string // genesis | rotate | migrate
+	Payload   string // canonical JSON
+	Prev      string // empty for genesis
+	Seq       int
+	CreatedAt time.Time
+}
+
+func (d *DB) AppendKELOp(ctx context.Context, op *KELOp) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO kel_ops (hash, did, type, payload, prev, seq, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			op.Hash, op.DID, op.Type, op.Payload,
+			nullString(op.Prev), op.Seq, op.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetKELForDID(ctx context.Context, did string) ([]*KELOp, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT hash, did, type, payload, COALESCE(prev,''), seq, created_at
+		 FROM kel_ops WHERE did = ? ORDER BY seq ASC`, did)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanKELOps(rows)
+}
+
+func (d *DB) GetKELOp(ctx context.Context, hash string) (*KELOp, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT hash, did, type, payload, COALESCE(prev,''), seq, created_at FROM kel_ops WHERE hash = ?`, hash)
+	return scanKELOp(row)
+}
+
+// ---- Users ----
+
+type User struct {
+	DID         string
+	DisplayName string
+	Avatar      string
+	Bio         string
+	CurrentPK   string // hex-encoded Ed25519 public key
+	RotationPK  string
+	Endpoint    string
+	Sig         string
+	UpdatedAt   time.Time
+}
+
+func (d *DB) UpsertUser(ctx context.Context, u *User) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO users (did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			 ON CONFLICT(did) DO UPDATE SET
+			   display_name = excluded.display_name,
+			   avatar       = excluded.avatar,
+			   bio          = excluded.bio,
+			   current_pk   = excluded.current_pk,
+			   rotation_pk  = excluded.rotation_pk,
+			   endpoint     = excluded.endpoint,
+			   sig          = excluded.sig,
+			   updated_at   = excluded.updated_at`,
+			u.DID, u.DisplayName, u.Avatar, u.Bio,
+			u.CurrentPK, u.RotationPK, u.Endpoint, u.Sig,
+			u.UpdatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetUser(ctx context.Context, did string) (*User, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at
+		 FROM users WHERE did = ?`, did)
+	u := &User{}
+	var updatedAt string
+	err := row.Scan(&u.DID, &u.DisplayName, &u.Avatar, &u.Bio,
+		&u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	u.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
+	return u, nil
+}
+
+// ---- User private ----
+
+type UserPrivate struct {
+	DID           string
+	Email         string
+	EmailVerified bool
+	GoogleSub     string
+	PasskeyIDs    string // JSON array
+	EncSigningKey string // AES-256-GCM encrypted Ed25519 seed
+}
+
+func (d *DB) UpsertUserPrivate(ctx context.Context, p *UserPrivate) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO user_private (did, email, email_verified, google_sub, passkey_ids, enc_signing_key)
+			 VALUES (?, ?, ?, ?, ?, ?)
+			 ON CONFLICT(did) DO UPDATE SET
+			   email          = excluded.email,
+			   email_verified = excluded.email_verified,
+			   google_sub     = excluded.google_sub,
+			   passkey_ids    = excluded.passkey_ids,
+			   enc_signing_key = excluded.enc_signing_key`,
+			p.DID, p.Email, boolInt(p.EmailVerified),
+			p.GoogleSub, p.PasskeyIDs, p.EncSigningKey,
+		)
+		return err
+	})
+}
+
+func (d *DB) GetUserPrivate(ctx context.Context, did string) (*UserPrivate, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
+		 FROM user_private WHERE did = ?`, did)
+	p := &UserPrivate{}
+	var ev int
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.EmailVerified = ev != 0
+	return p, nil
+}
+
+func (d *DB) GetUserPrivateByEmail(ctx context.Context, email string) (*UserPrivate, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
+		 FROM user_private WHERE email = ?`, email)
+	p := &UserPrivate{}
+	var ev int
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.EmailVerified = ev != 0
+	return p, nil
+}
+
+func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPrivate, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
+		 FROM user_private WHERE google_sub = ?`, sub)
+	p := &UserPrivate{}
+	var ev int
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.EmailVerified = ev != 0
+	return p, nil
+}
+
+// ---- Event records ----
+
+type EventFounding struct {
+	ID      string
+	Payload string // canonical JSON
+}
+
+type EventState struct {
+	Hash      string
+	ID        string
+	Prev      string
+	Payload   string // canonical JSON
+	IsCurrent bool
+	CreatedAt time.Time
+}
+
+func (d *DB) InsertEventFounding(ctx context.Context, f *EventFounding) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO event_founding (id, payload) VALUES (?, ?)`,
+			f.ID, f.Payload,
+		)
+		return err
+	})
+}
+
+func (d *DB) AppendEventState(ctx context.Context, s *EventState) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		// Demote previous current state.
+		if _, err := tx.Exec(
+			`UPDATE event_states SET is_current = 0 WHERE id = ? AND is_current = 1`, s.ID,
+		); err != nil {
+			return err
+		}
+		_, err := tx.Exec(
+			`INSERT INTO event_states (hash, id, prev, payload, is_current, created_at)
+			 VALUES (?, ?, ?, ?, 1, ?)`,
+			s.Hash, s.ID, nullString(s.Prev), s.Payload,
+			s.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetCurrentEventState(ctx context.Context, id string) (*EventState, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		 FROM event_states WHERE id = ? AND is_current = 1`, id)
+	return scanEventState(row)
+}
+
+func (d *DB) GetEventFounding(ctx context.Context, id string) (*EventFounding, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT id, payload FROM event_founding WHERE id = ?`, id)
+	f := &EventFounding{}
+	err := row.Scan(&f.ID, &f.Payload)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return f, err
+}
+
+func (d *DB) ListCurrentEventStates(ctx context.Context, limit, offset int) ([]*EventState, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		 FROM event_states WHERE is_current = 1
+		 ORDER BY created_at DESC LIMIT ? OFFSET ?`, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var states []*EventState
+	for rows.Next() {
+		s, err := scanEventStateRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		states = append(states, s)
+	}
+	return states, rows.Err()
+}
+
+// ---- Calendar records ----
+
+type CalendarFounding struct {
+	ID      string
+	Payload string
+}
+
+type CalendarState struct {
+	Hash      string
+	ID        string
+	Prev      string
+	Payload   string
+	IsCurrent bool
+	CreatedAt time.Time
+}
+
+func (d *DB) InsertCalendarFounding(ctx context.Context, f *CalendarFounding) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO calendar_founding (id, payload) VALUES (?, ?)`,
+			f.ID, f.Payload,
+		)
+		return err
+	})
+}
+
+func (d *DB) AppendCalendarState(ctx context.Context, s *CalendarState) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(
+			`UPDATE calendar_states SET is_current = 0 WHERE id = ? AND is_current = 1`, s.ID,
+		); err != nil {
+			return err
+		}
+		_, err := tx.Exec(
+			`INSERT INTO calendar_states (hash, id, prev, payload, is_current, created_at)
+			 VALUES (?, ?, ?, ?, 1, ?)`,
+			s.Hash, s.ID, nullString(s.Prev), s.Payload,
+			s.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetCurrentCalendarState(ctx context.Context, id string) (*CalendarState, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		 FROM calendar_states WHERE id = ? AND is_current = 1`, id)
+	s := &CalendarState{}
+	var createdAt string
+	err := row.Scan(&s.Hash, &s.ID, &s.Prev, &s.Payload, &s.IsCurrent, &createdAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	s.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+	return s, nil
+}
+
+// ---- RSVP envelopes ----
+
+type RSVPEnvelope struct {
+	ID         string
+	EventID    string
+	SenderDID  string
+	Payload    string // encrypted blob (JSON of private.Envelope)
+	Status     string // pending | confirmed | rejected | waitlisted | cancelled
+	ReceivedAt time.Time
+}
+
+func (d *DB) InsertRSVPEnvelope(ctx context.Context, e *RSVPEnvelope) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO rsvp_envelopes (id, event_id, sender_did, payload, status, received_at)
+			 VALUES (?, ?, ?, ?, ?, ?)`,
+			e.ID, e.EventID, e.SenderDID, e.Payload, e.Status,
+			e.ReceivedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) UpdateRSVPStatus(ctx context.Context, id, status string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE rsvp_envelopes SET status = ? WHERE id = ?`, status, id)
+		return err
+	})
+}
+
+func (d *DB) ListRSVPsForEvent(ctx context.Context, eventID string) ([]*RSVPEnvelope, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT id, event_id, sender_did, payload, status, received_at
+		 FROM rsvp_envelopes WHERE event_id = ? ORDER BY received_at ASC`, eventID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*RSVPEnvelope
+	for rows.Next() {
+		e := &RSVPEnvelope{}
+		var ra string
+		if err := rows.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &ra); err != nil {
+			return nil, err
+		}
+		e.ReceivedAt, _ = time.Parse(time.RFC3339, ra)
+		out = append(out, e)
+	}
+	return out, rows.Err()
+}
+
+// ---- Sessions ----
+
+type Session struct {
+	Token     string
+	DID       string
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
+func (d *DB) InsertSession(ctx context.Context, s *Session) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO sessions (token, did, created_at, expires_at) VALUES (?, ?, ?, ?)`,
+			s.Token, s.DID,
+			s.CreatedAt.UTC().Format(time.RFC3339),
+			s.ExpiresAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetSession(ctx context.Context, token string) (*Session, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT token, did, created_at, expires_at FROM sessions WHERE token = ?`, token)
+	s := &Session{}
+	var ca, ea string
+	err := row.Scan(&s.Token, &s.DID, &ca, &ea)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	s.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	s.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	return s, nil
+}
+
+func (d *DB) DeleteSession(ctx context.Context, token string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`DELETE FROM sessions WHERE token = ?`, token)
+		return err
+	})
+}
+
+// ---- Magic links ----
+
+type MagicLink struct {
+	Token     string
+	Email     string
+	DID       string // empty if new user
+	ExpiresAt time.Time
+	Used      bool
+}
+
+func (d *DB) InsertMagicLink(ctx context.Context, ml *MagicLink) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO magic_links (token, email, did, expires_at, used) VALUES (?, ?, ?, ?, 0)`,
+			ml.Token, ml.Email, nullString(ml.DID),
+			ml.ExpiresAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetMagicLink(ctx context.Context, token string) (*MagicLink, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT token, email, COALESCE(did,''), expires_at, used FROM magic_links WHERE token = ?`, token)
+	ml := &MagicLink{}
+	var ea string
+	var used int
+	err := row.Scan(&ml.Token, &ml.Email, &ml.DID, &ea, &used)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	ml.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	ml.Used = used != 0
+	return ml, nil
+}
+
+func (d *DB) MarkMagicLinkUsed(ctx context.Context, token string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE magic_links SET used = 1 WHERE token = ?`, token)
+		return err
+	})
+}
+
+// ---- helpers ----
+
+func nullString(s string) any {
+	if s == "" {
+		return nil
+	}
+	return s
+}
+
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func scanKELOps(rows *sql.Rows) ([]*KELOp, error) {
+	var ops []*KELOp
+	for rows.Next() {
+		op := &KELOp{}
+		var ca string
+		if err := rows.Scan(&op.Hash, &op.DID, &op.Type, &op.Payload, &op.Prev, &op.Seq, &ca); err != nil {
+			return nil, err
+		}
+		op.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+		ops = append(ops, op)
+	}
+	return ops, rows.Err()
+}
+
+func scanKELOp(row *sql.Row) (*KELOp, error) {
+	op := &KELOp{}
+	var ca string
+	err := row.Scan(&op.Hash, &op.DID, &op.Type, &op.Payload, &op.Prev, &op.Seq, &ca)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	op.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	return op, nil
+}
+
+func scanEventState(row *sql.Row) (*EventState, error) {
+	s := &EventState{}
+	var ca string
+	var isCurrent int
+	err := row.Scan(&s.Hash, &s.ID, &s.Prev, &s.Payload, &isCurrent, &ca)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("scan event state: %w", err)
+	}
+	s.IsCurrent = isCurrent != 0
+	s.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	return s, nil
+}
+
+func scanEventStateRow(rows *sql.Rows) (*EventState, error) {
+	s := &EventState{}
+	var ca string
+	var isCurrent int
+	err := rows.Scan(&s.Hash, &s.ID, &s.Prev, &s.Payload, &isCurrent, &ca)
+	if err != nil {
+		return nil, err
+	}
+	s.IsCurrent = isCurrent != 0
+	s.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	return s, nil
+}

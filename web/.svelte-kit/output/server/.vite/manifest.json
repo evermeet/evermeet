@@ -1,0 +1,188 @@
+{
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "name": "internal",
+    "src": ".svelte-kit/generated/server/internal.js",
+    "isEntry": true,
+    "imports": [
+      "_environment.js",
+      "_internal.js"
+    ]
+  },
+  "_api.js": {
+    "file": "chunks/api.js",
+    "name": "api"
+  },
+  "_auth.svelte.js": {
+    "file": "chunks/auth.svelte.js",
+    "name": "auth.svelte",
+    "imports": [
+      "_dev.js",
+      "_api.js"
+    ]
+  },
+  "_client.js": {
+    "file": "chunks/client.js",
+    "name": "client",
+    "imports": [
+      "_index-server.js",
+      "_environment.js",
+      "_internal.js",
+      "_exports.js",
+      "_shared.js",
+      "_dev.js"
+    ]
+  },
+  "_dev.js": {
+    "file": "chunks/dev.js",
+    "name": "dev"
+  },
+  "_environment.js": {
+    "file": "chunks/environment.js",
+    "name": "environment"
+  },
+  "_exports.js": {
+    "file": "chunks/exports.js",
+    "name": "exports",
+    "imports": [
+      "_dev.js"
+    ]
+  },
+  "_index-server.js": {
+    "file": "chunks/index-server.js",
+    "name": "index-server",
+    "imports": [
+      "_dev.js"
+    ]
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "name": "internal",
+    "imports": [
+      "_index-server.js",
+      "_environment.js",
+      "_dev.js"
+    ]
+  },
+  "_shared.js": {
+    "file": "chunks/shared.js",
+    "name": "shared",
+    "imports": [
+      "_index-server.js"
+    ]
+  },
+  "_utils.js": {
+    "file": "chunks/utils.js",
+    "name": "utils",
+    "imports": [
+      "_environment.js",
+      "_shared.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js": {
+    "file": "remote-entry.js",
+    "name": "remote-entry",
+    "src": "node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js",
+    "isEntry": true,
+    "imports": [
+      "_environment.js",
+      "_utils.js",
+      "_shared.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte": {
+    "file": "entries/fallbacks/error.svelte.js",
+    "name": "entries/fallbacks/error.svelte",
+    "src": "node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index-server.js",
+      "_client.js",
+      "_dev.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "name": "index",
+    "src": "node_modules/@sveltejs/kit/src/runtime/server/index.js",
+    "isEntry": true,
+    "imports": [
+      "_environment.js",
+      "_internal.js",
+      "_utils.js",
+      "_exports.js",
+      "_shared.js",
+      "_dev.js"
+    ]
+  },
+  "src/routes/+layout.svelte": {
+    "file": "entries/pages/_layout.svelte.js",
+    "name": "entries/pages/_layout.svelte",
+    "src": "src/routes/+layout.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index-server.js",
+      "_dev.js",
+      "_auth.svelte.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.D5Fh-ClS.css"
+    ]
+  },
+  "src/routes/+page.svelte": {
+    "file": "entries/pages/_page.svelte.js",
+    "name": "entries/pages/_page.svelte",
+    "src": "src/routes/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index-server.js",
+      "_dev.js",
+      "_api.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CdskE0sj.css"
+    ]
+  },
+  "src/routes/auth/login/+page.svelte": {
+    "file": "entries/pages/auth/login/_page.svelte.js",
+    "name": "entries/pages/auth/login/_page.svelte",
+    "src": "src/routes/auth/login/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_dev.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CLf6Yk9D.css"
+    ]
+  },
+  "src/routes/auth/verify/+page.svelte": {
+    "file": "entries/pages/auth/verify/_page.svelte.js",
+    "name": "entries/pages/auth/verify/_page.svelte",
+    "src": "src/routes/auth/verify/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index-server.js",
+      "_client.js",
+      "_dev.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.tqLIAr4J.css"
+    ]
+  },
+  "src/routes/events/[id]/+page.svelte": {
+    "file": "entries/pages/events/_id_/_page.svelte.js",
+    "name": "entries/pages/events/_id_/_page.svelte",
+    "src": "src/routes/events/[id]/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index-server.js",
+      "_client.js",
+      "_dev.js",
+      "_api.js",
+      "_auth.svelte.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.BbXV9BPu.css"
+    ]
+  }
+}

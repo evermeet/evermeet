@@ -40,6 +40,11 @@ export const api = {
 				method: 'POST',
 				body: JSON.stringify({ email }),
 			}),
+		updateProfile: (data: { display_name: string; avatar: string; bio: string }) =>
+			request<{ status: string }>('/api/auth/profile', {
+				method: 'PUT',
+				body: JSON.stringify(data),
+			}),
 		logout: () => request<{ status: string }>('/api/auth/logout', { method: 'POST' }),
 		passkey: {
 			signupStart: () => requestWithSession<any>('/api/auth/passkey/signup/start', null, { method: 'POST' }),
@@ -92,6 +97,9 @@ export const api = {
 	},
 	node: {
 		status: () => request<any>('/api/node/status'),
+	},
+	users: {
+		get: (did: string) => request<{ did: string; display_name: string; avatar: string; bio: string; updated_at: string }>(`/api/users/${did}`),
 	},
 };
 

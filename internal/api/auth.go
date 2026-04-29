@@ -137,6 +137,43 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
+func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
+	did := authDID(r)
+	if did == "" {
+		jsonErr(w, http.StatusUnauthorized, "not authenticated")
+		return
+	}
+
+	var req struct {
+		DisplayName string `json:"display_name"`
+		Avatar      string `json:"avatar"`
+		Bio         string `json:"bio"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	ctx := r.Context()
+	user, err := s.db.GetUser(ctx, did)
+	if err != nil || user == nil {
+		jsonErr(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	user.DisplayName = req.DisplayName
+	user.Avatar = req.Avatar
+	user.Bio = req.Bio
+	user.UpdatedAt = time.Now()
+
+	if err := s.db.UpsertUser(ctx, user); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "failed to update profile")
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
 // lookupOrCreateUser finds or creates a user for the given email.
 // Returns the user's Ed25519 private key (decrypted from custodial storage) and their DID.
 func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.PrivateKey, string, error) {

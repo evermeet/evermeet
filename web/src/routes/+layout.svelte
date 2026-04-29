@@ -10,7 +10,6 @@
 <nav>
 	<a href="/">Evermeet</a>
 	<div class="nav-right">
-		<a href="/node">Node</a>
 		{#if !auth.loading}
 			{#if auth.user}
 				<a href="/events/create">+ New event</a>
@@ -24,7 +23,18 @@
 	</div>
 </nav>
 
-{@render children()}
+<div class="content">
+	{@render children()}
+</div>
+
+<footer>
+	<div class="footer-links">
+		<a href="/node">Node Status</a>
+		<span>•</span>
+		<span class="version">v0.1.0-alpha</span>
+	</div>
+	<p class="muted">Evermeet — Decentralized Event Platform</p>
+</footer>
 
 <style>
 	nav {
@@ -61,4 +71,39 @@
 		padding: 0;
 	}
 	button:hover { color: #111; }
+
+	.content {
+		min-height: calc(100vh - 180px);
+	}
+
+	footer {
+		margin-top: 4rem;
+		padding: 3rem 1.5rem;
+		border-top: 1px solid #e5e5e5;
+		text-align: center;
+		font-family: system-ui, sans-serif;
+	}
+	.footer-links {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.5rem;
+		font-size: 0.875rem;
+		color: #666;
+	}
+	.footer-links a {
+		color: #666;
+		text-decoration: none;
+	}
+	.footer-links a:hover { color: #111; }
+	.version {
+		font-family: monospace;
+		color: #999;
+	}
+	.muted {
+		font-size: 0.8rem;
+		color: #aaa;
+		margin: 0;
+	}
 </style>

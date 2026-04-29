@@ -4,8 +4,33 @@
 	import { bufferToBase64, recursiveBase64ToBuffer } from '$lib/webauthn.js';
 
 	let registering = $state(false);
+	let savingProfile = $state(false);
 	let error = $state('');
 	let success = $state('');
+
+	let displayName = $state(auth.user?.display_name || '');
+	let bio = $state(auth.user?.bio || '');
+	let avatar = $state(auth.user?.avatar || '');
+
+	async function updateProfile(e: Event) {
+		e.preventDefault();
+		savingProfile = true;
+		error = '';
+		success = '';
+		try {
+			await api.auth.updateProfile({
+				display_name: displayName,
+				bio: bio,
+				avatar: avatar
+			});
+			success = 'Profile updated successfully!';
+			await auth.load(); // Refresh user state
+		} catch (err: any) {
+			error = err.message;
+		} finally {
+			savingProfile = false;
+		}
+	}
 
 	async function registerPasskey() {
 		registering = true;
@@ -41,6 +66,27 @@
 
 <main>
 	<h1>Settings</h1>
+
+	<section>
+		<h2>Profile</h2>
+		<form onsubmit={updateProfile}>
+			<div class="field">
+				<label for="display_name">Display Name</label>
+				<input type="text" id="display_name" bind:value={displayName} placeholder="Your Name" />
+			</div>
+			<div class="field">
+				<label for="bio">Bio</label>
+				<textarea id="bio" bind:value={bio} placeholder="Tell us about yourself…"></textarea>
+			</div>
+			<div class="field">
+				<label for="avatar">Avatar URL</label>
+				<input type="text" id="avatar" bind:value={avatar} placeholder="https://…" />
+			</div>
+			<button type="submit" disabled={savingProfile}>
+				{savingProfile ? 'Saving…' : 'Save Profile'}
+			</button>
+		</form>
+	</section>
 
 	<section>
 		<h2>Passkeys</h2>
@@ -83,6 +129,18 @@
 	p { font-size: 0.95rem; line-height: 1.5; }
 	.muted { color: #666; }
 	
+	form { display: flex; flex-direction: column; gap: 1rem; }
+	.field { display: flex; flex-direction: column; gap: 0.3rem; }
+	label { font-size: 0.85rem; font-weight: 600; color: #444; }
+	input, textarea {
+		padding: 0.6rem;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		font-size: 0.95rem;
+		font-family: inherit;
+	}
+	textarea { min-height: 80px; resize: vertical; }
+
 	button {
 		margin-top: 1rem;
 		padding: 0.6rem 1.2rem;

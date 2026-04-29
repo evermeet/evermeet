@@ -149,7 +149,7 @@
 			</div>
 		{/if}
 
-		<p class="organizer muted">Organized by <code>{event.organizer}</code></p>
+		<p class="organizer muted">Organized by <a href="/u/{event.organizer}">{event.organizer}</a></p>
 	{/if}
 </main>
 

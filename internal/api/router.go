@@ -68,6 +68,8 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)
 	r.Post("/api/auth/logout", s.handleLogout)
 	r.Get("/api/auth/me", s.handleMe)
+	r.Put("/api/auth/profile", s.requireAuth(s.handleUpdateProfile))
+	r.Get("/api/users/{did}", s.handleGetUser)
 
 	// Passkeys (WebAuthn)
 	r.Post("/api/auth/passkey/signup/start", s.handlePasskeySignupStart)
@@ -87,7 +89,6 @@ func (s *Server) Router() http.Handler {
 
 	// Users
 	r.Get("/api/users/{did}", s.handleGetUser)
-	r.Put("/api/users/me", s.requireAuth(s.handleUpdateMe))
 
 	// Well-known: instance public key for federation auth
 	r.Get("/.well-known/evermeet-node-key", s.handleNodeKey)

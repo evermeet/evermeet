@@ -60,13 +60,14 @@ type User struct {
 	Endpoint    string
 	Sig         string
 	UpdatedAt   time.Time
+	HomeHost    string
 }
 
 func (d *DB) UpsertUser(ctx context.Context, u *User) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
-			`INSERT INTO users (did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`INSERT INTO users (did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at, home_host)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			 ON CONFLICT(did) DO UPDATE SET
 			   display_name = excluded.display_name,
 			   avatar       = excluded.avatar,
@@ -75,10 +76,11 @@ func (d *DB) UpsertUser(ctx context.Context, u *User) error {
 			   rotation_pk  = excluded.rotation_pk,
 			   endpoint     = excluded.endpoint,
 			   sig          = excluded.sig,
-			   updated_at   = excluded.updated_at`,
+			   updated_at   = excluded.updated_at,
+			   home_host    = excluded.home_host`,
 			u.DID, u.DisplayName, u.Avatar, u.Bio,
 			u.CurrentPK, u.RotationPK, u.Endpoint, u.Sig,
-			u.UpdatedAt.UTC().Format(time.RFC3339),
+			u.UpdatedAt.UTC().Format(time.RFC3339), u.HomeHost,
 		)
 		return err
 	})
@@ -86,12 +88,12 @@ func (d *DB) UpsertUser(ctx context.Context, u *User) error {
 
 func (d *DB) GetUser(ctx context.Context, did string) (*User, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at
+		`SELECT did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at, COALESCE(home_host,'')
 		 FROM users WHERE did = ?`, did)
 	u := &User{}
 	var updatedAt string
 	err := row.Scan(&u.DID, &u.DisplayName, &u.Avatar, &u.Bio,
-		&u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt)
+		&u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt, &u.HomeHost)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

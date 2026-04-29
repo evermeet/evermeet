@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN home_host TEXT NOT NULL DEFAULT '';

@@ -16,6 +16,7 @@ type FoundingDoc struct {
 	Owners    []string `json:"owners"`     // initial did:em: owner list
 	CreatedAt string   `json:"created_at"`
 	Nonce     string   `json:"nonce"`
+	HomeHost  string   `json:"home_host,omitempty"`
 }
 
 // Sig is one entry in the sigs array on a mutable state record.
@@ -58,7 +59,7 @@ type Fields struct {
 }
 
 // New creates a new founding doc and signed initial mutable state.
-func New(ownerDID string, priv ed25519.PrivateKey, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
+func New(ownerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, "", nil, "", fmt.Errorf("nonce: %w", err)
@@ -70,6 +71,7 @@ func New(ownerDID string, priv ed25519.PrivateKey, f Fields) (*FoundingDoc, stri
 		Owners:    []string{ownerDID},
 		CreatedAt: now.Format(time.RFC3339),
 		Nonce:     hex.EncodeToString(nonce),
+		HomeHost:  homeHost,
 	}
 
 	calID, err := identity.ContentHash(founding)

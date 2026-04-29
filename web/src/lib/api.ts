@@ -96,7 +96,10 @@ export const api = {
 			}),
 	},
 	node: {
-		status: () => request<any>('/api/node/status'),
+		status: () => request<any>('/api/instance/status'),
+	},
+	instance: {
+		status: () => request<any>('/api/instance/status'),
 	},
 	users: {
 		get: (did: string) => request<{ did: string; display_name: string; avatar: string; bio: string; updated_at: string }>(`/api/users/${did}`),

@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -151,7 +152,13 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		f.EndsAt = &t
 	}
 
-	founding, eventID, state, stateHash, err := events.New(did, priv, f)
+	u := &url.URL{}
+	if parsed, err := url.Parse(s.baseURL); err == nil {
+		u = parsed
+	}
+	homeHost := u.Hostname()
+
+	founding, eventID, state, stateHash, err := events.New(did, priv, homeHost, f)
 	if err != nil {
 		s.log.Printf("create event: %v", err)
 		jsonErr(w, http.StatusInternalServerError, "create event failed")

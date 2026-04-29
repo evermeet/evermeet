@@ -8,6 +8,8 @@ CREATE TABLE passkeys (
     counter         INTEGER NOT NULL DEFAULT 0,
     user_present    INTEGER NOT NULL DEFAULT 1,
     user_verified   INTEGER NOT NULL DEFAULT 0,
+    backup_eligible INTEGER NOT NULL DEFAULT 0,
+    backup_state    INTEGER NOT NULL DEFAULT 0,
     created_at      TEXT NOT NULL
 );
 CREATE INDEX idx_passkeys_did ON passkeys(did);

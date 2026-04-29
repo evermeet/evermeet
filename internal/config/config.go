@@ -17,6 +17,7 @@ type Config struct {
 type NodeConfig struct {
 	Port    int    `toml:"port"`
 	DataDir string `toml:"data_dir"`
+	BaseURL string `toml:"base_url"`
 	Public  bool   `toml:"public"`
 	Dev     bool   `toml:"dev"`
 }

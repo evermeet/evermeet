@@ -31,6 +31,7 @@ func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		"display_name": user.DisplayName,
 		"avatar":       user.Avatar,
 		"bio":          user.Bio,
+		"home_host":    user.HomeHost,
 		"updated_at":   user.UpdatedAt,
 	})
 }

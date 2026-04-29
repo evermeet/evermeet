@@ -18,6 +18,7 @@ type FoundingDoc struct {
 	Calendar  *string `json:"calendar"`   // optional calendar ID
 	CreatedAt string  `json:"created_at"`
 	Nonce     string  `json:"nonce"` // random hex, ensures uniqueness
+	HomeHost  string  `json:"home_host,omitempty"`
 }
 
 // Location is the physical or virtual location of an event.
@@ -91,7 +92,7 @@ type Fields struct {
 
 // New creates a new founding doc and signed initial mutable state.
 // Returns (foundingDoc, eventID, mutableState, stateHash, error).
-func New(organizerDID string, priv ed25519.PrivateKey, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
+func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, "", nil, "", fmt.Errorf("nonce: %w", err)
@@ -104,6 +105,7 @@ func New(organizerDID string, priv ed25519.PrivateKey, f Fields) (*FoundingDoc, 
 		Calendar:  f.CalendarID,
 		CreatedAt: now.Format(time.RFC3339),
 		Nonce:     hex.EncodeToString(nonce),
+		HomeHost:  homeHost,
 	}
 
 	eventID, err := identity.ContentHash(founding)

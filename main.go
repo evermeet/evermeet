@@ -83,7 +83,10 @@ func main() {
 	// In production, load this from a file or env var. For now, derive from node key seed.
 	serverSecret := kp.SigningPriv.Seed()
 
-	baseURL := fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
+	baseURL := cfg.Node.BaseURL
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
+	}
 	
 	// P2P Node
 	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort)
@@ -92,7 +95,7 @@ func main() {
 	}
 	defer p2pNode.Close()
 
-	apiServer := api.NewServer(db, emailClient, baseURL, serverSecret, logger, p2pNode)
+	apiServer := api.NewServer(db, emailClient, baseURL, serverSecret, logger, p2pNode, cfg)
 
 	r := chi.NewRouter()
 

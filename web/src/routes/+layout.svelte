@@ -33,7 +33,7 @@
 
 <footer>
 	<div class="footer-links">
-		<a href="/node">Node Status</a>
+		<a href="/instance">Instance Status</a>
 		<span>•</span>
 		<span class="version">v0.1.0-alpha</span>
 	</div>

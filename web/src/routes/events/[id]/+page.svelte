@@ -5,7 +5,8 @@
 	import { auth } from '$lib/auth.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 
-	let event = $state<Event | null>(null);
+	let event = $state<any>(null);
+	let founding = $state<any>(null);
 	let loading = $state(true);
 	let error = $state('');
 
@@ -23,6 +24,7 @@
 			const res = await api.events.get(id);
 			event = res.state;
 			event.id = res.id;
+			founding = res.founded;
 
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
@@ -77,6 +79,9 @@
 			<span>{formatDate(event.starts_at)}</span>
 			{#if event.ends_at}
 				<span> – {formatDate(event.ends_at)}</span>
+			{/if}
+			{#if founding?.home_host}
+				<span> • Home: {founding.home_host}</span>
 			{/if}
 		</div>
 

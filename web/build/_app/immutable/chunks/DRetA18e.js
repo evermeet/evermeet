@@ -1,1 +1,0 @@
-import{N as e,P as t,S as n}from"./DdRuSZuU.js";import{t as r}from"./CQ_juSQk.js";function i(){let i=t(null),a=t(!0);async function o(){try{e(i,await r.auth.me(),!0)}catch{e(i,null)}finally{e(a,!1)}}async function s(){await r.auth.logout(),e(i,null)}return{get user(){return n(i)},get loading(){return n(a)},load:o,logout:s}}var a=i();export{a as t};

@@ -17,6 +17,7 @@ import (
 
 const (
 	EventsTopicName    = "em/events"
+	UsersTopicName     = "em/users"
 	EventFetchProtocol = "/evermeet/event-fetch/1.0.0"
 	UserFetchProtocol  = "/evermeet/user-fetch/1.0.0"
 )
@@ -31,6 +32,8 @@ type Node struct {
 
 	eventsTopic *pubsub.Topic
 	eventsSub   *pubsub.Subscription
+	usersTopic  *pubsub.Topic
+	usersSub    *pubsub.Subscription
 
 	peersMu sync.Mutex
 	peers   map[peer.ID]peer.AddrInfo
@@ -76,8 +79,11 @@ func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
 		l.Printf("mdns error: %v", err)
 	}
 
-	// Join events topic
+	// Join topics
 	if err := n.joinEvents(); err != nil {
+		return nil, err
+	}
+	if err := n.joinUsers(); err != nil {
 		return nil, err
 	}
 
@@ -108,6 +114,30 @@ func (n *Node) joinEvents() error {
 
 	go n.readEventsLoop()
 	return nil
+}
+
+func (n *Node) joinUsers() error {
+	topic, err := n.ps.Join(UsersTopicName)
+	if err != nil {
+		return fmt.Errorf("join topic: %w", err)
+	}
+	sub, err := topic.Subscribe()
+	if err != nil {
+		return fmt.Errorf("subscribe: %w", err)
+	}
+
+	n.usersTopic = topic
+	n.usersSub = sub
+
+	go n.readUsersLoop()
+	return nil
+}
+
+func (n *Node) BroadcastUser(data []byte) error {
+	if n.usersTopic == nil {
+		return fmt.Errorf("not joined to users topic")
+	}
+	return n.usersTopic.Publish(n.ctx, data)
 }
 
 func (n *Node) BroadcastEvent(data []byte) error {

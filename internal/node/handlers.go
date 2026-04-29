@@ -38,6 +38,11 @@ type UserFetchResponse struct {
 	Error string      `json:"error,omitempty"`
 }
 
+type ProfileGossip struct {
+	User *store.User `json:"user"`
+	Sig  string      `json:"sig"`
+}
+
 func (n *Node) handleEventFetchStream(s network.Stream) {
 	defer s.Close()
 
@@ -255,4 +260,68 @@ func (n *Node) handleIncomingEvent(data []byte) {
 	if err != nil {
 		n.log.Printf("failed to save event state: %v", err)
 	}
+}
+
+func (n *Node) readUsersLoop() {
+	for {
+		msg, err := n.usersSub.Next(n.ctx)
+		if err != nil {
+			if n.ctx.Err() == nil {
+				n.log.Printf("users pubsub error: %v", err)
+			}
+			return
+		}
+
+		if msg.ReceivedFrom == n.host.ID() {
+			continue
+		}
+
+		go n.handleIncomingUser(msg.Data)
+	}
+}
+
+func (n *Node) handleIncomingUser(data []byte) {
+	var pg ProfileGossip
+	if err := json.Unmarshal(data, &pg); err != nil {
+		return
+	}
+
+	u := pg.User
+	if u == nil {
+		return
+	}
+
+	// Verify signature
+	pkBytes, err := hex.DecodeString(u.CurrentPK)
+	if err != nil {
+		return
+	}
+	valid, err := identity.Verify(ed25519.PublicKey(pkBytes), u, pg.Sig)
+	if err != nil || !valid {
+		n.log.Printf("invalid profile signature from %s", u.DID)
+		return
+	}
+
+	// Check if newer
+	existing, err := n.db.GetUser(context.Background(), u.DID)
+	if err == nil && existing != nil && !u.UpdatedAt.After(existing.UpdatedAt) {
+		return
+	}
+
+	n.log.Printf("received profile update via P2P: %s (%s)", u.DisplayName, u.DID)
+	n.db.UpsertUser(context.Background(), u)
+}
+
+func (n *Node) BroadcastUserProfile(u *store.User, priv ed25519.PrivateKey) error {
+	sig, err := identity.Sign(priv, u)
+	if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(ProfileGossip{User: u, Sig: sig})
+	if err != nil {
+		return err
+	}
+
+	return n.BroadcastUser(data)
 }

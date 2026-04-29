@@ -27,7 +27,8 @@ type Keypair struct {
 // if the signing key is rotated.
 func DeriveDID(pubkey ed25519.PublicKey) string {
 	h := blake3.Sum256(pubkey)
-	encoded, _ := multibase.Encode(multibase.Base32, h[:])
+	// Truncate to 15 bytes (120 bits) for a 24-character Base32 ID
+	encoded, _ := multibase.Encode(multibase.Base32, h[:15])
 	// multibase prefixes with 'b' for base32; strip it and use our own prefix
 	return "did:em:" + encoded[1:]
 }

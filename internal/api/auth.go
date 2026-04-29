@@ -171,6 +171,12 @@ func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if s.node != nil {
+		if err := s.node.BroadcastUserProfile(user, authPrivKey(r)); err != nil {
+			s.log.Printf("broadcast profile: %v", err)
+		}
+	}
+
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 

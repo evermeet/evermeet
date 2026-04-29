@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/auth.svelte.js';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let { children } = $props();
 
@@ -14,7 +15,10 @@
 			{#if auth.user}
 				<a href="/events/create">+ New event</a>
 				<a href="/settings">Settings</a>
-				<span class="did">{auth.user.display_name || auth.user.did.slice(0, 20) + '…'}</span>
+				<a href="/u/{auth.user.did}" class="user-profile">
+					<Avatar src={auth.user.avatar} did={auth.user.did} size={28} />
+					<span class="did">{auth.user.display_name || auth.user.did.slice(0, 10) + '…'}</span>
+				</a>
 				<button onclick={() => auth.logout()}>Sign out</button>
 			{:else}
 				<a href="/auth/login">Sign in</a>
@@ -61,7 +65,19 @@
 		color: #555;
 	}
 	.nav-right a:hover { color: #111; }
-	.did { color: #888; font-size: 0.8rem; }
+	.user-profile {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		text-decoration: none;
+		color: inherit;
+		padding: 0.2rem 0.5rem;
+		border-radius: 6px;
+	}
+	.user-profile:hover {
+		background: #f4f4f4;
+	}
+	.did { color: #888; font-size: 0.8rem; font-weight: 500; }
 	button {
 		border: none;
 		background: none;

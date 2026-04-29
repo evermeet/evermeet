@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { api } from '$lib/api.js';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let user = $state<any>(null);
 	let loading = $state(true);
@@ -27,12 +28,8 @@
 		<p class="error">{error}</p>
 	{:else if user}
 		<div class="profile-card">
-			<div class="avatar-container">
-				{#if user.avatar}
-					<img src={user.avatar} alt={user.display_name} class="avatar" />
-				{:else}
-					<div class="avatar-placeholder">{user.display_name?.charAt(0) || '?'}</div>
-				{/if}
+			<div class="avatar-wrapper">
+				<Avatar src={user.avatar} did={user.did} size={120} />
 			</div>
 			
 			<h1>{user.display_name || 'Anonymous User'}</h1>
@@ -64,29 +61,10 @@
 		border-radius: 12px;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 	}
-	.avatar-container {
+	.avatar-wrapper {
 		margin-bottom: 1.5rem;
 		display: flex;
 		justify-content: center;
-	}
-	.avatar {
-		width: 100px;
-		height: 100px;
-		border-radius: 50%;
-		object-fit: cover;
-		border: 3px solid #f0f0f0;
-	}
-	.avatar-placeholder {
-		width: 100px;
-		height: 100px;
-		border-radius: 50%;
-		background: #1a1a1a;
-		color: #fff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 2.5rem;
-		font-weight: 700;
 	}
 	h1 { font-size: 1.75rem; font-weight: 800; margin: 0 0 0.5rem; }
 	.did {

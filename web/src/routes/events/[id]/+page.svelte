@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { api, type Event } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let event = $state<Event | null>(null);
 	let loading = $state(true);
@@ -149,7 +150,10 @@
 			</div>
 		{/if}
 
-		<p class="organizer muted">Organized by <a href="/u/{event.organizer}">{event.organizer}</a></p>
+		<div class="organizer-box">
+			<Avatar did={event.organizer} size={32} />
+			<span class="muted">Organized by <a href="/u/{event.organizer}">{event.organizer.slice(0, 16)}…</a></span>
+		</div>
 	{/if}
 </main>
 
@@ -219,7 +223,15 @@
 		font-size: 0.8rem;
 		color: #555;
 	}
-	.organizer { margin-top: 2rem; font-size: 0.8rem; }
+	.organizer-box {
+		margin-top: 2rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.875rem;
+	}
+	.organizer-box a { color: inherit; text-decoration: none; font-weight: 500; }
+	.organizer-box a:hover { color: #111; text-decoration: underline; }
 	.muted { color: #999; }
 	.error { color: #c00; }
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { api, type Event } from '$lib/api.js';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let events = $state<Event[]>([]);
 	let loading = $state(true);
@@ -41,8 +42,13 @@
 					<a href="/events/{event.id}">
 						<span class="date">{formatDate(event.starts_at)}</span>
 						<span class="title">{event.title}</span>
+						<span class="organizer">
+							<Avatar did={event.organizer} size={20} />
+						</span>
 						{#if event.location}
 							<span class="location">{event.location.name}</span>
+						{:else}
+							<span class="location"></span>
 						{/if}
 					</a>
 				</li>
@@ -63,14 +69,15 @@
 	.event-list li { border-bottom: 1px solid #f0f0f0; }
 	.event-list a {
 		display: grid;
-		grid-template-columns: 160px 1fr auto;
+		grid-template-columns: 160px 1fr auto auto;
 		gap: 0.5rem;
-		align-items: baseline;
+		align-items: center;
 		padding: 0.9rem 0;
 		text-decoration: none;
 		color: inherit;
 	}
 	.event-list a:hover .title { text-decoration: underline; }
+	.organizer { display: flex; align-items: center; opacity: 0.7; }
 	.date { font-size: 0.85rem; color: #666; white-space: nowrap; }
 	.title { font-weight: 600; }
 	.location { font-size: 0.85rem; color: #999; text-align: right; }

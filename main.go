@@ -17,12 +17,16 @@ import (
 	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/email"
 	"github.com/evermeet/evermeet/internal/identity"
+	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 )
 
 func main() {
 	cfgPath := flag.String("config", "evermeet.toml", "path to config file")
+	httpPort := flag.Int("port", 0, "HTTP port (overrides config)")
+	p2pPort := flag.Int("p2p-port", 0, "P2P port (overrides config)")
+	dataDir := flag.String("data", "", "Data directory (overrides config)")
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
@@ -30,6 +34,17 @@ func main() {
 	cfg, err := config.Load(*cfgPath)
 	if err != nil {
 		logger.Fatalf("load config: %v", err)
+	}
+
+	if *httpPort != 0 {
+		cfg.Node.Port = *httpPort
+	}
+	if *p2pPort != 0 {
+		cfg.P2P.ListenPort = *p2pPort
+	}
+	if *dataDir != "" {
+		cfg.Node.DataDir = *dataDir
+		cfg.Identity.KeyDir = filepath.Join(*dataDir, "keys")
 	}
 
 	if err := os.MkdirAll(cfg.Node.DataDir, 0755); err != nil {
@@ -69,14 +84,21 @@ func main() {
 	serverSecret := kp.SigningPriv.Seed()
 
 	baseURL := fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
+	
+	// P2P Node
+	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort)
+	if err != nil {
+		logger.Fatalf("start p2p node: %v", err)
+	}
+	defer p2pNode.Close()
 
-	apiServer := api.NewServer(db, emailClient, baseURL, serverSecret, logger)
+	apiServer := api.NewServer(db, emailClient, baseURL, serverSecret, logger, p2pNode)
 
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","did":%q}`, nodeDID)
+		fmt.Fprintf(w, `{"status":"ok","did":%q,"p2p_peers":%d}`, nodeDID, p2pNode.PeerCount())
 	})
 
 	r.Mount("/", apiServer.Router())

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/evermeet/evermeet/internal/email"
+	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -22,10 +23,11 @@ type Server struct {
 	baseURL      string
 	serverSecret []byte // used to derive per-user key encryption passwords
 	webauthn     *webauthn.WebAuthn
+	node         *node.Node
 }
 
 // NewServer creates a Server with the given dependencies.
-func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSecret []byte, logger *log.Logger) *Server {
+func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSecret []byte, logger *log.Logger, p2pNode *node.Node) *Server {
 	u, _ := url.Parse(baseURL)
 	w, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Evermeet",
@@ -47,6 +49,7 @@ func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSe
 		baseURL:      baseURL,
 		serverSecret: serverSecret,
 		webauthn:     w,
+		node:         p2pNode,
 	}
 }
 
@@ -88,6 +91,9 @@ func (s *Server) Router() http.Handler {
 
 	// Well-known: instance public key for federation auth
 	r.Get("/.well-known/evermeet-node-key", s.handleNodeKey)
+
+	// Node status (Public)
+	r.Get("/api/node/status", s.handleNodeStatus)
 
 	return r
 }

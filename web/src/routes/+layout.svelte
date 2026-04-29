@@ -10,6 +10,7 @@
 <nav>
 	<a href="/">Evermeet</a>
 	<div class="nav-right">
+		<a href="/node">Node</a>
 		{#if !auth.loading}
 			{#if auth.user}
 				<a href="/events/create">+ New event</a>

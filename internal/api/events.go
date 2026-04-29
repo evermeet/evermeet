@@ -9,6 +9,7 @@ import (
 
 	"github.com/evermeet/evermeet/internal/events"
 	"github.com/evermeet/evermeet/internal/identity"
+	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 )
@@ -54,6 +55,12 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	founding, err := s.db.GetEventFounding(ctx, id)
+	if (err != nil || founding == nil) && s.node != nil {
+		// Try fetching from P2P
+		if err := s.node.FetchEvent(id); err == nil {
+			founding, err = s.db.GetEventFounding(ctx, id)
+		}
+	}
 	if err != nil || founding == nil {
 		jsonErr(w, http.StatusNotFound, "event not found")
 		return
@@ -173,6 +180,18 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Broadcast via P2P if node is available
+	if s.node != nil {
+		gossip := node.GossipEvent{
+			Founding: founding,
+			State:    state,
+		}
+		data, _ := json.Marshal(gossip)
+		if err := s.node.BroadcastEvent(data); err != nil {
+			s.log.Printf("p2p broadcast failed: %v", err)
+		}
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	jsonOK(w, map[string]any{
 		"id":    eventID,
@@ -257,6 +276,25 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "persist update failed")
 		return
+	}
+
+	// Broadcast update via P2P
+	if s.node != nil {
+		// For updates, we might only need the state, but GossipEvent expects founding.
+		// We can get founding from DB if needed, or update GossipEvent to make it optional.
+		// For now, let's fetch founding.
+		founding, _ := s.db.GetEventFounding(ctx, id)
+		var fd events.FoundingDoc
+		if founding != nil {
+			json.Unmarshal([]byte(founding.Payload), &fd)
+		}
+
+		gossip := node.GossipEvent{
+			Founding: &fd,
+			State:    newState,
+		}
+		data, _ := json.Marshal(gossip)
+		s.node.BroadcastEvent(data)
 	}
 
 	jsonOK(w, map[string]any{

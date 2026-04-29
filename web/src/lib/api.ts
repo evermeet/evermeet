@@ -90,6 +90,9 @@ export const api = {
 				body: JSON.stringify(data),
 			}),
 	},
+	node: {
+		status: () => request<any>('/api/node/status'),
+	},
 };
 
 export interface Event {

@@ -13,6 +13,25 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	return res.json();
 }
 
+async function requestWithSession<T>(path: string, sessionToken?: string | null, init?: RequestInit): Promise<{ data: T; session: string }> {
+	const headers: Record<string, string> = { 'Content-Type': 'application/json', ...init?.headers };
+	if (sessionToken) headers['X-WebAuthn-Session'] = sessionToken;
+
+	const res = await fetch(base + path, {
+		credentials: 'include',
+		headers,
+		...init,
+	});
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({ error: res.statusText }));
+		throw new Error(err.error ?? res.statusText);
+	}
+	return {
+		data: await res.json(),
+		session: res.headers.get('X-WebAuthn-Session') ?? sessionToken ?? '',
+	};
+}
+
 export const api = {
 	auth: {
 		me: () => request<{ did: string; display_name: string; avatar: string; bio: string }>('/api/auth/me'),
@@ -22,6 +41,30 @@ export const api = {
 				body: JSON.stringify({ email }),
 			}),
 		logout: () => request<{ status: string }>('/api/auth/logout', { method: 'POST' }),
+		passkey: {
+			signupStart: () => requestWithSession<any>('/api/auth/passkey/signup/start', null, { method: 'POST' }),
+			signupFinish: (data: any, sessionToken: string) =>
+				requestWithSession<any>('/api/auth/passkey/signup/finish', sessionToken, {
+					method: 'POST',
+					body: JSON.stringify(data),
+				}),
+			registerStart: () => requestWithSession<any>('/api/auth/passkey/register/start', null, { method: 'POST' }),
+			registerFinish: (data: any, sessionToken: string) =>
+				requestWithSession<any>('/api/auth/passkey/register/finish', sessionToken, {
+					method: 'POST',
+					body: JSON.stringify(data),
+				}),
+			loginStart: (email?: string) =>
+				requestWithSession<any>('/api/auth/passkey/login/start', null, {
+					method: 'POST',
+					body: JSON.stringify({ email }),
+				}),
+			loginFinish: (data: any, sessionToken: string) =>
+				requestWithSession<any>('/api/auth/passkey/login/finish', sessionToken, {
+					method: 'POST',
+					body: JSON.stringify(data),
+				}),
+		},
 	},
 	events: {
 		list: (limit = 20, offset = 0) =>
@@ -38,6 +81,12 @@ export const api = {
 		update: (id: string, data: CreateEventInput) =>
 			request<{ id: string; hash: string; state: Event }>(`/api/events/${id}`, {
 				method: 'PUT',
+				body: JSON.stringify(data),
+			}),
+		listRSVPs: (id: string) => request<any[]>(`/api/events/${id}/rsvps`),
+		rsvp: (id: string, data: { name: string; email: string; note?: string }) =>
+			request<{ status: string }>(`/api/events/${id}/rsvp`, {
+				method: 'POST',
 				body: JSON.stringify(data),
 			}),
 	},

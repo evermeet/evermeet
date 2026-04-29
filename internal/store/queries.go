@@ -469,6 +469,141 @@ func (d *DB) MarkMagicLinkUsed(ctx context.Context, token string) error {
 	})
 }
 
+// ---- Passkeys (WebAuthn) ----
+
+type Passkey struct {
+	ID              []byte
+	DID             string
+	PublicKey       []byte
+	AttestationType string
+	Transport       string // JSON array
+	Counter         int64
+	UserPresent     bool
+	UserVerified    bool
+	BackupEligible  bool
+	BackupState     bool
+	CreatedAt       time.Time
+}
+
+func (d *DB) InsertPasskey(ctx context.Context, p *Passkey) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO passkeys (id, did, public_key, attestation_type, transport, counter, user_present, user_verified, backup_eligible, backup_state, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			p.ID, p.DID, p.PublicKey, p.AttestationType, p.Transport, p.Counter,
+			boolInt(p.UserPresent), boolInt(p.UserVerified), boolInt(p.BackupEligible), boolInt(p.BackupState), p.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetPasskeysByDID(ctx context.Context, did string) ([]*Passkey, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT id, did, public_key, attestation_type, COALESCE(transport,''), counter, user_present, user_verified, backup_eligible, backup_state, created_at
+		 FROM passkeys WHERE did = ?`, did)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*Passkey
+	for rows.Next() {
+		p := &Passkey{}
+		var ca string
+		var up, uv, be, bs int
+		if err := rows.Scan(&p.ID, &p.DID, &p.PublicKey, &p.AttestationType, &p.Transport, &p.Counter, &up, &uv, &be, &bs, &ca); err != nil {
+			return nil, err
+		}
+		p.UserPresent = up != 0
+		p.UserVerified = uv != 0
+		p.BackupEligible = be != 0
+		p.BackupState = bs != 0
+		p.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+		out = append(out, p)
+	}
+	return out, rows.Err()
+}
+
+func (d *DB) GetPasskeyByID(ctx context.Context, id []byte) (*Passkey, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT id, did, public_key, attestation_type, COALESCE(transport,''), counter, user_present, user_verified, backup_eligible, backup_state, created_at
+		 FROM passkeys WHERE id = ?`, id)
+	p := &Passkey{}
+	var ca string
+	var up, uv, be, bs int
+	err := row.Scan(&p.ID, &p.DID, &p.PublicKey, &p.AttestationType, &p.Transport, &p.Counter, &up, &uv, &be, &bs, &ca)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.UserPresent = up != 0
+	p.UserVerified = uv != 0
+	p.BackupEligible = be != 0
+	p.BackupState = bs != 0
+	p.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	return p, nil
+}
+
+func (d *DB) UpdatePasskeyCounter(ctx context.Context, id []byte, counter int64) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE passkeys SET counter = ? WHERE id = ?`, counter, id)
+		return err
+	})
+}
+
+func (d *DB) UpdatePasskeyBackupFlags(ctx context.Context, id []byte, eligible, state bool) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`UPDATE passkeys SET backup_eligible = ?, backup_state = ? WHERE id = ?`,
+			boolInt(eligible), boolInt(state), id,
+		)
+		return err
+	})
+}
+
+// ---- WebAuthn Sessions ----
+
+type WebAuthnSession struct {
+	Token     string
+	DID       string
+	Data      []byte
+	ExpiresAt time.Time
+}
+
+func (d *DB) InsertWebAuthnSession(ctx context.Context, s *WebAuthnSession) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO webauthn_sessions (token, did, data, expires_at) VALUES (?, ?, ?, ?)`,
+			s.Token, s.DID, s.Data, s.ExpiresAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetWebAuthnSession(ctx context.Context, token string) (*WebAuthnSession, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT token, did, data, expires_at FROM webauthn_sessions WHERE token = ?`, token)
+	s := &WebAuthnSession{}
+	var ea string
+	err := row.Scan(&s.Token, &s.DID, &s.Data, &ea)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	s.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	return s, nil
+}
+
+func (d *DB) DeleteWebAuthnSession(ctx context.Context, token string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`DELETE FROM webauthn_sessions WHERE token = ?`, token)
+		return err
+	})
+}
+
 // ---- helpers ----
 
 func nullString(s string) any {

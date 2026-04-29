@@ -13,6 +13,7 @@
 		{#if !auth.loading}
 			{#if auth.user}
 				<a href="/events/create">+ New event</a>
+				<a href="/settings">Settings</a>
 				<span class="did">{auth.user.display_name || auth.user.did.slice(0, 20) + '…'}</span>
 				<button onclick={() => auth.logout()}>Sign out</button>
 			{:else}

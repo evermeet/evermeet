@@ -1,12 +1,14 @@
 package api
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/events"
+	"github.com/evermeet/evermeet/internal/identity"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 )
@@ -262,4 +264,123 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		"hash":  newHash,
 		"state": json.RawMessage(statePayload),
 	})
+}
+
+func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	ctx := r.Context()
+
+	var req struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+		Note  string `json:"note"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+
+	// 1. Get event state to find organizer DID
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+	var ms events.MutableState
+	json.Unmarshal([]byte(state.Payload), &ms)
+
+	// 2. Get organizer's public key
+	organizer, err := s.db.GetUser(ctx, ms.Organizer)
+	if err != nil || organizer == nil {
+		jsonErr(w, http.StatusNotFound, "organizer not found")
+		return
+	}
+	organizerPub, err := hex.DecodeString(organizer.CurrentPK)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "invalid organizer key")
+		return
+	}
+
+	// 3. Create and encrypt RSVP
+	rsvp := events.RSVP{
+		EventID:   id,
+		SenderDID: did,
+		Name:      req.Name,
+		Email:     req.Email,
+		Note:      req.Note,
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+	}
+	rsvpPayload, _ := json.Marshal(rsvp)
+	encrypted, err := identity.EncryptForRecipient(organizerPub, rsvpPayload)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "encryption failed")
+		return
+	}
+
+	// 4. Save envelope
+	envelope := &store.RSVPEnvelope{
+		ID:         randomHex(16),
+		EventID:    id,
+		SenderDID:  did,
+		Payload:    encrypted,
+		Status:     "pending",
+		ReceivedAt: time.Now(),
+	}
+	if err := s.db.InsertRSVPEnvelope(ctx, envelope); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "save rsvp failed")
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleListRSVPs(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	priv := authPrivKey(r)
+	ctx := r.Context()
+
+	// 1. Verify requester is organizer
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+	var ms events.MutableState
+	json.Unmarshal([]byte(state.Payload), &ms)
+	if ms.Organizer != did {
+		jsonErr(w, http.StatusForbidden, "only organizer can list RSVPs")
+		return
+	}
+
+	// 2. List envelopes
+	envelopes, err := s.db.ListRSVPsForEvent(ctx, id)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "list rsvps failed")
+		return
+	}
+
+	// 3. Decrypt payloads
+	out := make([]any, 0, len(envelopes))
+	for _, env := range envelopes {
+		decrypted, err := identity.DecryptForRecipient(priv, env.Payload)
+		if err != nil {
+			s.log.Printf("decrypt rsvp %s: %v", env.ID, err)
+			continue
+		}
+		var rsvp events.RSVP
+		if err := json.Unmarshal(decrypted, &rsvp); err != nil {
+			continue
+		}
+		out = append(out, map[string]any{
+			"id":          env.ID,
+			"sender_did":  env.SenderDID,
+			"status":      env.Status,
+			"received_at": env.ReceivedAt,
+			"rsvp":        rsvp,
+		})
+	}
+
+	jsonOK(w, out)
 }

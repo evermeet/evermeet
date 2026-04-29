@@ -236,3 +236,14 @@ func isOwner(g Governance, did string) bool {
 	}
 	return false
 }
+
+// RSVP is the private content of an RSVP envelope.
+// It is encrypted for the event organizer.
+type RSVP struct {
+	EventID   string `json:"event_id"`
+	SenderDID string `json:"sender_did"`
+	Name      string `json:"name,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Note      string `json:"note,omitempty"`
+	Timestamp string `json:"timestamp"`
+}

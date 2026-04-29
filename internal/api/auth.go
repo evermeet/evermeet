@@ -12,6 +12,7 @@ import (
 
 	"github.com/evermeet/evermeet/internal/identity"
 	"github.com/evermeet/evermeet/internal/store"
+	"github.com/go-webauthn/webauthn/webauthn"
 )
 
 func (s *Server) handleMagicLinkRequest(w http.ResponseWriter, r *http.Request) {
@@ -203,6 +204,339 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 	}
 
 	return kp.SigningPriv, did, nil
+}
+
+func (s *Server) handlePasskeyRegisterStart(w http.ResponseWriter, r *http.Request) {
+	did := authDID(r)
+	ctx := r.Context()
+
+	user, err := s.db.GetUser(ctx, did)
+	if err != nil || user == nil {
+		jsonErr(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	passkeys, err := s.db.GetPasskeysByDID(ctx, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	waUser := s.wrapUser(user, passkeys)
+	options, sessionData, err := s.webauthn.BeginRegistration(waUser)
+	if err != nil {
+		s.log.Printf("webauthn registration start: %v", err)
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	token := randomHex(32)
+	sd, _ := json.Marshal(sessionData)
+	ws := &store.WebAuthnSession{
+		Token:     token,
+		DID:       did,
+		Data:      sd,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+	}
+	if err := s.db.InsertWebAuthnSession(ctx, ws); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	w.Header().Set("X-WebAuthn-Session", token)
+	jsonOK(w, options)
+}
+
+func (s *Server) handlePasskeyRegisterFinish(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("X-WebAuthn-Session")
+	if token == "" {
+		jsonErr(w, http.StatusBadRequest, "session token required")
+		return
+	}
+
+	ctx := r.Context()
+	ws, err := s.db.GetWebAuthnSession(ctx, token)
+	if err != nil || ws == nil || time.Now().After(ws.ExpiresAt) {
+		jsonErr(w, http.StatusUnauthorized, "invalid or expired session")
+		return
+	}
+	defer s.db.DeleteWebAuthnSession(ctx, token)
+
+	var sessionData webauthn.SessionData
+	if err := json.Unmarshal(ws.Data, &sessionData); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	user, err := s.db.GetUser(ctx, ws.DID)
+	if err != nil || user == nil {
+		jsonErr(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	passkeys, err := s.db.GetPasskeysByDID(ctx, ws.DID)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	waUser := s.wrapUser(user, passkeys)
+	credential, err := s.webauthn.FinishRegistration(waUser, sessionData, r)
+	if err != nil {
+		s.log.Printf("webauthn registration finish: %v", err)
+		jsonErr(w, http.StatusBadRequest, "registration failed")
+		return
+	}
+
+	p := &store.Passkey{
+		ID:              credential.ID,
+		DID:             ws.DID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Counter:         int64(credential.Authenticator.SignCount),
+		BackupEligible:  credential.Flags.BackupEligible,
+		BackupState:     credential.Flags.BackupState,
+		UserPresent:     true,
+		UserVerified:    true,
+		CreatedAt:       time.Now(),
+	}
+	if err := s.db.InsertPasskey(ctx, p); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "failed to save passkey")
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handlePasskeySignupStart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Generate a new custodial identity for this prospective user
+	kp, err := identity.Generate()
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "identity generation failed")
+		return
+	}
+	did := identity.DeriveDID(kp.SigningPub)
+
+	// 2. Prepare WebAuthn registration
+	waUser := &waUser{user: &store.User{DID: did}}
+	options, sessionData, err := s.webauthn.BeginRegistration(waUser)
+	if err != nil {
+		s.log.Printf("webauthn signup start: %v", err)
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	// 3. Encrypt the new signing key immediately (custodial Level 1)
+	password := identity.SessionPassword(s.serverSecret, did)
+	encKey, err := identity.EncryptKeypair(kp.SigningPriv, password)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "key encryption failed")
+		return
+	}
+
+	// 4. Store session state along with the encrypted key to be persisted on finish
+	token := randomHex(32)
+	state := map[string]any{
+		"sd":  sessionData,
+		"enc": encKey,
+		"pk":  hex.EncodeToString(kp.SigningPub),
+		"rp":  hex.EncodeToString(kp.RotationPub),
+	}
+	sd, _ := json.Marshal(state)
+	ws := &store.WebAuthnSession{
+		Token:     token,
+		DID:       did,
+		Data:      sd,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+	}
+	if err := s.db.InsertWebAuthnSession(ctx, ws); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	w.Header().Set("X-WebAuthn-Session", token)
+	jsonOK(w, options)
+}
+
+func (s *Server) handlePasskeySignupFinish(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("X-WebAuthn-Session")
+	if token == "" {
+		jsonErr(w, http.StatusBadRequest, "session token required")
+		return
+	}
+
+	ctx := r.Context()
+	ws, err := s.db.GetWebAuthnSession(ctx, token)
+	if err != nil || ws == nil || time.Now().After(ws.ExpiresAt) {
+		jsonErr(w, http.StatusUnauthorized, "invalid or expired session")
+		return
+	}
+	defer s.db.DeleteWebAuthnSession(ctx, token)
+
+	var state struct {
+		SD  webauthn.SessionData `json:"sd"`
+		Enc string               `json:"enc"`
+		PK  string               `json:"pk"`
+		RP  string               `json:"rp"`
+	}
+	if err := json.Unmarshal(ws.Data, &state); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	waUser := &waUser{user: &store.User{DID: ws.DID}}
+	credential, err := s.webauthn.FinishRegistration(waUser, state.SD, r)
+	if err != nil {
+		s.log.Printf("webauthn signup finish: %v", err)
+		jsonErr(w, http.StatusBadRequest, "registration failed")
+		return
+	}
+
+	// Persist the new user!
+	genesisHash := "signup-" + randomHex(8) // Placeholder for real KEL genesis
+	if err := s.db.UpsertUser(ctx, &store.User{
+		DID:        ws.DID,
+		CurrentPK:  state.PK,
+		RotationPK: state.RP,
+		Endpoint:   s.baseURL,
+		Sig:        genesisHash,
+		UpdatedAt:  time.Now(),
+	}); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "failed to save user")
+		return
+	}
+
+	if err := s.db.UpsertUserPrivate(ctx, &store.UserPrivate{
+		DID:           ws.DID,
+		EncSigningKey: state.Enc,
+	}); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "failed to save private data")
+		return
+	}
+
+	p := &store.Passkey{
+		ID:              credential.ID,
+		DID:             ws.DID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Counter:         int64(credential.Authenticator.SignCount),
+		BackupEligible:  credential.Flags.BackupEligible,
+		BackupState:     credential.Flags.BackupState,
+		UserPresent:     true,
+		UserVerified:    true,
+		CreatedAt:       time.Now(),
+	}
+	if err := s.db.InsertPasskey(ctx, p); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "failed to save passkey")
+		return
+	}
+
+	// Create session and log them in
+	s.createSession(w, ctx, ws.DID)
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handlePasskeyLoginStart(w http.ResponseWriter, r *http.Request) {
+	// Discovery-based login (no email needed)
+	options, sessionData, err := s.webauthn.BeginDiscoverableLogin()
+	if err != nil {
+		s.log.Printf("webauthn login start: %v", err)
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	token := randomHex(32)
+	sd, _ := json.Marshal(sessionData)
+	ws := &store.WebAuthnSession{
+		Token:     token,
+		DID:       "", // will be filled on finish
+		Data:      sd,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+	}
+	if err := s.db.InsertWebAuthnSession(r.Context(), ws); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	w.Header().Set("X-WebAuthn-Session", token)
+	jsonOK(w, options)
+}
+
+func (s *Server) handlePasskeyLoginFinish(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("X-WebAuthn-Session")
+	if token == "" {
+		jsonErr(w, http.StatusBadRequest, "session token required")
+		return
+	}
+
+	ctx := r.Context()
+	ws, err := s.db.GetWebAuthnSession(ctx, token)
+	if err != nil || ws == nil || time.Now().After(ws.ExpiresAt) {
+		jsonErr(w, http.StatusUnauthorized, "invalid or expired session")
+		return
+	}
+	defer s.db.DeleteWebAuthnSession(ctx, token)
+
+	var sessionData webauthn.SessionData
+	if err := json.Unmarshal(ws.Data, &sessionData); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	// FinishPasskeyLogin uses the discoverable handler to find the user
+	user, credential, err := s.webauthn.FinishPasskeyLogin(func(rawID, userHandle []byte) (webauthn.User, error) {
+		did := string(userHandle)
+		s.log.Printf("discoverable login userHandle: %s", did)
+		u, err := s.db.GetUser(context.Background(), did)
+		if err != nil || u == nil {
+			s.log.Printf("discoverable login: user %s not found", did)
+			return nil, fmt.Errorf("user not found")
+		}
+		pk, err := s.db.GetPasskeysByDID(context.Background(), did)
+		if err != nil {
+			s.log.Printf("discoverable login: failed to get passkeys for %s: %v", did, err)
+			return nil, err
+		}
+		return s.wrapUser(u, pk), nil
+	}, sessionData, r)
+
+	if err != nil {
+		s.log.Printf("webauthn login finish error: %v", err)
+		jsonErr(w, http.StatusUnauthorized, "login failed")
+		return
+	}
+
+	wa := user.(*waUser)
+	s.db.UpdatePasskeyCounter(ctx, credential.ID, int64(credential.Authenticator.SignCount))
+	s.db.UpdatePasskeyBackupFlags(ctx, credential.ID, credential.Flags.BackupEligible, credential.Flags.BackupState)
+	s.createSession(w, ctx, wa.user.DID)
+
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) createSession(w http.ResponseWriter, ctx context.Context, did string) {
+	sessionToken := randomHex(32)
+	sess := &store.Session{
+		Token:     sessionToken,
+		DID:       did,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
+	}
+	if err := s.db.InsertSession(ctx, sess); err != nil {
+		s.log.Printf("failed to insert session: %v", err)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    sessionToken,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  sess.ExpiresAt,
+	})
 }
 
 func randomHex(n int) string {

@@ -79,11 +79,10 @@ func main() {
 		fmt.Fprintf(w, `{"status":"ok","did":%q}`, nodeDID)
 	})
 
-	// Mount all API routes.
 	r.Mount("/", apiServer.Router())
 
 	// SPA fallback — must come after API routes.
-	r.Handle("/*", spaHandler())
+	r.NotFound(spaHandler())
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Node.Port),
@@ -114,29 +113,29 @@ func main() {
 
 // spaHandler serves static files from the embedded web/build directory.
 // Unknown paths fall back to index.html so SvelteKit's client-side router handles them.
-func spaHandler() http.Handler {
+func spaHandler() http.HandlerFunc {
 	sub, err := fs.Sub(webFS, "web/build")
 	if err != nil {
 		log.Fatalf("embed sub: %v", err)
 	}
 	fileServer := http.FileServer(http.FS(sub))
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := filepath.Clean(r.URL.Path)
+	return func(w http.ResponseWriter, r *http.Request) {
+		path := filepath.ToSlash(filepath.Clean(r.URL.Path))
 		if path == "/" {
 			path = "index.html"
-		} else {
+		} else if len(path) > 0 && path[0] == '/' {
 			path = path[1:]
 		}
 
 		f, err := sub.Open(path)
 		if err != nil {
-			r2 := r.Clone(r.Context())
-			r2.URL.Path = "/index.html"
-			fileServer.ServeHTTP(w, r2)
+			r.URL.Path = "/"
+			fileServer.ServeHTTP(w, r)
 			return
 		}
 		f.Close()
+
 		fileServer.ServeHTTP(w, r)
-	})
+	}
 }

@@ -18,7 +18,7 @@ type FoundingDoc struct {
 	Calendar  *string `json:"calendar"`   // optional calendar ID
 	CreatedAt string  `json:"created_at"`
 	Nonce     string  `json:"nonce"` // random hex, ensures uniqueness
-	HomeHost  string  `json:"home_host,omitempty"`
+	InstanceID string `json:"instance_id,omitempty"`
 }
 
 // Location is the physical or virtual location of an event.
@@ -105,7 +105,7 @@ func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields
 		Calendar:  f.CalendarID,
 		CreatedAt: now.Format(time.RFC3339),
 		Nonce:     hex.EncodeToString(nonce),
-		HomeHost:  homeHost,
+		InstanceID: homeHost,
 	}
 
 	eventID, err := identity.ContentHash(founding)

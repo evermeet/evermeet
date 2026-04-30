@@ -8,10 +8,9 @@ import (
 )
 
 type Config struct {
-	Node     NodeConfig     `toml:"node"`
-	Identity IdentityConfig `toml:"identity"`
-	Email    EmailConfig    `toml:"email"`
-	P2P      P2PConfig      `toml:"p2p"`
+	Node  NodeConfig  `toml:"node"`
+	Email EmailConfig `toml:"email"`
+	P2P   P2PConfig   `toml:"p2p"`
 }
 
 type NodeConfig struct {
@@ -20,10 +19,6 @@ type NodeConfig struct {
 	BaseURL string `toml:"base_url"`
 	Public  bool   `toml:"public"`
 	Dev     bool   `toml:"dev"`
-}
-
-type IdentityConfig struct {
-	KeyDir string `toml:"key_dir"`
 }
 
 type EmailConfig struct {
@@ -60,10 +55,7 @@ func defaults() *Config {
 			DataDir: "./data",
 			Public:  true,
 		},
-		Identity: IdentityConfig{
-			KeyDir: "./data/keys",
-		},
-		P2P: P2PConfig{
+P2P: P2PConfig{
 			ListenPort: 4001,
 		},
 	}

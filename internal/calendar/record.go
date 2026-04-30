@@ -16,7 +16,7 @@ type FoundingDoc struct {
 	Owners    []string `json:"owners"`     // initial did:em: owner list
 	CreatedAt string   `json:"created_at"`
 	Nonce     string   `json:"nonce"`
-	HomeHost  string   `json:"home_host,omitempty"`
+	InstanceID string  `json:"instance_id,omitempty"`
 }
 
 // Sig is one entry in the sigs array on a mutable state record.
@@ -71,7 +71,7 @@ func New(ownerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*
 		Owners:    []string{ownerDID},
 		CreatedAt: now.Format(time.RFC3339),
 		Nonce:     hex.EncodeToString(nonce),
-		HomeHost:  homeHost,
+		InstanceID: homeHost,
 	}
 
 	calID, err := identity.ContentHash(founding)

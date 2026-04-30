@@ -23,13 +23,15 @@ type Server struct {
 	log          *log.Logger
 	baseURL      string
 	serverSecret []byte // used to derive per-user key encryption passwords
+	instanceID   string
 	webauthn     *webauthn.WebAuthn
 	node         *node.Node
 	cfg          *config.Config
+	startTime    time.Time
 }
 
 // NewServer creates a Server with the given dependencies.
-func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSecret []byte, logger *log.Logger, p2pNode *node.Node, cfg *config.Config) *Server {
+func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSecret []byte, instanceID string, logger *log.Logger, p2pNode *node.Node, cfg *config.Config) *Server {
 	u, _ := url.Parse(baseURL)
 	w, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Evermeet",
@@ -50,9 +52,11 @@ func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSe
 		log:          logger,
 		baseURL:      baseURL,
 		serverSecret: serverSecret,
+		instanceID:   instanceID,
 		webauthn:     w,
 		node:         p2pNode,
 		cfg:          cfg,
+		startTime:    time.Now(),
 	}
 }
 
@@ -139,6 +143,14 @@ func (s *Server) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+// homeHost returns the canonical instance address: "instanceID@hostname".
+func (s *Server) homeHost() string {
+	if u, err := url.Parse(s.baseURL); err == nil && u.Hostname() != "" {
+		return s.instanceID + "@" + u.Hostname()
+	}
+	return s.instanceID
 }
 
 func (s *Server) handleNodeKey(w http.ResponseWriter, r *http.Request) {

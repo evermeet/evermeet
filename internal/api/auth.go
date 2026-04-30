@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/identity"
@@ -211,7 +210,7 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 		return nil, "", err
 	}
 
-	genesisOp, genesisHash, err := identity.BuildGenesisOp(kp.SigningPriv, kp.RotationPriv, s.baseURL)
+	genesisOp, genesisHash, err := identity.BuildGenesisOp(kp.SigningPriv, kp.RotationPriv, s.homeHost())
 	if err != nil {
 		return nil, "", err
 	}
@@ -227,11 +226,6 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 		return nil, "", err
 	}
 
-	u := &url.URL{}
-	if parsed, err := url.Parse(s.baseURL); err == nil {
-		u = parsed
-	}
-
 	if err := s.db.UpsertUser(ctx, &store.User{
 		DID:        did,
 		CurrentPK:  hex.EncodeToString(kp.SigningPub),
@@ -239,7 +233,7 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 		Endpoint:   s.baseURL,
 		Sig:        genesisHash,
 		UpdatedAt:  time.Now(),
-		HomeHost:   u.Hostname(),
+		InstanceID: s.homeHost(),
 	}); err != nil {
 		return nil, "", err
 	}
@@ -446,7 +440,6 @@ func (s *Server) handlePasskeySignupFinish(w http.ResponseWriter, r *http.Reques
 
 	// Persist the new user!
 	genesisHash := "signup-" + randomHex(8) // Placeholder for real KEL genesis
-	pURL, _ := url.Parse(s.baseURL)
 	if err := s.db.UpsertUser(ctx, &store.User{
 		DID:        ws.DID,
 		CurrentPK:  state.PK,
@@ -454,7 +447,7 @@ func (s *Server) handlePasskeySignupFinish(w http.ResponseWriter, r *http.Reques
 		Endpoint:   s.baseURL,
 		Sig:        genesisHash,
 		UpdatedAt:  time.Now(),
-		HomeHost:   pURL.Hostname(),
+		InstanceID: s.homeHost(),
 	}); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "failed to save user")
 		return

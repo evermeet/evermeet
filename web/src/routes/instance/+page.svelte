@@ -41,14 +41,22 @@
 			<h2>Overview</h2>
 			<div class="card info-grid">
 				<div class="info-row">
-					<span class="label">Home URL</span>
-					<span class="value mono">{status.home_host}</span>
+					<span class="label">Instance ID</span>
+					<span class="value mono">{status.instance_id}</span>
 				</div>
 				<div class="info-row">
 					<span class="label">Version</span>
 					<span class="value">
 						<span class="badge">{status.version}</span>
 					</span>
+				</div>
+				<div class="info-row">
+					<span class="label">Uptime</span>
+					<span class="value"><strong>{status.uptime}</strong></span>
+				</div>
+				<div class="info-row">
+					<span class="label">Started At</span>
+					<span class="value mono">{new Date(status.started_at).toLocaleString()}</span>
 				</div>
 				<div class="info-row">
 					<span class="label">P2P Peer ID</span>

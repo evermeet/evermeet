@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"io/fs"
@@ -16,10 +20,10 @@ import (
 	"github.com/evermeet/evermeet/internal/api"
 	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/email"
-	"github.com/evermeet/evermeet/internal/identity"
 	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
+	"lukechampine.com/blake3"
 )
 
 func main() {
@@ -44,20 +48,20 @@ func main() {
 	}
 	if *dataDir != "" {
 		cfg.Node.DataDir = *dataDir
-		cfg.Identity.KeyDir = filepath.Join(*dataDir, "keys")
 	}
 
 	if err := os.MkdirAll(cfg.Node.DataDir, 0755); err != nil {
 		logger.Fatalf("create data dir: %v", err)
 	}
 
-	// Node identity keypair (used for protocol signing).
-	kp, err := identity.LoadOrGenerate(cfg.Identity.KeyDir)
+	// Instance key: a persistent Ed25519 key whose public key deterministically
+	// derives the instance ID. Used as the server secret for user key encryption.
+	instancePriv, err := loadOrGenerateInstanceKey(filepath.Join(cfg.Node.DataDir, "instance.key"))
 	if err != nil {
-		logger.Fatalf("load keypair: %v", err)
+		logger.Fatalf("instance key: %v", err)
 	}
-	nodeDID := identity.DeriveDID(kp.SigningPub)
-	logger.Printf("node identity: %s", nodeDID)
+	instanceID := deriveInstanceID(instancePriv.Public().(ed25519.PublicKey))
+	logger.Printf("instance id: %s", instanceID)
 
 	// SQLite database.
 	dbPath := filepath.Join(cfg.Node.DataDir, "evermeet.db")
@@ -79,15 +83,11 @@ func main() {
 		})
 	}
 
-	// Server secret: used to derive per-user key-encryption passwords.
-	// In production, load this from a file or env var. For now, derive from node key seed.
-	serverSecret := kp.SigningPriv.Seed()
-
 	baseURL := cfg.Node.BaseURL
 	if baseURL == "" {
 		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
 	}
-	
+
 	// P2P Node
 	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort)
 	if err != nil {
@@ -95,13 +95,13 @@ func main() {
 	}
 	defer p2pNode.Close()
 
-	apiServer := api.NewServer(db, emailClient, baseURL, serverSecret, logger, p2pNode, cfg)
+	apiServer := api.NewServer(db, emailClient, baseURL, instancePriv.Seed(), instanceID, logger, p2pNode, cfg)
 
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","did":%q,"p2p_peers":%d}`, nodeDID, p2pNode.PeerCount())
+		fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, instanceID, p2pNode.PeerCount())
 	})
 
 	r.Mount("/", apiServer.Router())
@@ -134,6 +134,37 @@ func main() {
 	if err := srv.Shutdown(shutCtx); err != nil {
 		logger.Printf("shutdown error: %v", err)
 	}
+}
+
+// deriveInstanceID returns a 16-character hex string from blake3(pubkey)[:8].
+func deriveInstanceID(pub ed25519.PublicKey) string {
+	h := blake3.Sum256(pub)
+	return hex.EncodeToString(h[:8])
+}
+
+// loadOrGenerateInstanceKey loads a PEM-encoded Ed25519 private key from path,
+// generating and saving a new one if the file does not exist.
+func loadOrGenerateInstanceKey(path string) (ed25519.PrivateKey, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		_, priv, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			return nil, fmt.Errorf("generate: %w", err)
+		}
+		block := &pem.Block{Type: "ED25519 PRIVATE KEY", Bytes: priv.Seed()}
+		if err := os.WriteFile(path, pem.EncodeToMemory(block), 0600); err != nil {
+			return nil, fmt.Errorf("save: %w", err)
+		}
+		return priv, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read: %w", err)
+	}
+	block, _ := pem.Decode(data)
+	if block == nil || len(block.Bytes) != ed25519.SeedSize {
+		return nil, fmt.Errorf("invalid key file %s", path)
+	}
+	return ed25519.NewKeyFromSeed(block.Bytes), nil
 }
 
 // spaHandler serves static files from the embedded web/build directory.

@@ -60,7 +60,7 @@ type User struct {
 	Endpoint    string
 	Sig         string
 	UpdatedAt   time.Time
-	HomeHost    string
+	InstanceID    string
 }
 
 func (d *DB) UpsertUser(ctx context.Context, u *User) error {
@@ -80,7 +80,7 @@ func (d *DB) UpsertUser(ctx context.Context, u *User) error {
 			   home_host    = excluded.home_host`,
 			u.DID, u.DisplayName, u.Avatar, u.Bio,
 			u.CurrentPK, u.RotationPK, u.Endpoint, u.Sig,
-			u.UpdatedAt.UTC().Format(time.RFC3339), u.HomeHost,
+			u.UpdatedAt.UTC().Format(time.RFC3339), u.InstanceID,
 		)
 		return err
 	})
@@ -93,7 +93,7 @@ func (d *DB) GetUser(ctx context.Context, did string) (*User, error) {
 	u := &User{}
 	var updatedAt string
 	err := row.Scan(&u.DID, &u.DisplayName, &u.Avatar, &u.Bio,
-		&u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt, &u.HomeHost)
+		&u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt, &u.InstanceID)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

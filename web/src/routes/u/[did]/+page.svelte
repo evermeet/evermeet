@@ -41,9 +41,9 @@
 
 			<div class="meta">
 				<span class="muted">Joined {new Date(user.updated_at).toLocaleDateString()}</span>
-				{#if user.home_host}
+				{#if user.instance_id}
 					<span class="muted">•</span>
-					<span class="muted">Home: {user.home_host}</span>
+					<span class="muted">Home: {user.instance_id}</span>
 				{/if}
 			</div>
 		</div>

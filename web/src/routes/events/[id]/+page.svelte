@@ -80,8 +80,8 @@
 			{#if event.ends_at}
 				<span> – {formatDate(event.ends_at)}</span>
 			{/if}
-			{#if founding?.home_host}
-				<span> • Home: {founding.home_host}</span>
+			{#if founding?.instance_id}
+				<span> • Home: {founding.instance_id}</span>
 			{/if}
 		</div>
 

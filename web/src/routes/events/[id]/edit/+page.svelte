@@ -9,6 +9,7 @@
 
 	let title = $state('');
 	let description = $state('');
+	let cover_url = $state('');
 	let starts_at = $state('');
 	let ends_at = $state('');
 	let locationName = $state('');
@@ -31,6 +32,7 @@
 
 			title = e.title;
 			description = e.description || '';
+			cover_url = e.cover_url || '';
 			starts_at = formatForInput(e.starts_at);
 			ends_at = e.ends_at ? formatForInput(e.ends_at) : '';
 			locationName = e.location?.name || '';
@@ -58,6 +60,7 @@
 			await api.events.update(id, {
 				title,
 				description,
+				cover_url: cover_url || undefined,
 				starts_at: new Date(starts_at).toISOString(),
 				ends_at: ends_at ? new Date(ends_at).toISOString() : undefined,
 				location: locationName ? { name: locationName } : undefined,
@@ -90,7 +93,12 @@
 
 			<div class="field">
 				<label for="description">Description</label>
-				<textarea id="description" bind:value={description} placeholder="Tell us about it…"></textarea>
+				<textarea id="description" bind:value={description} placeholder="Tell us about it… (Markdown supported)"></textarea>
+			</div>
+
+			<div class="field">
+				<label for="cover_url">Cover Image URL (optional)</label>
+				<input type="url" id="cover_url" bind:value={cover_url} placeholder="https://…" />
 			</div>
 
 			<div class="grid">

@@ -4,6 +4,7 @@
 
 	let title = $state('');
 	let description = $state('');
+	let cover_url = $state('');
 	let starts_at = $state('');
 	let ends_at = $state('');
 	let locationName = $state('');
@@ -22,6 +23,7 @@
 			const res = await api.events.create({
 				title,
 				description,
+				cover_url: cover_url || undefined,
 				starts_at: new Date(starts_at).toISOString(),
 				ends_at: ends_at ? new Date(ends_at).toISOString() : undefined,
 				location: locationName ? { name: locationName } : undefined,
@@ -48,7 +50,12 @@
 
 		<div class="field">
 			<label for="description">Description</label>
-			<textarea id="description" bind:value={description} placeholder="Tell us about it…"></textarea>
+			<textarea id="description" bind:value={description} placeholder="Tell us about it… (Markdown supported)"></textarea>
+		</div>
+
+		<div class="field">
+			<label for="cover_url">Cover Image URL (optional)</label>
+			<input type="url" id="cover_url" bind:value={cover_url} placeholder="https://…" />
 		</div>
 
 		<div class="grid">

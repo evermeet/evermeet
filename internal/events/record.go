@@ -64,6 +64,7 @@ type MutableState struct {
 	Calendar    *string     `json:"calendar,omitempty"`
 	Title       string      `json:"title"`
 	Description string      `json:"description,omitempty"`
+	CoverURL    string      `json:"cover_url,omitempty"`
 	StartsAt    string      `json:"starts_at"`
 	EndsAt      string      `json:"ends_at,omitempty"`
 	Location    *Location   `json:"location,omitempty"`
@@ -77,17 +78,18 @@ type MutableState struct {
 
 // Fields is the user-supplied input when creating or updating an event.
 type Fields struct {
-	Title       string
-	Description string
-	StartsAt    time.Time
-	EndsAt      *time.Time
-	Location    *Location
-	CalendarID  *string
-	Visibility  string
-	RSVPLimit   int
+	Title        string
+	Description  string
+	CoverURL     string
+	StartsAt     time.Time
+	EndsAt       *time.Time
+	Location     *Location
+	CalendarID   *string
+	Visibility   string
+	RSVPLimit    int
 	RSVPApproval string
 	RSVPDeadline *time.Time
-	Tags        []string
+	Tags         []string
 }
 
 // New creates a new founding doc and signed initial mutable state.
@@ -201,6 +203,7 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 		Calendar:    f.CalendarID,
 		Title:       f.Title,
 		Description: f.Description,
+		CoverURL:    f.CoverURL,
 		StartsAt:    f.StartsAt.UTC().Format(time.RFC3339),
 		EndsAt:      endsAt,
 		Location:    f.Location,

@@ -103,6 +103,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Title        string           `json:"title"`
 		Description  string           `json:"description"`
+		CoverURL     string           `json:"cover_url"`
 		StartsAt     string           `json:"starts_at"`
 		EndsAt       string           `json:"ends_at"`
 		Location     *events.Location `json:"location"`
@@ -134,6 +135,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	f := events.Fields{
 		Title:        req.Title,
 		Description:  req.Description,
+		CoverURL:     req.CoverURL,
 		StartsAt:     startsAt,
 		Location:     req.Location,
 		CalendarID:   req.CalendarID,
@@ -221,6 +223,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Title        string           `json:"title"`
 		Description  string           `json:"description"`
+		CoverURL     string           `json:"cover_url"`
 		StartsAt     string           `json:"starts_at"`
 		EndsAt       string           `json:"ends_at"`
 		Location     *events.Location `json:"location"`
@@ -243,6 +246,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 	f := events.Fields{
 		Title:        req.Title,
 		Description:  req.Description,
+		CoverURL:     req.CoverURL,
 		StartsAt:     startsAt,
 		Location:     req.Location,
 		Visibility:   req.Visibility,

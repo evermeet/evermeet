@@ -76,7 +76,7 @@
 
 		{#if !auth.loading}
 			{#if auth.user}
-				<a href="/events/create" class="btn-create">Create Event</a>
+				<a href="/events/create" class="nav-item">Create Event</a>
 				<button class="icon-btn" title="Search" aria-label="Search">
 					<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 				</button>
@@ -135,15 +135,11 @@
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0 1.5rem;
 		height: 56px;
-		border-bottom: 1px solid var(--border);
 		font-family: system-ui, sans-serif;
 		background: var(--bg);
-		position: sticky;
-		top: 0;
-		z-index: 100;
+		padding: 0 1.5rem;
+		gap: 0;
 	}
 
 	/* Logo */
@@ -153,7 +149,8 @@
 		color: var(--text);
 		text-decoration: none;
 		flex-shrink: 0;
-		width: 160px;
+		/* push nav-center to align with page content left edge */
+		margin-right: max(0px, calc((100vw - 900px) / 2 - 20px));
 	}
 	.logo:hover { opacity: 0.7; }
 
@@ -162,9 +159,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
+		flex: 1;
+		min-width: 0;
 	}
 	.nav-item {
 		display: flex;
@@ -176,6 +172,7 @@
 		text-decoration: none;
 		font-size: 0.875rem;
 		font-weight: 500;
+		white-space: nowrap;
 		transition: color 0.1s, background 0.1s;
 	}
 	.nav-item:hover {
@@ -190,8 +187,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		flex-shrink: 0;
-		width: 160px;
-		justify-content: flex-end;
+		margin-left: auto;
 	}
 
 	.clock {
@@ -202,18 +198,12 @@
 		white-space: nowrap;
 	}
 
-	.btn-create {
-		padding: 0.4rem 0.85rem;
-		background: var(--bg-btn-primary);
-		color: var(--text-btn-primary);
-		border-radius: var(--radius-md);
-		font-size: 0.825rem;
-		font-weight: 600;
-		text-decoration: none;
-		white-space: nowrap;
-		transition: opacity 0.1s;
+	@media (max-width: 640px) {
+		.clock { display: none; }
+		.nav-center { display: none; }
+		nav { padding: 0 1rem; }
 	}
-	.btn-create:hover { opacity: 0.85; }
+
 
 	.btn-signin {
 		padding: 0.4rem 0.85rem;

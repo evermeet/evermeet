@@ -111,6 +111,7 @@ export interface Event {
 	organizer: string;
 	title: string;
 	description?: string;
+	cover_url?: string;
 	starts_at: string;
 	ends_at?: string;
 	location?: { name: string; address?: string; lat?: number; lon?: number };
@@ -123,6 +124,7 @@ export interface Event {
 export interface CreateEventInput {
 	title: string;
 	description?: string;
+	cover_url?: string;
 	starts_at: string;
 	ends_at?: string;
 	location?: { name: string; address?: string };

@@ -60,7 +60,7 @@ type User struct {
 	Endpoint    string
 	Sig         string
 	UpdatedAt   time.Time
-	InstanceID    string
+	InstanceID  string
 }
 
 func (d *DB) UpsertUser(ctx context.Context, u *User) error {
@@ -327,6 +327,19 @@ func (d *DB) GetCurrentCalendarState(ctx context.Context, id string) (*CalendarS
 	}
 	s.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
 	return s, nil
+}
+
+func (d *DB) ListCurrentCalendars(ctx context.Context) ([]*CalendarState, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		FROM calendar_states
+		WHERE is_current = 1
+		ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanCalendarStates(rows)
 }
 
 func (d *DB) InsertCalendarOwner(ctx context.Context, calendarID, did string) error {

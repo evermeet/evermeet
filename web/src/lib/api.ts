@@ -97,6 +97,7 @@ export const api = {
 	},
 	calendars: {
 		list: () => request<{ owned: Calendar[]; subscribed: Calendar[] }>('/api/calendars'),
+		discover: () => request<{ calendars: DiscoverCalendar[] }>('/api/calendars/discover'),
 		get: (id: string) => request<CalendarDetail>(`/api/calendars/${id}`),
 		create: (data: CalendarInput) =>
 			request<{ id: string; state: Calendar }>('/api/calendars', {
@@ -154,6 +155,10 @@ export interface CalendarDetail extends Calendar {
 	governance: { threshold: number; owners: { did: string; role: string }[] };
 	updated_at: string;
 	events: CalendarEvent[];
+}
+
+export interface DiscoverCalendar extends Calendar {
+	subscribed: boolean;
 }
 
 export interface CalendarEvent {

@@ -77,6 +77,57 @@ func (s *Server) handleListCalendars(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleDiscoverCalendars(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	did := authDID(r)
+
+	type calendarItem struct {
+		ID          string `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description,omitempty"`
+		Avatar      string `json:"avatar,omitempty"`
+		BackdropURL string `json:"backdrop_url,omitempty"`
+		Website     string `json:"website,omitempty"`
+		Subscribers int    `json:"subscribers"`
+		Subscribed  bool   `json:"subscribed"`
+	}
+
+	calendars, err := s.db.ListCurrentCalendars(ctx)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "list calendars")
+		return
+	}
+
+	items := make([]*calendarItem, 0, len(calendars))
+	for _, st := range calendars {
+		var ms calendar.MutableState
+		if err := json.Unmarshal([]byte(st.Payload), &ms); err != nil {
+			continue
+		}
+
+		subs, _ := s.db.CountCalendarSubscribers(ctx, ms.ID)
+		subscribed := false
+		if did != "" {
+			subscribed, _ = s.db.IsSubscribed(ctx, ms.ID, did)
+		}
+
+		items = append(items, &calendarItem{
+			ID:          ms.ID,
+			Name:        ms.Name,
+			Description: ms.Description,
+			Avatar:      ms.Avatar,
+			BackdropURL: ms.BackdropURL,
+			Website:     ms.Website,
+			Subscribers: subs,
+			Subscribed:  subscribed,
+		})
+	}
+
+	jsonOK(w, map[string]any{
+		"calendars": items,
+	})
+}
+
 func (s *Server) handleCreateCalendar(w http.ResponseWriter, r *http.Request) {
 	did := authDID(r)
 	priv := authPrivKey(r)
@@ -207,17 +258,17 @@ func (s *Server) handleGetCalendar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]any{
-		"id":          ms.ID,
-		"name":        ms.Name,
-		"description": ms.Description,
-		"avatar":      ms.Avatar,
+		"id":           ms.ID,
+		"name":         ms.Name,
+		"description":  ms.Description,
+		"avatar":       ms.Avatar,
 		"backdrop_url": ms.BackdropURL,
-		"website":     ms.Website,
-		"governance":  ms.Governance,
-		"updated_at":  ms.UpdatedAt,
-		"subscribers": subs,
-		"subscribed":  subscribed,
-		"events":      eventList,
+		"website":      ms.Website,
+		"governance":   ms.Governance,
+		"updated_at":   ms.UpdatedAt,
+		"subscribers":  subs,
+		"subscribed":   subscribed,
+		"events":       eventList,
 	})
 }
 

@@ -88,6 +88,7 @@ func (s *Server) Router() http.Handler {
 
 	// Calendars
 	r.Get("/api/calendars", s.requireAuth(s.handleListCalendars))
+	r.Get("/api/calendars/discover", s.handleDiscoverCalendars)
 	r.Post("/api/calendars", s.requireAuth(s.handleCreateCalendar))
 	r.Get("/api/calendars/{id}", s.handleGetCalendar)
 	r.Put("/api/calendars/{id}", s.requireAuth(s.handleUpdateCalendar))

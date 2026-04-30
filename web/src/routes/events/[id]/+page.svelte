@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { api, type Event } from '$lib/api.js';
+	import { api, type CalendarDetail, type Event } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { marked } from 'marked';
 
 	let event = $state<any>(null);
 	let founding = $state<any>(null);
+let calendar = $state<CalendarDetail | null>(null);
 let currentHash = $state('');
 	let loading = $state(true);
 	let error = $state('');
@@ -28,6 +29,14 @@ let currentHash = $state('');
 			event.id = res.id;
 			founding = res.founded;
 			currentHash = res.hash;
+
+			if (event.calendar) {
+				try {
+					calendar = await api.calendars.get(event.calendar);
+				} catch (e) {
+					calendar = null;
+				}
+			}
 
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
@@ -92,6 +101,26 @@ let currentHash = $state('');
 						</div>
 					{/if}
 				</div>
+
+				{#if calendar}
+					<div class="side-section presenter-section">
+						<p class="side-label">Presented By</p>
+						<div class="presenter-row">
+							<a href="/calendars/{calendar.id}" class="presenter-avatar">
+								<Avatar src={calendar.avatar} did={calendar.id} size={36} rounded={false} />
+							</a>
+							<div class="presenter-meta">
+								<a href="/calendars/{calendar.id}" class="presenter-name">{calendar.name}</a>
+								{#if calendar.description}
+									<p class="presenter-description">{calendar.description}</p>
+								{/if}
+								{#if calendar.website}
+									<a href={calendar.website} target="_blank" rel="noreferrer" class="presenter-link">{calendar.website}</a>
+								{/if}
+							</div>
+						</div>
+					</div>
+				{/if}
 
 				<!-- Hosted By -->
 				<div class="side-section">
@@ -307,6 +336,41 @@ let currentHash = $state('');
 		text-decoration: none;
 	}
 	.host-name:hover { text-decoration: underline; }
+	.presenter-section { border-top: none; padding-top: 0; }
+	.presenter-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+	.presenter-avatar {
+		flex-shrink: 0;
+		display: inline-flex;
+	}
+	.presenter-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	.presenter-name {
+		font-weight: 700;
+		font-size: 0.95rem;
+		color: var(--text);
+		text-decoration: none;
+	}
+	.presenter-name:hover { text-decoration: underline; }
+	.presenter-description {
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		line-height: 1.35;
+	}
+	.presenter-link {
+		font-size: 0.82rem;
+		color: var(--text-accent);
+		text-decoration: none;
+		word-break: break-word;
+	}
+	.presenter-link:hover { text-decoration: underline; }
 
 	.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 	.tag {

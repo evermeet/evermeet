@@ -2,17 +2,20 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { api } from '$lib/api.js';
+	import { api, type CalendarLink, type CalendarLinkType } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 
 	const id = $page.params.id;
+
+	const LINK_TYPES: CalendarLinkType[] = ['twitter', 'instagram', 'facebook', 'youtube', 'tiktok', 'linkedin', 'bluesky', 'nostr'];
 
 	let name = $state('');
 	let description = $state('');
 	let avatar = $state('');
 	let backdrop_url = $state('');
 	let website = $state('');
-let owners = $state<string[]>([]);
+	let links = $state<CalendarLink[]>([]);
+	let owners = $state<string[]>([]);
 
 	let loading = $state(true);
 	let saving = $state(false);
@@ -32,6 +35,7 @@ let owners = $state<string[]>([]);
 			avatar = cal.avatar ?? '';
 			backdrop_url = cal.backdrop_url ?? '';
 			website = cal.website ?? '';
+			links = cal.links ?? [];
 			owners = (cal.governance.owners ?? []).map((o) => o.did);
 			if (owners.length === 0 && auth.user?.did) {
 				owners = [auth.user.did];
@@ -58,6 +62,7 @@ let owners = $state<string[]>([]);
 				avatar,
 				backdrop_url,
 				website,
+				links: links.filter(l => l.url.trim()),
 				owners: cleanedOwners
 			});
 			goto(`/calendars/${id}`);
@@ -66,6 +71,16 @@ let owners = $state<string[]>([]);
 		} finally {
 			saving = false;
 		}
+	}
+
+	function addLink() {
+		const used = new Set(links.map(l => l.type));
+		const next = LINK_TYPES.find(t => !used.has(t));
+		if (next) links = [...links, { type: next, url: '' }];
+	}
+
+	function removeLink(index: number) {
+		links = links.filter((_, i) => i !== index);
 	}
 
 	function addOwner() {
@@ -115,6 +130,26 @@ let owners = $state<string[]>([]);
 
 			<div class="field">
 				<div class="owners-header">
+					<p class="owners-title">Social Links</p>
+					<button type="button" class="btn-add-owner" onclick={addLink} disabled={links.length >= LINK_TYPES.length}>+ Add link</button>
+				</div>
+				<div class="owner-list">
+					{#each links as link, i}
+						<div class="owner-row">
+							<select bind:value={links[i].type} class="link-type-select">
+								{#each LINK_TYPES as t}
+									<option value={t} disabled={t !== link.type && links.some(l => l.type === t)}>{t}</option>
+								{/each}
+							</select>
+							<input type="url" bind:value={links[i].url} placeholder="https://…" />
+							<button type="button" class="btn-remove-owner" onclick={() => removeLink(i)}>Remove</button>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<div class="field">
+				<div class="owners-header">
 					<p class="owners-title">Owners (DIDs)</p>
 					<button type="button" class="btn-add-owner" onclick={addOwner}>+ Add owner</button>
 				</div>
@@ -157,7 +192,7 @@ let owners = $state<string[]>([]);
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
 	label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
-	input, textarea {
+	input, textarea, select {
 		padding: 0.6rem 0.75rem;
 		border: 1px solid var(--border-input);
 		border-radius: var(--radius-md);
@@ -166,7 +201,8 @@ let owners = $state<string[]>([]);
 		background: var(--bg-input);
 		color: var(--text);
 	}
-	input:focus, textarea:focus { outline: none; border-color: var(--border-input-focus); }
+	input:focus, textarea:focus, select:focus { outline: none; border-color: var(--border-input-focus); }
+	.link-type-select { width: 110px; flex-shrink: 0; text-transform: capitalize; cursor: pointer; }
 	textarea { min-height: 90px; resize: vertical; }
 
 	.actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; }

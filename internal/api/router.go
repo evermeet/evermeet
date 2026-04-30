@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/evermeet/evermeet/internal/blob"
 	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/email"
 	"github.com/evermeet/evermeet/internal/node"
@@ -19,6 +20,7 @@ import (
 // Server holds shared dependencies for all API handlers.
 type Server struct {
 	db           *store.DB
+	blobs        *blob.Store
 	email        *email.Client
 	log          *log.Logger
 	baseURL      string
@@ -31,7 +33,7 @@ type Server struct {
 }
 
 // NewServer creates a Server with the given dependencies.
-func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSecret []byte, instanceID string, logger *log.Logger, p2pNode *node.Node, cfg *config.Config) *Server {
+func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, baseURL string, serverSecret []byte, instanceID string, logger *log.Logger, p2pNode *node.Node, cfg *config.Config) *Server {
 	u, _ := url.Parse(baseURL)
 	w, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Evermeet",
@@ -48,6 +50,7 @@ func NewServer(db *store.DB, emailClient *email.Client, baseURL string, serverSe
 
 	return &Server{
 		db:           db,
+		blobs:        blobStore,
 		email:        emailClient,
 		log:          logger,
 		baseURL:      baseURL,
@@ -108,6 +111,10 @@ func (s *Server) Router() http.Handler {
 
 	// Users
 	r.Get("/api/users/{did}", s.handleGetUser)
+
+	// Blobs
+	r.Post("/api/blobs", s.requireAuth(s.handleUploadBlob))
+	r.Get("/api/blobs/{hash}", s.handleGetBlob)
 
 	// Well-known: instance public key for federation auth
 	r.Get("/.well-known/evermeet-node-key", s.handleNodeKey)

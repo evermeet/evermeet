@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { api, type Calendar, type ImportEventPreview } from '$lib/api.js';
+	import ImageUpload from '$lib/components/ImageUpload.svelte';
 
 	let title = $state('');
 	let description = $state('');
@@ -140,8 +141,8 @@
 		</div>
 
 		<div class="field">
-			<label for="cover_url">Cover Image URL (optional)</label>
-			<input type="url" id="cover_url" bind:value={cover_url} placeholder="https://…" />
+			<span class="field-label">Cover Image (optional)</span>
+			<ImageUpload bind:value={cover_url} />
 		</div>
 
 		<div class="grid">
@@ -227,7 +228,7 @@
 
 	form { display: flex; flex-direction: column; gap: 1.5rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
-	label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
+	label, .field-label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
 	input, select, textarea {
 		padding: 0.6rem;

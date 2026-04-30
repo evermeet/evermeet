@@ -7,6 +7,40 @@ import (
 	"time"
 )
 
+// ---- Blobs ----
+
+type BlobRecord struct {
+	Hash        string
+	ContentType string
+	Size        int64
+	UploadedBy  string
+	CreatedAt   time.Time
+}
+
+func (d *DB) InsertBlob(ctx context.Context, b *BlobRecord) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO blobs (hash, content_type, size, uploaded_by, created_at) VALUES (?,?,?,?,?)`,
+			b.Hash, b.ContentType, b.Size, b.UploadedBy, b.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetBlob(ctx context.Context, hash string) (*BlobRecord, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT hash, content_type, size, uploaded_by, created_at FROM blobs WHERE hash = ?`, hash)
+	var b BlobRecord
+	var ca string
+	if err := row.Scan(&b.Hash, &b.ContentType, &b.Size, &b.UploadedBy, &ca); err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("get blob: %w", err)
+	}
+	b.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	return &b, nil
+}
+
 // ---- Key event log ----
 
 type KELOp struct {

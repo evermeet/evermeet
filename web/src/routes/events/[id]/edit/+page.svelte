@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 import { api, type Calendar } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import ImageUpload from '$lib/components/ImageUpload.svelte';
 
 	const id = $page.params.id;
 
@@ -139,8 +140,8 @@ let deleting = $state(false);
 			</div>
 
 			<div class="field">
-				<label for="cover_url">Cover Image URL (optional)</label>
-				<input type="url" id="cover_url" bind:value={cover_url} placeholder="https://…" />
+				<span class="field-label">Cover Image (optional)</span>
+				<ImageUpload bind:value={cover_url} />
 			</div>
 
 			<div class="grid">
@@ -231,7 +232,7 @@ let deleting = $state(false);
 
 	form { display: flex; flex-direction: column; gap: 1.5rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
-	label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
+	label, .field-label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
 	input, select, textarea {
 		padding: 0.6rem;

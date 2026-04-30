@@ -37,6 +37,12 @@ type Governance struct {
 	Owners    []GovernanceOwner `json:"owners"`
 }
 
+// Link is a social/external link attached to a calendar.
+type Link struct {
+	Type string `json:"type"`
+	URL  string `json:"url"`
+}
+
 // MutableState is the signed, updateable part of a calendar record.
 type MutableState struct {
 	ID          string     `json:"id"`
@@ -46,6 +52,7 @@ type MutableState struct {
 	Avatar      string     `json:"avatar,omitempty"`
 	BackdropURL string     `json:"backdrop_url,omitempty"`
 	Website     string     `json:"website,omitempty"`
+	Links       []Link     `json:"links,omitempty"`
 	Governance  Governance `json:"governance"`
 	UpdatedAt   string     `json:"updated_at"`
 	Sigs        []Sig      `json:"sigs"`
@@ -58,6 +65,7 @@ type Fields struct {
 	Avatar      string
 	BackdropURL string
 	Website     string
+	Links       []Link
 	Owners      []GovernanceOwner
 }
 
@@ -144,6 +152,7 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 		Avatar:      f.Avatar,
 		BackdropURL: f.BackdropURL,
 		Website:     f.Website,
+		Links:       f.Links,
 		Governance: Governance{
 			Threshold: 1,
 			Owners:    owners,

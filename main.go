@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/evermeet/evermeet/internal/api"
+	"github.com/evermeet/evermeet/internal/blob"
 	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/email"
 	"github.com/evermeet/evermeet/internal/node"
@@ -95,7 +96,12 @@ func main() {
 	}
 	defer p2pNode.Close()
 
-	apiServer := api.NewServer(db, emailClient, baseURL, instancePriv.Seed(), instanceID, logger, p2pNode, cfg)
+	blobStore, err := blob.New(filepath.Join(cfg.Node.DataDir, "blobs"))
+	if err != nil {
+		logger.Fatalf("blob store: %v", err)
+	}
+
+	apiServer := api.NewServer(db, blobStore, emailClient, baseURL, instancePriv.Seed(), instanceID, logger, p2pNode, cfg)
 
 	r := chi.NewRouter()
 

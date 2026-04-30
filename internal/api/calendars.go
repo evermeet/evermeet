@@ -135,12 +135,13 @@ func (s *Server) handleCreateCalendar(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Avatar      string `json:"avatar"`
-		BackdropURL string `json:"backdrop_url"`
-		Website     string `json:"website"`
-		Owners      []string `json:"owners"`
+		Name        string          `json:"name"`
+		Description string          `json:"description"`
+		Avatar      string          `json:"avatar"`
+		BackdropURL string          `json:"backdrop_url"`
+		Website     string          `json:"website"`
+		Links       []calendar.Link `json:"links"`
+		Owners      []string        `json:"owners"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonErr(w, http.StatusBadRequest, "invalid JSON")
@@ -157,6 +158,7 @@ func (s *Server) handleCreateCalendar(w http.ResponseWriter, r *http.Request) {
 		Avatar:      req.Avatar,
 		BackdropURL: req.BackdropURL,
 		Website:     req.Website,
+		Links:       req.Links,
 	}
 
 	founding, calID, state, stateHash, err := calendar.New(did, priv, s.homeHost(), f)
@@ -282,6 +284,7 @@ func (s *Server) handleGetCalendar(w http.ResponseWriter, r *http.Request) {
 		"avatar":       ms.Avatar,
 		"backdrop_url": ms.BackdropURL,
 		"website":      ms.Website,
+		"links":        ms.Links,
 		"governance":   ms.Governance,
 		"updated_at":   ms.UpdatedAt,
 		"subscribers":  subs,
@@ -309,12 +312,13 @@ func (s *Server) handleUpdateCalendar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Avatar      string `json:"avatar"`
-		BackdropURL string `json:"backdrop_url"`
-		Website     string `json:"website"`
-		Owners      []string `json:"owners"`
+		Name        string          `json:"name"`
+		Description string          `json:"description"`
+		Avatar      string          `json:"avatar"`
+		BackdropURL string          `json:"backdrop_url"`
+		Website     string          `json:"website"`
+		Links       []calendar.Link `json:"links"`
+		Owners      []string        `json:"owners"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonErr(w, http.StatusBadRequest, "invalid JSON")
@@ -348,6 +352,7 @@ func (s *Server) handleUpdateCalendar(w http.ResponseWriter, r *http.Request) {
 		Avatar:      req.Avatar,
 		BackdropURL: req.BackdropURL,
 		Website:     req.Website,
+		Links:       req.Links,
 		Owners:      owners,
 	})
 	if err != nil {

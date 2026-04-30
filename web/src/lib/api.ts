@@ -33,6 +33,22 @@ async function requestWithSession<T>(path: string, sessionToken?: string | null,
 }
 
 export const api = {
+	blobs: {
+		upload: async (file: File): Promise<{ hash: string; url: string }> => {
+			const form = new FormData();
+			form.append('file', file);
+			const res = await fetch('/api/blobs', {
+				method: 'POST',
+				credentials: 'include',
+				body: form,
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({ error: res.statusText }));
+				throw new Error(err.error ?? res.statusText);
+			}
+			return res.json();
+		},
+	},
 	auth: {
 		me: () => request<{ did: string; display_name: string; avatar: string; bio: string }>('/api/auth/me'),
 		requestMagicLink: (email: string) =>
@@ -160,6 +176,13 @@ export interface EventRevision {
 	state: Event;
 }
 
+export type CalendarLinkType = 'website' | 'twitter' | 'instagram' | 'youtube' | 'tiktok' | 'linkedin' | 'bluesky' | 'nostr' | 'facebook';
+
+export interface CalendarLink {
+	type: CalendarLinkType;
+	url: string;
+}
+
 export interface Calendar {
 	id: string;
 	name: string;
@@ -167,6 +190,7 @@ export interface Calendar {
 	avatar?: string;
 	backdrop_url?: string;
 	website?: string;
+	links?: CalendarLink[];
 	subscribers: number;
 }
 
@@ -197,6 +221,7 @@ export interface CalendarInput {
 	avatar?: string;
 	backdrop_url?: string;
 	website?: string;
+	links?: CalendarLink[];
 	owners?: string[];
 }
 

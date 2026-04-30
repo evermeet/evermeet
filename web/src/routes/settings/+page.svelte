@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { api } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import { theme, themes } from '$lib/theme.svelte.js';
 	import { bufferToBase64, recursiveBase64ToBuffer } from '$lib/webauthn.js';
 
 	let registering = $state(false);
@@ -24,7 +25,7 @@
 				avatar: avatar
 			});
 			success = 'Profile updated successfully!';
-			await auth.load(); // Refresh user state
+			await auth.load();
 		} catch (err: any) {
 			error = err.message;
 		} finally {
@@ -38,7 +39,7 @@
 		success = '';
 		try {
 			const { data: options, session } = await api.auth.passkey.registerStart();
-			
+
 			const credential: any = await navigator.credentials.create({
 				publicKey: recursiveBase64ToBuffer(options.publicKey)
 			});
@@ -89,9 +90,27 @@
 	</section>
 
 	<section>
+		<h2>Appearance</h2>
+		<p class="muted">Choose a theme for the interface.</p>
+		<div class="theme-grid">
+			{#each themes as t}
+				<button
+					type="button"
+					class="theme-btn"
+					class:active={theme.current === t.id}
+					onclick={() => theme.apply(t.id)}
+				>
+					<span class="theme-name">{t.name}</span>
+					<span class="theme-desc">{t.description}</span>
+				</button>
+			{/each}
+		</div>
+	</section>
+
+	<section>
 		<h2>Passkeys</h2>
 		<p class="muted">Add a passkey to sign in without waiting for email links.</p>
-		
+
 		{#if success}
 			<p class="success">{success}</p>
 		{/if}
@@ -118,42 +137,84 @@
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
 	}
-	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; }
+	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: var(--text); }
 	section {
 		padding: 1.5rem;
-		border: 1px solid #eee;
-		border-radius: 8px;
+		border: 1px solid var(--border-card);
+		border-radius: var(--radius-lg);
 		margin-bottom: 1.5rem;
+		background: var(--bg-card);
 	}
-	h2 { font-size: 1.1rem; margin-top: 0; }
-	p { font-size: 0.95rem; line-height: 1.5; }
-	.muted { color: #666; }
-	
+	h2 { font-size: 1.1rem; margin-top: 0; color: var(--text); }
+	p { font-size: 0.95rem; line-height: 1.5; color: var(--text); }
+	.muted { color: var(--text-subtle); }
+
 	form { display: flex; flex-direction: column; gap: 1rem; }
 	.field { display: flex; flex-direction: column; gap: 0.3rem; }
-	label { font-size: 0.85rem; font-weight: 600; color: #444; }
+	label { font-size: 0.85rem; font-weight: 600; color: var(--text-label); }
 	input, textarea {
 		padding: 0.6rem;
-		border: 1px solid #ddd;
-		border-radius: 6px;
+		border: 1px solid var(--border-input);
+		border-radius: var(--radius-md);
 		font-size: 0.95rem;
 		font-family: inherit;
+		background: var(--bg-input);
+		color: var(--text);
+	}
+	input:focus, textarea:focus {
+		outline: none;
+		border-color: var(--border-input-focus);
 	}
 	textarea { min-height: 80px; resize: vertical; }
 
 	button {
 		margin-top: 1rem;
 		padding: 0.6rem 1.2rem;
-		background: #1a1a1a;
-		color: #fff;
+		background: var(--bg-btn-primary);
+		color: var(--text-btn-primary);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		font-weight: 600;
 		cursor: pointer;
+		font-size: 0.95rem;
 	}
 	button:disabled { opacity: 0.5; cursor: default; }
-	
-	.error { color: #c00; font-size: 0.9rem; margin: 1rem 0; }
-	.success { color: #080; font-size: 0.9rem; margin: 1rem 0; }
-	code { font-size: 0.8rem; background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; word-break: break-all; }
+
+	.theme-grid {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+	.theme-btn {
+		margin-top: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.2rem;
+		padding: 0.75rem 1rem;
+		background: var(--bg);
+		color: var(--text);
+		border: 2px solid var(--border-input);
+		border-radius: var(--radius-lg);
+		cursor: pointer;
+		font-size: 0.875rem;
+		transition: border-color 0.1s;
+		min-width: 120px;
+	}
+	.theme-btn:hover { border-color: var(--border-input-focus); }
+	.theme-btn.active { border-color: var(--border-input-focus); background: var(--bg-raised); }
+	.theme-name { font-weight: 600; }
+	.theme-desc { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; }
+
+	.error { color: var(--text-error); font-size: 0.9rem; margin: 1rem 0; }
+	.success { color: var(--text-success); font-size: 0.9rem; margin: 1rem 0; }
+	code {
+		font-size: 0.8rem;
+		background: var(--bg-code);
+		color: var(--text-code);
+		padding: 0.2rem 0.4rem;
+		border-radius: var(--radius-sm);
+		word-break: break-all;
+	}
 </style>

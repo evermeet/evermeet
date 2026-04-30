@@ -23,7 +23,7 @@
 		try {
 			const res = await api.events.get(id);
 			const e = res.state;
-			
+
 			if (auth.user?.did !== e.organizer) {
 				error = 'You are not the organizer of this event';
 				return;
@@ -141,41 +141,48 @@
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
 	}
-	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; }
-	
+	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: var(--text); }
+
 	form { display: flex; flex-direction: column; gap: 1.5rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
-	label { font-size: 0.9rem; font-weight: 600; color: #444; }
-	
+	label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
+
 	input, select, textarea {
 		padding: 0.6rem;
-		border: 1px solid #ddd;
-		border-radius: 6px;
+		border: 1px solid var(--border-input);
+		border-radius: var(--radius-md);
 		font-size: 1rem;
 		font-family: inherit;
+		background: var(--bg-input);
+		color: var(--text);
+	}
+	input:focus, select:focus, textarea:focus {
+		outline: none;
+		border-color: var(--border-input-focus);
 	}
 	textarea { min-height: 100px; resize: vertical; }
-	
+
 	.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-	
+
 	.actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 1rem; }
-	
+
 	button {
-		background: #111;
-		color: #fff;
+		background: var(--bg-btn-primary);
+		color: var(--text-btn-primary);
 		border: none;
 		padding: 0.7rem 1.5rem;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		font-weight: 600;
 		cursor: pointer;
+		font-size: 1rem;
 	}
 	button:disabled { opacity: 0.5; cursor: not-allowed; }
-	
-	.cancel { text-decoration: none; color: #666; font-size: 0.9rem; }
-	.cancel:hover { color: #111; }
-	
-	.error { color: #c00; font-size: 0.9rem; margin: 0; }
-	.muted { color: #888; }
+
+	.cancel { text-decoration: none; color: var(--text-subtle); font-size: 0.9rem; }
+	.cancel:hover { color: var(--text); }
+
+	.error { color: var(--text-error); font-size: 0.9rem; margin: 0; }
+	.muted { color: var(--text-muted); }
 
 	@media (max-width: 480px) {
 		.grid { grid-template-columns: 1fr; }

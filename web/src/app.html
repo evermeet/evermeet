@@ -4,6 +4,13 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			// Apply theme before first paint to avoid flash
+			try {
+				var t = localStorage.getItem('evermeet-theme');
+				if (t) document.documentElement.setAttribute('data-theme', t);
+			} catch (_) {}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

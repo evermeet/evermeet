@@ -36,7 +36,6 @@
 		<div class="error">{error}</div>
 	{:else if status}
 
-		<!-- Overview -->
 		<section>
 			<h2>Overview</h2>
 			<div class="card info-grid">
@@ -69,7 +68,6 @@
 			</div>
 		</section>
 
-		<!-- Configuration -->
 		<section>
 			<h2>Active Configuration</h2>
 			<div class="card">
@@ -106,7 +104,6 @@
 			</div>
 		</section>
 
-		<!-- P2P Network -->
 		<section>
 			<h2>P2P Network Node</h2>
 			<div class="card">
@@ -119,7 +116,6 @@
 			</div>
 		</section>
 
-		<!-- Connected Peers -->
 		<section>
 			<h2>Connected Peers ({status.p2p.peers.length})</h2>
 			{#if status.p2p.peers.length === 0}
@@ -159,32 +155,33 @@
 		font-size: 1.75rem;
 		font-weight: 800;
 		margin-bottom: 2rem;
+		color: var(--text);
 	}
 	h2 {
 		font-size: 1rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #888;
+		color: var(--text-heading-section);
 		margin: 2rem 0 0.75rem;
 	}
 	h3 {
 		font-size: 0.85rem;
 		font-weight: 600;
-		color: #555;
+		color: var(--text-heading-sub);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		margin: 1rem 0 0.5rem;
 	}
 	.card {
-		background: #fafafa;
-		border: 1px solid #eee;
-		border-radius: 10px;
+		background: var(--bg-card);
+		border: 1px solid var(--border-card);
+		border-radius: var(--radius-xl);
 		padding: 1.25rem 1.5rem;
 		margin-bottom: 0.5rem;
 	}
 	.peer-card {
-		border-left: 3px solid #3b82f6;
+		border-left: 3px solid var(--border-peer);
 		margin-bottom: 0.5rem;
 	}
 	.info-grid {
@@ -199,20 +196,20 @@
 	}
 	.label {
 		font-size: 0.8rem;
-		color: #888;
+		color: var(--text-heading-section);
 		min-width: 140px;
 		flex-shrink: 0;
 		font-weight: 500;
 	}
 	.value {
 		font-size: 0.9rem;
-		color: #222;
+		color: var(--text-value);
 		word-break: break-all;
 	}
 	.mono {
 		font-family: monospace;
 		font-size: 0.85rem;
-		color: #333;
+		color: var(--text-mono);
 	}
 	.peer-id {
 		word-break: break-all;
@@ -220,11 +217,11 @@
 	}
 	.badge {
 		display: inline-block;
-		background: #1a1a1a;
-		color: #fff;
+		background: var(--bg-badge);
+		color: var(--text-badge);
 		font-size: 0.75rem;
 		padding: 0.15rem 0.5rem;
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		font-family: monospace;
 	}
 	.addr-list {
@@ -237,10 +234,10 @@
 	}
 	.addr-list li {
 		font-size: 0.8rem;
-		color: #555;
+		color: var(--text-addr);
 	}
 	.config-group {
-		border-top: 1px solid #eee;
+		border-top: 1px solid var(--border-separator);
 		padding-top: 0.75rem;
 		margin-top: 0.75rem;
 	}
@@ -251,7 +248,7 @@
 	}
 	details summary {
 		cursor: pointer;
-		color: #3b82f6;
+		color: var(--text-accent);
 		font-size: 0.8rem;
 		margin-top: 0.25rem;
 	}
@@ -260,11 +257,11 @@
 		flex-direction: column;
 		gap: 0.5rem;
 	}
-	.muted { color: #999; }
+	.muted { color: var(--text-muted); }
 	.error {
-		color: #d32f2f;
-		background: #ffebee;
+		color: var(--text-error);
+		background: var(--bg-error);
 		padding: 1rem;
-		border-radius: 8px;
+		border-radius: var(--radius-lg);
 	}
 </style>

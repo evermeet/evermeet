@@ -31,7 +31,7 @@
 			<div class="avatar-wrapper">
 				<Avatar src={user.avatar} did={user.did} size={120} />
 			</div>
-			
+
 			<h1>{user.display_name || 'Anonymous User'}</h1>
 			<code class="did">{user.did}</code>
 
@@ -60,24 +60,24 @@
 	.profile-card {
 		text-align: center;
 		padding: 2.5rem;
-		background: #fff;
-		border: 1px solid #eee;
-		border-radius: 12px;
-		box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+		background: var(--bg-card);
+		border: 1px solid var(--border-card);
+		border-radius: var(--radius-2xl);
+		box-shadow: var(--shadow-card);
 	}
 	.avatar-wrapper {
 		margin-bottom: 1.5rem;
 		display: flex;
 		justify-content: center;
 	}
-	h1 { font-size: 1.75rem; font-weight: 800; margin: 0 0 0.5rem; }
+	h1 { font-size: 1.75rem; font-weight: 800; margin: 0 0 0.5rem; color: var(--text); }
 	.did {
 		display: inline-block;
 		font-size: 0.8rem;
-		background: #f4f4f4;
+		background: var(--bg-code);
+		color: var(--text-subtle);
 		padding: 0.3rem 0.6rem;
-		border-radius: 4px;
-		color: #666;
+		border-radius: var(--radius-sm);
 		margin-bottom: 1.5rem;
 		max-width: 100%;
 		word-break: break-all;
@@ -85,16 +85,19 @@
 	.bio {
 		font-size: 1.1rem;
 		line-height: 1.6;
-		color: #444;
+		color: var(--text-secondary);
 		margin: 1.5rem 0;
 		white-space: pre-wrap;
 	}
 	.meta {
 		margin-top: 2rem;
 		padding-top: 1.5rem;
-		border-top: 1px solid #eee;
+		border-top: 1px solid var(--border-subtle);
 		font-size: 0.85rem;
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
 	}
-	.muted { color: #999; }
-	.error { color: #c00; }
+	.muted { color: var(--text-muted); }
+	.error { color: var(--text-error); }
 </style>

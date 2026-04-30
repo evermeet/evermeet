@@ -1,0 +1,121 @@
+/* Default (light) theme */
+:root,
+[data-theme="default"] {
+	--bg: #ffffff;
+	--bg-subtle: #fafafa;
+	--bg-raised: #f4f4f4;
+	--bg-input: #ffffff;
+	--bg-hover: #f4f4f4;
+	--bg-success: #e8f5e9;
+	--bg-error: #ffebee;
+	--bg-code: #f4f4f4;
+	--bg-badge: #1a1a1a;
+	--bg-btn-primary: #1a1a1a;
+	--bg-btn-secondary: #ffffff;
+	--bg-card: #fafafa;
+	--bg-avatar: #eeeeee;
+
+	--text: #1a1a1a;
+	--text-muted: #999999;
+	--text-subtle: #666666;
+	--text-faint: #aaaaaa;
+	--text-secondary: #555555;
+	--text-label: #444444;
+	--text-heading-section: #888888;
+	--text-heading-sub: #555555;
+	--text-success: #2e7d32;
+	--text-error: #cc0000;
+	--text-link: #1a1a1a;
+	--text-badge: #ffffff;
+	--text-btn-primary: #ffffff;
+	--text-btn-secondary: #1a1a1a;
+	--text-code: #333333;
+	--text-addr: #555555;
+	--text-value: #222222;
+	--text-mono: #333333;
+	--text-accent: #3b82f6;
+
+	--border: #e5e5e5;
+	--border-subtle: #eeeeee;
+	--border-input: #d0d0d0;
+	--border-input-focus: #1a1a1a;
+	--border-card: #eeeeee;
+	--border-separator: #eeeeee;
+	--border-peer: #3b82f6;
+
+	--shadow-card: 0 4px 12px rgba(0, 0, 0, 0.03);
+	--shadow-avatar: rgba(0, 0, 0, 0.05);
+
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--radius-lg: 8px;
+	--radius-xl: 10px;
+	--radius-2xl: 12px;
+	--radius-full: 999px;
+
+	color-scheme: light;
+}
+
+/* Luma dark theme */
+[data-theme="luma"] {
+	--bg: #1a1a1a;
+	--bg-subtle: #222222;
+	--bg-raised: #2a2a2a;
+	--bg-input: #2a2a2a;
+	--bg-hover: #2a2a2a;
+	--bg-success: #1a2e1a;
+	--bg-error: #2e1a1a;
+	--bg-code: #2a2a2a;
+	--bg-badge: #ffffff;
+	--bg-btn-primary: #ffffff;
+	--bg-btn-secondary: #2a2a2a;
+	--bg-card: #222222;
+	--bg-avatar: #333333;
+
+	--text: #f0f0f0;
+	--text-muted: #888888;
+	--text-subtle: #aaaaaa;
+	--text-faint: #666666;
+	--text-secondary: #aaaaaa;
+	--text-label: #cccccc;
+	--text-heading-section: #888888;
+	--text-heading-sub: #aaaaaa;
+	--text-success: #66bb6a;
+	--text-error: #ef5350;
+	--text-link: #f0f0f0;
+	--text-badge: #1a1a1a;
+	--text-btn-primary: #1a1a1a;
+	--text-btn-secondary: #f0f0f0;
+	--text-code: #cccccc;
+	--text-addr: #888888;
+	--text-value: #e0e0e0;
+	--text-mono: #cccccc;
+	--text-accent: #60a5fa;
+
+	--border: #333333;
+	--border-subtle: #2a2a2a;
+	--border-input: #444444;
+	--border-input-focus: #f0f0f0;
+	--border-card: #333333;
+	--border-separator: #2a2a2a;
+	--border-peer: #60a5fa;
+
+	--shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+	--shadow-avatar: rgba(0, 0, 0, 0.3);
+
+	color-scheme: dark;
+}
+
+/* Global resets that apply across all themes */
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: system-ui, sans-serif;
+	transition: background 0.15s, color 0.15s;
+}

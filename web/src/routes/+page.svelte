@@ -64,9 +64,9 @@
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
 	}
-	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text); }
 	.event-list { list-style: none; padding: 0; margin: 0; }
-	.event-list li { border-bottom: 1px solid #f0f0f0; }
+	.event-list li { border-bottom: 1px solid var(--border-subtle); }
 	.event-list a {
 		display: grid;
 		grid-template-columns: 160px 1fr auto auto;
@@ -78,9 +78,9 @@
 	}
 	.event-list a:hover .title { text-decoration: underline; }
 	.organizer { display: flex; align-items: center; opacity: 0.7; }
-	.date { font-size: 0.85rem; color: #666; white-space: nowrap; }
-	.title { font-weight: 600; }
-	.location { font-size: 0.85rem; color: #999; text-align: right; }
-	.muted { color: #999; }
-	.error { color: #c00; }
+	.date { font-size: 0.85rem; color: var(--text-subtle); white-space: nowrap; }
+	.title { font-weight: 600; color: var(--text); }
+	.location { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
+	.muted { color: var(--text-muted); }
+	.error { color: var(--text-error); }
 </style>

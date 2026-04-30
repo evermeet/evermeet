@@ -33,7 +33,6 @@
 		submitting = true;
 		error = '';
 		try {
-			// Email is optional. If empty, uses discoverable credentials.
 			const { data: options, session } = await api.auth.passkey.loginStart(email || undefined);
 			const credential: any = await navigator.credentials.get({
 				publicKey: recursiveBase64ToBuffer(options.publicKey)
@@ -137,41 +136,43 @@
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
 	}
-	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-	p { color: #555; margin: 0.25rem 0 1rem; }
-	.muted { color: #999; }
+	h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+	p { color: var(--text-secondary); margin: 0.25rem 0 1rem; }
+	.muted { color: var(--text-muted); }
 	form { display: flex; flex-direction: column; gap: 0.5rem; }
-	label { font-size: 0.875rem; font-weight: 500; }
+	label { font-size: 0.875rem; font-weight: 500; color: var(--text); }
 	input {
 		padding: 0.6rem 0.75rem;
-		border: 1px solid #d0d0d0;
-		border-radius: 6px;
+		border: 1px solid var(--border-input);
+		border-radius: var(--radius-md);
 		font-size: 1rem;
 		outline: none;
+		background: var(--bg-input);
+		color: var(--text);
 	}
-	input:focus { border-color: #1a1a1a; }
+	input:focus { border-color: var(--border-input-focus); }
 	button {
 		margin-top: 0.5rem;
 		padding: 0.7rem;
-		background: #1a1a1a;
-		color: #fff;
+		background: var(--bg-btn-primary);
+		color: var(--text-btn-primary);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
 	}
 	button:disabled { opacity: 0.5; cursor: default; }
 	button.secondary {
-		background: #fff;
-		color: #1a1a1a;
-		border: 1px solid #d0d0d0;
+		background: var(--bg-btn-secondary);
+		color: var(--text-btn-secondary);
+		border: 1px solid var(--border-input);
 	}
-	button.secondary:hover { background: #f8f8f8; }
+	button.secondary:hover { background: var(--bg-hover); }
 	.separator {
 		text-align: center;
 		font-size: 0.8rem;
-		color: #999;
+		color: var(--text-muted);
 		margin: 0.5rem 0;
 		display: flex;
 		align-items: center;
@@ -181,8 +182,8 @@
 		content: "";
 		flex: 1;
 		height: 1px;
-		background: #eee;
+		background: var(--border-subtle);
 	}
 	.passkey-btns { display: flex; flex-direction: column; gap: 0.5rem; }
-	.error { color: #c00; font-size: 0.875rem; }
+	.error { color: var(--text-error); font-size: 0.875rem; }
 </style>

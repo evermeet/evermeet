@@ -125,6 +125,19 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusBadRequest, "starts_at required")
 		return
 	}
+	if req.CalendarID == nil || *req.CalendarID == "" {
+		jsonErr(w, http.StatusBadRequest, "calendar_id required")
+		return
+	}
+	calendar, err := s.db.GetCurrentCalendarState(ctx, *req.CalendarID)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "check calendar failed")
+		return
+	}
+	if calendar == nil {
+		jsonErr(w, http.StatusBadRequest, "calendar not found")
+		return
+	}
 
 	startsAt, err := time.Parse(time.RFC3339, req.StartsAt)
 	if err != nil {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { api } from '$lib/api.js';
+	import { onMount } from 'svelte';
+	import { api, type Calendar } from '$lib/api.js';
 
 	let title = $state('');
 	let description = $state('');
@@ -8,14 +9,32 @@
 	let starts_at = $state('');
 	let ends_at = $state('');
 	let locationName = $state('');
+	let calendars = $state<Calendar[]>([]);
+	let calendarId = $state('');
 	let visibility = $state<'public' | 'unlisted' | 'private'>('public');
 	let rsvpLimit = $state(0);
 
 	let loading = $state(false);
 	let error = $state('');
 
+	onMount(async () => {
+		try {
+			const res = await api.calendars.list();
+			calendars = [...(res.owned ?? []), ...(res.subscribed ?? [])];
+			if (calendars.length > 0) {
+				calendarId = calendars[0].id;
+			}
+		} catch (e: any) {
+			error = e.message;
+		}
+	});
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
+		if (!calendarId) {
+			error = 'Please select a calendar';
+			return;
+		}
 		loading = true;
 		error = '';
 
@@ -25,6 +44,7 @@
 				description,
 				cover_url: cover_url || undefined,
 				starts_at: new Date(starts_at).toISOString(),
+				calendar_id: calendarId,
 				ends_at: ends_at ? new Date(ends_at).toISOString() : undefined,
 				location: locationName ? { name: locationName } : undefined,
 				visibility,
@@ -75,6 +95,18 @@
 		</div>
 
 		<div class="grid">
+			<div class="field">
+				<label for="calendar">Calendar</label>
+				<select id="calendar" bind:value={calendarId} required>
+					{#if calendars.length === 0}
+						<option value="" disabled selected>No calendars available</option>
+					{:else}
+						{#each calendars as cal}
+							<option value={cal.id}>{cal.name}</option>
+						{/each}
+					{/if}
+				</select>
+			</div>
 			<div class="field">
 				<label for="visibility">Visibility</label>
 				<select id="visibility" bind:value={visibility}>

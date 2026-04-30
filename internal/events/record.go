@@ -95,6 +95,10 @@ type Fields struct {
 // New creates a new founding doc and signed initial mutable state.
 // Returns (foundingDoc, eventID, mutableState, stateHash, error).
 func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
+	if f.CalendarID == nil || *f.CalendarID == "" {
+		return nil, "", nil, "", fmt.Errorf("calendar_id is required")
+	}
+
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, "", nil, "", fmt.Errorf("nonce: %w", err)

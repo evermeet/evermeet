@@ -9,6 +9,8 @@ import (
 	"github.com/evermeet/evermeet/internal/identity"
 )
 
+func strPtr(s string) *string { return &s }
+
 func newKeypair(t *testing.T) (ed25519.PublicKey, ed25519.PrivateKey) {
 	t.Helper()
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
@@ -23,11 +25,12 @@ func TestEvent_NewAndVerify(t *testing.T) {
 	did := identity.DeriveDID(pub)
 
 	f := Fields{
-		Title:    "Test Event",
-		StartsAt: time.Now().Add(24 * time.Hour),
+		Title:      "Test Event",
+		StartsAt:   time.Now().Add(24 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	}
 
-	founding, eventID, state, stateHash, err := New(did, priv, f)
+	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", f)
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
@@ -67,9 +70,10 @@ func TestEvent_Update(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	founding, eventID, state, stateHash, err := New(did, priv, Fields{
-		Title:    "Original Title",
-		StartsAt: time.Now().Add(24 * time.Hour),
+	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", Fields{
+		Title:      "Original Title",
+		StartsAt:   time.Now().Add(24 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -78,8 +82,9 @@ func TestEvent_Update(t *testing.T) {
 	_ = eventID
 
 	newState, newHash, err := Update(state, stateHash, did, priv, Fields{
-		Title:    "Updated Title",
-		StartsAt: time.Now().Add(48 * time.Hour),
+		Title:      "Updated Title",
+		StartsAt:   time.Now().Add(48 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
@@ -103,9 +108,10 @@ func TestEvent_UnauthorizedUpdate(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	_, _, state, stateHash, err := New(did, priv, Fields{
-		Title:    "My Event",
-		StartsAt: time.Now().Add(24 * time.Hour),
+	_, _, state, stateHash, err := New(did, priv, "test@localhost", Fields{
+		Title:      "My Event",
+		StartsAt:   time.Now().Add(24 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -116,8 +122,9 @@ func TestEvent_UnauthorizedUpdate(t *testing.T) {
 	attackerDID := identity.DeriveDID(attackerPub)
 
 	_, _, err = Update(state, stateHash, attackerDID, attackerPriv, Fields{
-		Title:    "Hacked",
-		StartsAt: time.Now().Add(24 * time.Hour),
+		Title:      "Hacked",
+		StartsAt:   time.Now().Add(24 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 	if err == nil {
 		t.Fatal("expected error for unauthorized update, got nil")
@@ -128,14 +135,16 @@ func TestEvent_IDStability(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	_, eventID, state, stateHash, _ := New(did, priv, Fields{
-		Title:    "Stable",
-		StartsAt: time.Now().Add(24 * time.Hour),
+	_, eventID, state, stateHash, _ := New(did, priv, "test@localhost", Fields{
+		Title:      "Stable",
+		StartsAt:   time.Now().Add(24 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 
 	updatedState, _, _ := Update(state, stateHash, did, priv, Fields{
-		Title:    "Changed",
-		StartsAt: time.Now().Add(48 * time.Hour),
+		Title:      "Changed",
+		StartsAt:   time.Now().Add(48 * time.Hour),
+		CalendarID: strPtr("cal_1"),
 	})
 
 	if updatedState.ID != eventID {

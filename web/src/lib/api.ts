@@ -183,6 +183,7 @@ export interface CreateEventInput {
 	description?: string;
 	cover_url?: string;
 	starts_at: string;
+	calendar_id?: string;
 	ends_at?: string;
 	location?: { name: string; address?: string };
 	visibility?: string;

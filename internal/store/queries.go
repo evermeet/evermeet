@@ -352,6 +352,23 @@ func (d *DB) InsertCalendarOwner(ctx context.Context, calendarID, did string) er
 	})
 }
 
+func (d *DB) ReplaceCalendarOwners(ctx context.Context, calendarID string, dids []string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`DELETE FROM calendar_owners WHERE calendar_id = ?`, calendarID); err != nil {
+			return err
+		}
+		for _, did := range dids {
+			if _, err := tx.Exec(
+				`INSERT OR IGNORE INTO calendar_owners (calendar_id, did) VALUES (?, ?)`,
+				calendarID, did,
+			); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (d *DB) ListOwnedCalendars(ctx context.Context, did string) ([]*CalendarState, error) {
 	rows, err := d.db.QueryContext(ctx, `
 		SELECT cs.hash, cs.id, COALESCE(cs.prev,''), cs.payload, cs.is_current, cs.created_at

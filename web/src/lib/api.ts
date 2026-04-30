@@ -176,6 +176,7 @@ export interface CalendarInput {
 	avatar?: string;
 	backdrop_url?: string;
 	website?: string;
+	owners?: string[];
 }
 
 export interface CreateEventInput {

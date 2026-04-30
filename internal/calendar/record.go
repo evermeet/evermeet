@@ -58,6 +58,7 @@ type Fields struct {
 	Avatar      string
 	BackdropURL string
 	Website     string
+	Owners      []GovernanceOwner
 }
 
 // New creates a new founding doc and signed initial mutable state.
@@ -94,6 +95,15 @@ func Update(current *MutableState, currentHash, signerDID string, priv ed25519.P
 	if !isOwner(current.Governance, signerDID) {
 		return nil, "", fmt.Errorf("signer %s is not an owner", signerDID)
 	}
+	if f.Owners == nil {
+		f.Owners = current.Governance.Owners
+	}
+	if len(f.Owners) == 0 {
+		return nil, "", fmt.Errorf("at least one owner is required")
+	}
+	if !isOwner(Governance{Owners: f.Owners}, signerDID) {
+		return nil, "", fmt.Errorf("signer %s must remain an owner", signerDID)
+	}
 	return buildState(current.ID, currentHash, signerDID, priv, f, time.Now().UTC())
 }
 
@@ -121,6 +131,11 @@ func Verify(state *MutableState, resolveKey func(did string) (ed25519.PublicKey,
 }
 
 func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, now time.Time) (*MutableState, string, error) {
+	owners := f.Owners
+	if len(owners) == 0 {
+		owners = []GovernanceOwner{{DID: signerDID, Role: "owner"}}
+	}
+
 	state := &MutableState{
 		ID:          id,
 		Prev:        prev,
@@ -131,7 +146,7 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 		Website:     f.Website,
 		Governance: Governance{
 			Threshold: 1,
-			Owners:    []GovernanceOwner{{DID: signerDID, Role: "owner"}},
+			Owners:    owners,
 		},
 		UpdatedAt: now.Format(time.RFC3339),
 		Sigs:      nil,

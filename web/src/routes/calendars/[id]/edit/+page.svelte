@@ -12,6 +12,7 @@
 	let avatar = $state('');
 	let backdrop_url = $state('');
 	let website = $state('');
+let owners = $state<string[]>([]);
 
 	let loading = $state(true);
 	let saving = $state(false);
@@ -31,6 +32,10 @@
 			avatar = cal.avatar ?? '';
 			backdrop_url = cal.backdrop_url ?? '';
 			website = cal.website ?? '';
+			owners = (cal.governance.owners ?? []).map((o) => o.did);
+			if (owners.length === 0 && auth.user?.did) {
+				owners = [auth.user.did];
+			}
 		} catch (e: any) {
 			error = e.message;
 		} finally {
@@ -43,13 +48,33 @@
 		saving = true;
 		error = '';
 		try {
-			await api.calendars.update(id, { name, description, avatar, backdrop_url, website });
+			const cleanedOwners = owners.map((o) => o.trim()).filter(Boolean);
+			if (cleanedOwners.length === 0) {
+				throw new Error('At least one owner is required');
+			}
+			await api.calendars.update(id, {
+				name,
+				description,
+				avatar,
+				backdrop_url,
+				website,
+				owners: cleanedOwners
+			});
 			goto(`/calendars/${id}`);
 		} catch (e: any) {
 			error = e.message;
 		} finally {
 			saving = false;
 		}
+	}
+
+	function addOwner() {
+		owners = [...owners, ''];
+	}
+
+	function removeOwner(index: number) {
+		if (owners.length <= 1) return;
+		owners = owners.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -86,6 +111,23 @@
 			<div class="field">
 				<label for="website">Website</label>
 				<input type="url" id="website" bind:value={website} placeholder="https://…" />
+			</div>
+
+			<div class="field">
+				<div class="owners-header">
+					<label>Owners (DIDs)</label>
+					<button type="button" class="btn-add-owner" onclick={addOwner}>+ Add owner</button>
+				</div>
+				<div class="owner-list">
+					{#each owners as owner, i}
+						<div class="owner-row">
+							<input type="text" bind:value={owners[i]} placeholder="did:em:..." />
+							<button type="button" class="btn-remove-owner" onclick={() => removeOwner(i)} disabled={owners.length <= 1}>
+								Remove
+							</button>
+						</div>
+					{/each}
+				</div>
 			</div>
 
 			{#if error}
@@ -128,6 +170,19 @@
 	textarea { min-height: 90px; resize: vertical; }
 
 	.actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; }
+	.owners-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+	.owner-list { display: flex; flex-direction: column; gap: 0.5rem; }
+	.owner-row { display: flex; gap: 0.5rem; }
+	.btn-add-owner, .btn-remove-owner {
+		border: 1px solid var(--border-input);
+		border-radius: var(--radius-md);
+		background: var(--bg-raised);
+		color: var(--text);
+		padding: 0.35rem 0.6rem;
+		font-size: 0.8rem;
+		cursor: pointer;
+	}
+	.btn-add-owner:hover, .btn-remove-owner:hover { background: var(--bg-hover); }
 	button {
 		background: var(--bg-btn-primary);
 		color: var(--text-btn-primary);

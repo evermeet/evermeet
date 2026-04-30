@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/calendar"
@@ -139,6 +140,7 @@ func (s *Server) handleCreateCalendar(w http.ResponseWriter, r *http.Request) {
 		Avatar      string `json:"avatar"`
 		BackdropURL string `json:"backdrop_url"`
 		Website     string `json:"website"`
+		Owners      []string `json:"owners"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonErr(w, http.StatusBadRequest, "invalid JSON")
@@ -296,6 +298,7 @@ func (s *Server) handleUpdateCalendar(w http.ResponseWriter, r *http.Request) {
 		Avatar      string `json:"avatar"`
 		BackdropURL string `json:"backdrop_url"`
 		Website     string `json:"website"`
+		Owners      []string `json:"owners"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonErr(w, http.StatusBadRequest, "invalid JSON")
@@ -306,12 +309,30 @@ func (s *Server) handleUpdateCalendar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var owners []calendar.GovernanceOwner
+	if req.Owners != nil {
+		seen := map[string]struct{}{}
+		owners = make([]calendar.GovernanceOwner, 0, len(req.Owners))
+		for _, owner := range req.Owners {
+			owner = strings.TrimSpace(owner)
+			if owner == "" {
+				continue
+			}
+			if _, ok := seen[owner]; ok {
+				continue
+			}
+			seen[owner] = struct{}{}
+			owners = append(owners, calendar.GovernanceOwner{DID: owner, Role: "owner"})
+		}
+	}
+
 	newState, newHash, err := calendar.Update(&ms, current.Hash, did, priv, calendar.Fields{
 		Name:        req.Name,
 		Description: req.Description,
 		Avatar:      req.Avatar,
 		BackdropURL: req.BackdropURL,
 		Website:     req.Website,
+		Owners:      owners,
 	})
 	if err != nil {
 		jsonErr(w, http.StatusForbidden, err.Error())
@@ -326,6 +347,15 @@ func (s *Server) handleUpdateCalendar(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: time.Now(),
 	}); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "store failed")
+		return
+	}
+
+	ownerDIDs := make([]string, 0, len(newState.Governance.Owners))
+	for _, owner := range newState.Governance.Owners {
+		ownerDIDs = append(ownerDIDs, owner.DID)
+	}
+	if err := s.db.ReplaceCalendarOwners(ctx, id, ownerDIDs); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "store owners failed")
 		return
 	}
 

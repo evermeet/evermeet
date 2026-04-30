@@ -85,6 +85,11 @@ export const api = {
 				method: 'POST',
 				body: JSON.stringify(data),
 			}),
+		importPreview: (url: string) =>
+			request<ImportEventPreview>('/api/events/import/preview', {
+				method: 'POST',
+				body: JSON.stringify({ url }),
+			}),
 		update: (id: string, data: CreateEventInput) =>
 			request<{ id: string; hash: string; state: Event }>(`/api/events/${id}`, {
 				method: 'PUT',
@@ -207,4 +212,16 @@ export interface CreateEventInput {
 	visibility?: string;
 	rsvp_limit?: number;
 	tags?: string[];
+}
+
+export interface ImportEventPreview {
+	provider: string;
+	source_url: string;
+	title: string;
+	description?: string;
+	cover_url?: string;
+	starts_at: string;
+	ends_at?: string;
+	location_name?: string;
+	location_address?: string;
 }

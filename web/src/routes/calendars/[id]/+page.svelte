@@ -323,7 +323,7 @@ let hostProfiles = $state<Record<string, { displayName: string; avatar: string }
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		padding: 1rem 1.25rem;
+		padding: 1rem 0.7rem 1rem 1.25rem;
 		border: 1px solid var(--border-card);
 		border-radius: var(--radius-xl);
 		background: var(--bg-card);
@@ -361,8 +361,8 @@ let hostProfiles = $state<Record<string, { displayName: string; avatar: string }
 		margin-top: 0.1rem;
 	}
 	.event-cover {
-		width: 80px;
-		height: 60px;
+		width: 120px;
+		height: 120px;
 		object-fit: cover;
 		border-radius: var(--radius-md);
 		flex-shrink: 0;

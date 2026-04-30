@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { api, type Calendar } from '$lib/api.js';
+	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 
 	let owned = $state<Calendar[]>([]);
@@ -19,24 +20,29 @@
 			loading = false;
 		}
 	});
+
+	function subscriberLabel(count: number) {
+		if (count === 0) return intl.t('calendars.noSubscribers');
+		return intl.t(count === 1 ? 'calendars.subscriberCount.one' : 'calendars.subscriberCount.other', { count });
+	}
 </script>
 
 <main>
-	<h1>Calendars</h1>
+	<h1>{intl.t('calendars.title')}</h1>
 
 	{#if loading}
-		<p class="muted">Loading…</p>
+		<p class="muted">{intl.t('common.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else}
 		<section>
 			<div class="section-header">
-				<h2>My Calendars</h2>
-				<a href="/calendars/create" class="btn-create">+ Create</a>
+				<h2>{intl.t('calendars.mine')}</h2>
+				<a href="/calendars/create" class="btn-create">{intl.t('calendars.create')}</a>
 			</div>
 
 			{#if owned.length === 0}
-				<p class="muted">No calendars yet. <a href="/calendars/create">Create one.</a></p>
+				<p class="muted">{intl.t('calendars.empty')} <a href="/calendars/create">{intl.t('calendars.createOne')}</a></p>
 			{:else}
 				<div class="calendar-grid">
 					{#each owned as cal}
@@ -46,9 +52,7 @@
 							</div>
 							<div class="card-info">
 								<span class="card-name">{cal.name}</span>
-								<span class="card-subs">
-									{cal.subscribers === 0 ? 'No Subscribers' : `${cal.subscribers} Subscriber${cal.subscribers === 1 ? '' : 's'}`}
-								</span>
+								<span class="card-subs">{subscriberLabel(cal.subscribers)}</span>
 							</div>
 						</a>
 					{/each}
@@ -59,12 +63,12 @@
 		<div class="divider"></div>
 
 		<section>
-			<h2>Subscribed Calendars</h2>
+			<h2>{intl.t('calendars.subscribed')}</h2>
 
 			{#if subscribed.length === 0}
 				<div class="empty-subscribed">
-					<p class="muted">No Subscriptions</p>
-					<p class="muted-sm">You haven't subscribed to any calendars yet.</p>
+					<p class="muted">{intl.t('calendars.noSubscriptions')}</p>
+					<p class="muted-sm">{intl.t('calendars.noSubscriptionsHelp')}</p>
 				</div>
 			{:else}
 				<div class="subscribed-list">
@@ -79,9 +83,7 @@
 									{/if}
 								</div>
 							</div>
-							<span class="card-subs">
-								{cal.subscribers === 0 ? 'No Subscribers' : `${cal.subscribers} Subscriber${cal.subscribers === 1 ? '' : 's'}`}
-							</span>
+							<span class="card-subs">{subscriberLabel(cal.subscribers)}</span>
 						</a>
 					{/each}
 				</div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api } from '$lib/api.js';
+	import { intl } from '$lib/i18n.svelte.js';
 
 	interface Props {
 		value: string;        // current URL (bound by parent)
@@ -38,8 +39,8 @@
 <div class="image-upload">
 	{#if value}
 		<div class="preview">
-			<img src={value} alt="Cover preview" />
-			<button type="button" class="clear-btn" onclick={clear} title="Remove image">
+			<img src={value} alt={intl.t('upload.coverPreview')} />
+			<button type="button" class="clear-btn" onclick={clear} title={intl.t('upload.removeImage')}>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 					<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
 				</svg>
@@ -55,14 +56,14 @@
 				disabled={uploading}
 			/>
 			{#if uploading}
-				<span class="upload-hint">Uploading…</span>
+				<span class="upload-hint">{intl.t('upload.uploading')}</span>
 			{:else}
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 					<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
 					<polyline points="21 15 16 10 5 21"/>
 				</svg>
-				<span class="upload-hint">Click to upload image</span>
-				<span class="upload-sub">JPEG, PNG, GIF or WebP · max 10 MB</span>
+				<span class="upload-hint">{intl.t('upload.clickImage')}</span>
+				<span class="upload-sub">{intl.t('upload.acceptedImages')}</span>
 			{/if}
 		</label>
 	{/if}

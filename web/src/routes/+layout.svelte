@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/auth.svelte.js';
+	import { intl, localeNames, locales, type Locale } from '$lib/i18n.svelte.js';
 	import { theme } from '$lib/theme.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import '../app.css';
@@ -12,6 +13,7 @@
 	let clock = $state('');
 
 	onMount(() => {
+		intl.load();
 		auth.load();
 		theme.load();
 		updateClock();
@@ -21,8 +23,8 @@
 
 	function updateClock() {
 		const now = new Date();
-		const time = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false });
-		const tz = now.toLocaleDateString('en', { timeZoneName: 'short' }).split(', ')[1] ?? '';
+		const time = now.toLocaleTimeString(intl.dateLocale(), { hour: '2-digit', minute: '2-digit', hour12: false });
+		const tz = now.toLocaleDateString(intl.dateLocale(), { timeZoneName: 'short' }).split(', ')[1] ?? '';
 		clock = `${time} ${tz}`;
 	}
 
@@ -37,6 +39,11 @@
 
 	function handleClickOutside(e: MouseEvent) {
 		if (menuRef && !menuRef.contains(e.target as Node)) closeMenu();
+	}
+
+	function changeLocale(e: Event) {
+		intl.activate((e.target as HTMLSelectElement).value as Locale);
+		updateClock();
 	}
 </script>
 
@@ -55,15 +62,15 @@
 		<div class="nav-center">
 			<a href="/" class="nav-item">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-				Events
+				{intl.t('nav.events')}
 			</a>
 			<a href="/calendars" class="nav-item">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg>
-				Calendars
+				{intl.t('nav.calendars')}
 			</a>
 			<a href="/discover" class="nav-item">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-				Discover
+				{intl.t('nav.discover')}
 			</a>
 		</div>
 	{/if}
@@ -76,43 +83,43 @@
 
 		{#if !auth.loading}
 			{#if auth.user}
-				<a href="/events/create" class="nav-item">Create Event</a>
-				<button class="icon-btn" title="Search" aria-label="Search">
+				<a href="/events/create" class="nav-item">{intl.t('nav.createEvent')}</a>
+				<button class="icon-btn" title={intl.t('nav.search')} aria-label={intl.t('nav.search')}>
 					<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 				</button>
-				<button class="icon-btn" title="Notifications" aria-label="Notifications">
+				<button class="icon-btn" title={intl.t('nav.notifications')} aria-label={intl.t('nav.notifications')}>
 					<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 				</button>
 				<div class="avatar-menu" bind:this={menuRef}>
-					<button class="avatar-btn" onclick={toggleMenu} aria-label="User menu" aria-expanded={menuOpen}>
+					<button class="avatar-btn" onclick={toggleMenu} aria-label={intl.t('nav.userMenu')} aria-expanded={menuOpen}>
 						<Avatar src={auth.user.avatar} did={auth.user.did} size={32} />
 					</button>
 					{#if menuOpen}
 						<div class="dropdown" role="menu">
 							<div class="dropdown-header">
-								<span class="dropdown-name">{auth.user.display_name || 'Anonymous'}</span>
+								<span class="dropdown-name">{auth.user.display_name || intl.t('user.anonymous')}</span>
 								<span class="dropdown-did">{auth.user.did.slice(0, 20)}…</span>
 							</div>
 							<div class="dropdown-divider"></div>
 							<a href="/u/{auth.user.did}" class="dropdown-item" onclick={closeMenu} role="menuitem">
 								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-								Profile
+								{intl.t('nav.profile')}
 							</a>
 							<a href="/settings" class="dropdown-item" onclick={closeMenu} role="menuitem">
 								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-								Settings
+								{intl.t('nav.settings')}
 							</a>
 							<div class="dropdown-divider"></div>
 							<button class="dropdown-item dropdown-logout" onclick={handleLogout} role="menuitem">
 								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-								Sign out
+								{intl.t('nav.signOut')}
 							</button>
 						</div>
 					{/if}
 				</div>
 			{:else}
-				<a href="/discover" class="nav-item">Explore events</a>
-				<a href="/auth/login" class="btn-signin">Sign In</a>
+				<a href="/discover" class="nav-item">{intl.t('nav.exploreEvents')}</a>
+				<a href="/auth/login" class="btn-signin">{intl.t('nav.signIn')}</a>
 			{/if}
 		{/if}
 	</div>
@@ -124,11 +131,17 @@
 
 <footer>
 	<div class="footer-links">
-		<a href="/instance">Instance Status</a>
+		<a href="/instance">{intl.t('nav.instanceStatus')}</a>
 		<span>•</span>
 		<span class="version">v0.1.0-alpha</span>
+		<span>•</span>
+		<select class="locale-select" aria-label="Language" value={intl.locale} onchange={changeLocale}>
+			{#each locales as locale}
+				<option value={locale}>{localeNames[locale]}</option>
+			{/each}
+		</select>
 	</div>
-	<p class="muted">Evermeet — Decentralized Event Platform</p>
+	<p class="muted">{intl.t('footer.tagline')}</p>
 </footer>
 
 <style>
@@ -196,6 +209,14 @@
 		font-variant-numeric: tabular-nums;
 		margin-right: 0.25rem;
 		white-space: nowrap;
+	}
+	.locale-select {
+		border: 1px solid var(--border-input);
+		border-radius: var(--radius-md);
+		background: var(--bg-input);
+		color: var(--text-secondary);
+		font-size: 0.8rem;
+		padding: 0.25rem 0.45rem;
 	}
 
 	@media (max-width: 640px) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from './Avatar.svelte';
 
 	interface Props {
@@ -14,7 +15,7 @@
 	let { id, title, starts_at, location, cover_url, hosts = [], hostProfiles = {} }: Props = $props();
 
 	function formatTime(iso: string) {
-		return new Date(iso).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+		return new Date(iso).toLocaleTimeString(intl.dateLocale(), { hour: '2-digit', minute: '2-digit' });
 	}
 </script>
 
@@ -29,7 +30,7 @@
 						<Avatar src={hostProfiles[did]?.avatar} did={did} size={24} />
 					{/each}
 				</div>
-				<span>By {hosts.map(did => hostProfiles[did]?.displayName || did).join(', ')}</span>
+				<span>{intl.t('events.byHosts', { hosts: hosts.map(did => hostProfiles[did]?.displayName || did).join(', ') })}</span>
 			</div>
 		{/if}
 		{#if location}

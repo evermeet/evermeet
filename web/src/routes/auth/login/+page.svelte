@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api } from '$lib/api.js';
+	import { intl } from '$lib/i18n.svelte.js';
 
 	import { bufferToBase64, recursiveBase64ToBuffer } from '$lib/webauthn.js';
 
@@ -54,7 +55,7 @@
 			window.location.href = '/';
 		} catch (err: any) {
 			console.error(err);
-			error = err.name === 'NotAllowedError' ? 'Sign in cancelled.' : err.message;
+			error = err.name === 'NotAllowedError' ? intl.t('auth.signInCancelled') : err.message;
 		} finally {
 			submitting = false;
 		}
@@ -83,7 +84,7 @@
 			window.location.href = '/';
 		} catch (err: any) {
 			console.error(err);
-			error = err.name === 'NotAllowedError' ? 'Signup cancelled.' : err.message;
+			error = err.name === 'NotAllowedError' ? intl.t('auth.signupCancelled') : err.message;
 		} finally {
 			submitting = false;
 		}
@@ -92,15 +93,15 @@
 
 <main>
 	{#if sent}
-		<h1>Check your email</h1>
-		<p>A sign-in link was sent to <strong>{email}</strong>.</p>
-		<p class="muted">The link expires in 15 minutes.</p>
+		<h1>{intl.t('auth.checkEmail')}</h1>
+		<p>{intl.t('auth.linkSentPrefix')} <strong>{email}</strong>.</p>
+		<p class="muted">{intl.t('auth.linkExpires')}</p>
 	{:else}
-		<h1>Sign in</h1>
-		<p class="muted">We'll email you a sign-in link — no password needed.</p>
+		<h1>{intl.t('auth.signIn')}</h1>
+		<p class="muted">{intl.t('auth.emailLinkHelp')}</p>
 
 		<form onsubmit={submit}>
-			<label for="email">Email</label>
+			<label for="email">{intl.t('common.email')}</label>
 			<input
 				id="email"
 				type="email"
@@ -111,17 +112,17 @@
 			/>
 			{#if error}<p class="error">{error}</p>{/if}
 			<button type="submit" disabled={submitting}>
-				{submitting ? 'Sending…' : 'Send sign-in link'}
+				{submitting ? intl.t('auth.sending') : intl.t('auth.sendLink')}
 			</button>
 
 			{#if passkeySupported}
-				<div class="separator">or use passkey</div>
+				<div class="separator">{intl.t('auth.orPasskey')}</div>
 				<div class="passkey-btns">
 					<button type="button" class="secondary" onclick={loginWithPasskey} disabled={submitting}>
-						Sign in with Passkey
+						{intl.t('auth.signInPasskey')}
 					</button>
 					<button type="button" class="secondary" onclick={signupWithPasskey} disabled={submitting}>
-						Create account with Passkey
+						{intl.t('auth.createPasskey')}
 					</button>
 				</div>
 			{/if}

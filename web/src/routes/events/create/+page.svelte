@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { api, type Calendar, type ImportEventPreview } from '$lib/api.js';
 	import ImageUpload from '$lib/components/ImageUpload.svelte';
+	import { intl } from '$lib/i18n.svelte.js';
 
 	let title = $state('');
 	let description = $state('');
@@ -95,34 +96,34 @@
 
 <main>
 	<div class="header-row">
-		<h1>Create Event</h1>
+		<h1>{intl.t('events.create.title')}</h1>
 		<button type="button" class="btn-import-toggle" onclick={() => (importOpen = !importOpen)}>
-			{importOpen ? 'Close Import' : 'Import events'}
+			{importOpen ? intl.t('events.create.closeImport') : intl.t('events.create.importEvents')}
 		</button>
 	</div>
 
 	{#if importOpen}
 		<div class="import-panel">
 			<div class="field">
-				<label for="import_url">Import URL</label>
+				<label for="import_url">{intl.t('events.create.importUrl')}</label>
 				<div class="import-row">
 					<input id="import_url" type="url" bind:value={importUrl} placeholder="https://lu.ma/..." />
 					<button type="button" onclick={fetchImportPreview} disabled={importFetching}>
-						{importFetching ? 'Fetching…' : 'Fetch'}
+						{importFetching ? intl.t('events.create.fetching') : intl.t('events.create.fetch')}
 					</button>
 				</div>
-				<p class="muted">Currently supported: `luma.com`</p>
+				<p class="muted">{intl.t('events.create.supportedImports')}</p>
 			</div>
 			{#if importPreview}
 				<div class="import-preview">
-					<p class="preview-label">Preview ({importPreview.provider})</p>
+					<p class="preview-label">{intl.t('events.create.preview', { provider: importPreview.provider })}</p>
 					<p class="preview-title">{importPreview.title}</p>
-					<p class="muted">{new Date(importPreview.starts_at).toLocaleString()}</p>
+					<p class="muted">{new Date(importPreview.starts_at).toLocaleString(intl.dateLocale())}</p>
 					{#if importPreview.location_name}
 						<p class="muted">{importPreview.location_name}{importPreview.location_address ? `, ${importPreview.location_address}` : ''}</p>
 					{/if}
 					<button type="button" onclick={applyImportToForm}>
-						Use in form
+						{intl.t('events.create.useInForm')}
 					</button>
 				</div>
 			{/if}
@@ -131,56 +132,56 @@
 
 	<form onsubmit={handleSubmit}>
 		<div class="field">
-			<label for="title">Title</label>
-			<input type="text" id="title" bind:value={title} required placeholder="My Awesome Meetup" />
+			<label for="title">{intl.t('events.form.title')}</label>
+			<input type="text" id="title" bind:value={title} required placeholder={intl.t('events.form.titlePlaceholder')} />
 		</div>
 
 		<div class="field">
-			<label for="description">Description</label>
-			<textarea id="description" bind:value={description} placeholder="Tell us about it… (Markdown supported)"></textarea>
+			<label for="description">{intl.t('events.form.description')}</label>
+			<textarea id="description" bind:value={description} placeholder={intl.t('events.form.descriptionPlaceholder')}></textarea>
 		</div>
 
 		<div class="field">
-			<span class="field-label">Cover Image (optional)</span>
+			<span class="field-label">{intl.t('events.form.coverImageOptional')}</span>
 			<ImageUpload bind:value={cover_url} />
 		</div>
 
 		<div class="grid">
 			<div class="field">
-				<label for="starts_at">Starts At</label>
+				<label for="starts_at">{intl.t('events.form.startsAt')}</label>
 				<input type="datetime-local" id="starts_at" bind:value={starts_at} required />
 			</div>
 			<div class="field">
-				<label for="ends_at">Ends At (optional)</label>
+				<label for="ends_at">{intl.t('events.form.endsAtOptional')}</label>
 				<input type="datetime-local" id="ends_at" bind:value={ends_at} />
 			</div>
 		</div>
 
 		<div class="field">
-			<label for="location">Location Name</label>
-			<input type="text" id="location" bind:value={locationName} placeholder="The Coffee Shop / Zoom" />
+			<label for="location">{intl.t('events.form.locationName')}</label>
+			<input type="text" id="location" bind:value={locationName} placeholder={intl.t('events.form.locationPlaceholder')} />
 		</div>
 
 		<div class="grid">
 			<div class="field">
-				<label for="calendar">Calendar</label>
+				<label for="calendar">{intl.t('events.form.calendar')}</label>
 				<select id="calendar" bind:value={calendarId}>
-					<option value="">Personal event (no calendar)</option>
+					<option value="">{intl.t('events.form.personalEvent')}</option>
 					{#each calendars as cal}
 						<option value={cal.id}>{cal.name}</option>
 					{/each}
 				</select>
 			</div>
 			<div class="field">
-				<label for="visibility">Visibility</label>
+				<label for="visibility">{intl.t('events.form.visibility')}</label>
 				<select id="visibility" bind:value={visibility}>
-					<option value="public">Public (on homepage)</option>
-					<option value="unlisted">Unlisted (direct link only)</option>
-					<option value="private">Private (Phase 8 feature)</option>
+					<option value="public">{intl.t('events.form.visibility.public')}</option>
+					<option value="unlisted">{intl.t('events.form.visibility.unlisted')}</option>
+					<option value="private">{intl.t('events.form.visibility.private')}</option>
 				</select>
 			</div>
 			<div class="field">
-				<label for="rsvp_limit">RSVP Limit (0 for no limit)</label>
+				<label for="rsvp_limit">{intl.t('events.form.rsvpLimit')}</label>
 				<input type="number" id="rsvp_limit" bind:value={rsvpLimit} min="0" />
 			</div>
 		</div>
@@ -191,9 +192,9 @@
 
 		<div class="actions">
 			<button type="submit" disabled={loading}>
-				{loading ? 'Creating…' : 'Create Event'}
+				{loading ? intl.t('events.form.creatingSubmit') : intl.t('events.form.createSubmit')}
 			</button>
-			<a href="/" class="cancel">Cancel</a>
+			<a href="/" class="cancel">{intl.t('common.cancel')}</a>
 		</div>
 	</form>
 </main>

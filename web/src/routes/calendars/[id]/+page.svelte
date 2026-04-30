@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { api, type CalendarDetail, type CalendarEvent } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import EventCard from '$lib/components/EventCard.svelte';
 
@@ -71,7 +72,9 @@
 		const groups = new Map<string, CalendarEvent[]>();
 		for (const ev of events) {
 			const d = new Date(ev.starts_at);
-			const key = d.toLocaleDateString('en', { month: 'long', day: 'numeric', weekday: 'long' });
+			const weekday = d.toLocaleDateString(intl.dateLocale(), { weekday: 'long' });
+			const monthDay = d.toLocaleDateString(intl.dateLocale(), { month: 'long', day: 'numeric' });
+			const key = `${weekday}|${monthDay}`;
 			if (!groups.has(key)) groups.set(key, []);
 			groups.get(key)!.push(ev);
 		}
@@ -127,11 +130,17 @@
 
 	// Parse grouped key to extract short day label
 	function parseDateKey(key: string): { monthDay: string; weekday: string } {
-		// key: "Thursday, May 7, 2026"
-		const parts = key.split(',');
-		const weekday = parts[0]?.trim() ?? '';
-		const monthDay = (parts[1]?.trim() ?? '') + (parts[2] ? `, ${parts[2].trim()}` : '');
+		const [weekday = '', monthDay = ''] = key.split('|');
 		return { monthDay, weekday };
+	}
+
+	function subscriberLabel(count: number) {
+		if (count === 0) return intl.t('calendars.noSubscribers');
+		return intl.t(count === 1 ? 'calendars.subscriberCount.one' : 'calendars.subscriberCount.other', { count });
+	}
+
+	function weekdayLabels() {
+		return intl.t('calendar.weekdays').split(',');
 	}
 </script>
 
@@ -140,7 +149,7 @@
 </svelte:head>
 
 {#if loading}
-	<p class="status-msg muted">Loading…</p>
+	<p class="status-msg muted">{intl.t('common.loading')}</p>
 {:else if error}
 	<p class="status-msg error">{error}</p>
 {:else if cal}
@@ -162,10 +171,10 @@
 					onclick={toggleSubscribe}
 					disabled={subscribing}
 				>
-					{cal.subscribed ? 'Subscribed ✓' : 'Subscribe'}
+					{cal.subscribed ? intl.t('calendars.subscribedState') : intl.t('calendars.subscribe')}
 				</button>
 			{:else if isOwner()}
-				<a href="/calendars/{id}/edit" class="btn-edit">Edit Calendar</a>
+				<a href="/calendars/{id}/edit" class="btn-edit">{intl.t('calendars.edit')}</a>
 			{/if}
 		</div>
 
@@ -176,7 +185,7 @@
 				<p class="cal-desc">{cal.description}</p>
 			{/if}
 			<div class="cal-meta">
-				<span class="muted">{cal.subscribers} subscriber{cal.subscribers === 1 ? '' : 's'}</span>
+				<span class="muted">{subscriberLabel(cal.subscribers)}</span>
 			</div>
 			{#if cal.website || (cal.links && cal.links.length > 0)}
 				<div class="cal-links">
@@ -220,24 +229,24 @@
 		<div class="left-col">
 			<!-- Events header -->
 			<div class="events-header">
-				<h2>Events</h2>
+				<h2>{intl.t('events.title')}</h2>
 				<div class="events-toolbar">
-					<button class="tool-btn" class:active={false} title="Card view">
+					<button class="tool-btn" class:active={false} title={intl.t('events.cardView')}>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
 					</button>
-					<button class="tool-btn" title="List view">
+					<button class="tool-btn" title={intl.t('events.listView')}>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
 					</button>
-					<button class="tool-btn" title="Search" onclick={() => searchOpen = !searchOpen}>
+					<button class="tool-btn" title={intl.t('nav.search')} onclick={() => searchOpen = !searchOpen}>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 					</button>
 				</div>
 			</div>
 
 			{#if cal.events.length === 0}
-				<p class="muted">No events yet.</p>
+				<p class="muted">{intl.t('events.noneYet')}</p>
 			{:else if filteredEvents.length === 0}
-				<p class="muted">No {filter} events.</p>
+				<p class="muted">{intl.t('events.empty', { filter: intl.t(filter === 'upcoming' ? 'events.upcoming' : 'events.past').toLowerCase() })}</p>
 			{:else}
 				<div class="event-groups">
 					{#each grouped as [key, evs]}
@@ -245,7 +254,7 @@
 						<div class="date-group">
 							<div class="date-label">
 								<span class="dot"></span>
-								<span class="date-month">{monthDay.split(',')[0]}</span>
+								<span class="date-month">{monthDay}</span>
 								<span class="date-weekday">{weekday}</span>
 							</div>
 							<div class="event-cards">
@@ -274,13 +283,13 @@
 				{#if auth.user}
 					<a href="/events/create?calendar={id}" class="btn-submit">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-						Submit Event
+						{intl.t('events.submit')}
 					</a>
 				{/if}
 				<a
 					href="/api/calendars/{id}/feed.ics"
 					class="btn-rss"
-					title="Subscribe via RSS/iCal"
+					title={intl.t('events.subscribeFeed')}
 					target="_blank"
 					rel="noopener"
 				>
@@ -291,21 +300,21 @@
 			<!-- Mini calendar -->
 			<div class="mini-cal">
 				<div class="mini-cal-header">
-					<span class="mini-cal-month">{calendarMonth.toLocaleDateString('en', { month: 'long' })}</span>
+					<span class="mini-cal-month">{calendarMonth.toLocaleDateString(intl.dateLocale(), { month: 'long' })}</span>
 					<div class="mini-cal-nav">
-						<button class="cal-nav-btn" onclick={prevMonth} title="Previous month">
+						<button class="cal-nav-btn" onclick={prevMonth} title={intl.t('calendar.previousMonth')}>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
 						</button>
-						<button class="cal-nav-btn cal-today-btn" onclick={goToday} title="Today">
+						<button class="cal-nav-btn cal-today-btn" onclick={goToday} title={intl.t('calendar.today')}>
 							<svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="currentColor"/></svg>
 						</button>
-						<button class="cal-nav-btn" onclick={nextMonth} title="Next month">
+						<button class="cal-nav-btn" onclick={nextMonth} title={intl.t('calendar.nextMonth')}>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
 						</button>
 					</div>
 				</div>
 				<div class="mini-cal-grid">
-					{#each ['S','M','T','W','T','F','S'] as d}
+					{#each weekdayLabels() as d}
 						<span class="cal-dow">{d}</span>
 					{/each}
 					{#each calDays as day}
@@ -329,10 +338,10 @@
 				<!-- Upcoming / Past toggle -->
 				<div class="filter-toggle">
 					<button class="filter-btn" class:active={filter === 'upcoming'} onclick={() => filter = 'upcoming'}>
-						Upcoming
+						{intl.t('events.upcoming')}
 					</button>
 					<button class="filter-btn" class:active={filter === 'past'} onclick={() => filter = 'past'}>
-						Past
+						{intl.t('events.past')}
 					</button>
 				</div>
 			</div>

@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { api, type CalendarEvent } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import { intl } from '$lib/i18n.svelte.js';
 	import EventCard from '$lib/components/EventCard.svelte';
 
 	let events = $state<CalendarEvent[]>([]);
@@ -81,7 +82,7 @@
 		const groups = new Map<string, CalendarEvent[]>();
 		for (const ev of evs) {
 			const d = new Date(ev.starts_at);
-			const key = d.toLocaleDateString('en', { month: 'long', day: 'numeric', weekday: 'long' });
+			const key = d.toLocaleDateString(intl.dateLocale(), { month: 'long', day: 'numeric', weekday: 'long' });
 			if (!groups.has(key)) groups.set(key, []);
 			groups.get(key)!.push(ev);
 		}
@@ -99,24 +100,24 @@
 </script>
 
 <svelte:head>
-	<title>Events — Evermeet</title>
+	<title>{intl.t('events.title')} - Evermeet</title>
 </svelte:head>
 
 <main>
 	<div class="page-header">
-		<h1>Events</h1>
+		<h1>{intl.t('events.title')}</h1>
 		<div class="filter-toggle">
-			<button class="filter-btn" class:active={filter === 'upcoming'} onclick={() => filter = 'upcoming'}>Upcoming</button>
-			<button class="filter-btn" class:active={filter === 'past'} onclick={() => filter = 'past'}>Past</button>
+			<button class="filter-btn" class:active={filter === 'upcoming'} onclick={() => filter = 'upcoming'}>{intl.t('events.upcoming')}</button>
+			<button class="filter-btn" class:active={filter === 'past'} onclick={() => filter = 'past'}>{intl.t('events.past')}</button>
 		</div>
 	</div>
 
 	{#if loading}
-		<p class="muted">Loading…</p>
+		<p class="muted">{intl.t('common.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if filtered.length === 0}
-		<p class="muted">No {filter} events.</p>
+		<p class="muted">{intl.t('events.empty', { filter: intl.t(filter === 'upcoming' ? 'events.upcoming' : 'events.past').toLowerCase() })}</p>
 	{:else}
 		<div class="event-groups">
 			{#each grouped as [key, evs]}

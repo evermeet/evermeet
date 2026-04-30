@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { api, type CalendarDetail, type Event } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { marked } from 'marked';
 
@@ -78,11 +79,11 @@ let currentHash = $state('');
 	function formatDateBlock(iso: string) {
 		const d = new Date(iso);
 		return {
-			weekday: d.toLocaleDateString('en', { weekday: 'long' }),
-			date: d.toLocaleDateString('en', { month: 'long', day: 'numeric' }),
-			month: d.toLocaleDateString('en', { month: 'short' }).toUpperCase(),
+			weekday: d.toLocaleDateString(intl.dateLocale(), { weekday: 'long' }),
+			date: d.toLocaleDateString(intl.dateLocale(), { month: 'long', day: 'numeric' }),
+			month: d.toLocaleDateString(intl.dateLocale(), { month: 'short' }).toUpperCase(),
 			day: d.getDate(),
-			time: d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+			time: d.toLocaleTimeString(intl.dateLocale(), { hour: '2-digit', minute: '2-digit' }),
 		};
 	}
 
@@ -107,7 +108,7 @@ let currentHash = $state('');
 
 <main>
 	{#if loading}
-		<p class="muted">Loading…</p>
+		<p class="muted">{intl.t('common.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if event}
@@ -131,7 +132,7 @@ let currentHash = $state('');
 
 				{#if calendar}
 					<div class="side-section presenter-section">
-						<p class="side-label">Presented By</p>
+						<p class="side-label">{intl.t('events.presentedBy')}</p>
 						<div class="presenter-row">
 							<a href="/calendars/{calendar.id}" class="presenter-avatar">
 								<Avatar src={calendar.avatar} did={calendar.id} size={36} rounded={false} />
@@ -180,7 +181,7 @@ let currentHash = $state('');
 
 				<!-- Hosted By -->
 				<div class="side-section">
-					<p class="side-label">Hosted By</p>
+					<p class="side-label">{intl.t('events.hostedBy')}</p>
 					{#if hosts.length > 0}
 						<div class="host-list">
 							{#each hosts as host}
@@ -203,7 +204,7 @@ let currentHash = $state('');
 				<!-- Going -->
 				{#if event.rsvp?.count !== undefined}
 					<div class="side-section">
-						<p class="side-label">{event.rsvp.count}{event.rsvp.limit ? `/${event.rsvp.limit}` : ''} Going</p>
+						<p class="side-label">{intl.t('events.going', { count: event.rsvp.count, limit: event.rsvp.limit ? `/${event.rsvp.limit}` : '' })}</p>
 					</div>
 				{/if}
 
@@ -219,9 +220,9 @@ let currentHash = $state('');
 				{/if}
 
 				<div class="side-section">
-					<p class="side-label">Revision</p>
+					<p class="side-label">{intl.t('events.revision')}</p>
 					<code class="revision-id">{currentHash ? `${currentHash.slice(0, 16)}…` : 'n/a'}</code>
-					<a class="revision-link" href="/events/{id}/history">View edit history</a>
+					<a class="revision-link" href="/events/{id}/history">{intl.t('events.viewEditHistory')}</a>
 				</div>
 			</aside>
 
@@ -230,7 +231,7 @@ let currentHash = $state('');
 				<div class="right-top">
 					<h1>{event.title}</h1>
 					{#if isOrganizer()}
-						<a href="/events/{id}/edit" class="edit-btn">Edit</a>
+						<a href="/events/{id}/edit" class="edit-btn">{intl.t('events.edit')}</a>
 					{/if}
 				</div>
 
@@ -266,9 +267,9 @@ let currentHash = $state('');
 				<!-- RSVP panel -->
 				<div class="rsvp-panel">
 					{#if isOrganizer()}
-						<p class="panel-label">RSVPs ({rsvps.length})</p>
+						<p class="panel-label">{intl.t('events.rsvps', { count: rsvps.length })}</p>
 						{#if rsvps.length === 0}
-							<p class="muted">No RSVPs yet.</p>
+							<p class="muted">{intl.t('events.noRsvps')}</p>
 						{:else}
 							<div class="rsvp-list">
 								{#each rsvps as env}
@@ -282,7 +283,7 @@ let currentHash = $state('');
 										{/if}
 										<div class="rsvp-meta">
 											<code>{env.sender_did.slice(0, 16)}…</code>
-											<span>{new Date(env.received_at).toLocaleDateString()}</span>
+											<span>{new Date(env.received_at).toLocaleDateString(intl.dateLocale())}</span>
 										</div>
 									</div>
 								{/each}
@@ -290,37 +291,37 @@ let currentHash = $state('');
 						{/if}
 					{:else if rsvpSent}
 						<div class="success-box">
-							<strong>RSVP Sent!</strong>
-							<p>Your encrypted RSVP has been delivered to the organizer.</p>
+							<strong>{intl.t('events.rsvpSent')}</strong>
+							<p>{intl.t('events.rsvpDelivered')}</p>
 						</div>
 					{:else if auth.user}
-						<p class="panel-label">Register</p>
+						<p class="panel-label">{intl.t('events.register')}</p>
 						<form class="rsvp-form" onsubmit={submitRSVP}>
 							<div class="form-row">
-								<input type="text" bind:value={rsvpName} placeholder="Your Name" required />
-								<input type="email" bind:value={rsvpEmail} placeholder="Email" required />
+								<input type="text" bind:value={rsvpName} placeholder={intl.t('events.yourName')} required />
+								<input type="email" bind:value={rsvpEmail} placeholder={intl.t('common.email')} required />
 							</div>
-							<textarea bind:value={rsvpNote} placeholder="Note to organizer (optional)"></textarea>
+							<textarea bind:value={rsvpNote} placeholder={intl.t('events.noteToOrganizer')}></textarea>
 							<button type="submit" class="rsvp-btn" disabled={rsvpSubmitting}>
-								{rsvpSubmitting ? 'Sending…' : 'Confirm RSVP'}
+								{rsvpSubmitting ? intl.t('auth.sending') : intl.t('events.confirmRsvp')}
 							</button>
 						</form>
 					{:else}
-						<p class="panel-label">Register</p>
-						<a href="/auth/login" class="rsvp-btn">Sign in to RSVP</a>
+						<p class="panel-label">{intl.t('events.register')}</p>
+						<a href="/auth/login" class="rsvp-btn">{intl.t('events.signInToRsvp')}</a>
 					{/if}
 				</div>
 
 				<!-- About -->
 				{#if event.description}
 					<div class="about-section">
-						<p class="about-label">About Event</p>
+						<p class="about-label">{intl.t('events.about')}</p>
 						<div class="description">{@html marked(event.description)}</div>
 					</div>
 				{/if}
 
 				{#if founding?.instance_id}
-					<p class="muted instance-hint">Home: {founding.instance_id}</p>
+					<p class="muted instance-hint">{intl.t('events.homeInstance', { instance: founding.instance_id })}</p>
 				{/if}
 			</div>
 		</div>

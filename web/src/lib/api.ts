@@ -78,6 +78,8 @@ export const api = {
 			),
 		get: (id: string) =>
 			request<{ id: string; state: Event; hash: string; founded: object }>(`/api/events/${id}`),
+		history: (id: string) =>
+			request<{ id: string; revisions: EventRevision[] }>(`/api/events/${id}/history`),
 		create: (data: CreateEventInput) =>
 			request<{ id: string; hash: string; state: Event }>('/api/events', {
 				method: 'POST',
@@ -138,6 +140,14 @@ export interface Event {
 	rsvp: { limit: number; count: number; deadline?: string; approval: string };
 	tags?: string[];
 	updated_at: string;
+}
+
+export interface EventRevision {
+	hash: string;
+	prev?: string;
+	is_current: boolean;
+	created_at: string;
+	state: Event;
 }
 
 export interface Calendar {

@@ -99,6 +99,7 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/events", s.handleListEvents)
 	r.Post("/api/events", s.requireAuth(s.handleCreateEvent))
 	r.Get("/api/events/{id}", s.handleGetEvent)
+	r.Get("/api/events/{id}/history", s.handleEventHistory)
 	r.Put("/api/events/{id}", s.requireAuth(s.handleUpdateEvent))
 	r.Post("/api/events/{id}/rsvp", s.requireAuth(s.handleRSVP))
 	r.Get("/api/events/{id}/rsvps", s.requireAuth(s.handleListRSVPs))

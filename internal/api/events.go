@@ -95,6 +95,41 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleEventHistory(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	ctx := r.Context()
+
+	states, err := s.db.ListEventStatesByID(ctx, id)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "list event history failed")
+		return
+	}
+
+	type revision struct {
+		Hash      string          `json:"hash"`
+		Prev      string          `json:"prev,omitempty"`
+		IsCurrent bool            `json:"is_current"`
+		CreatedAt string          `json:"created_at"`
+		State     json.RawMessage `json:"state"`
+	}
+
+	out := make([]revision, 0, len(states))
+	for _, st := range states {
+		out = append(out, revision{
+			Hash:      st.Hash,
+			Prev:      st.Prev,
+			IsCurrent: st.IsCurrent,
+			CreatedAt: st.CreatedAt.UTC().Format(time.RFC3339),
+			State:     json.RawMessage(st.Payload),
+		})
+	}
+
+	jsonOK(w, map[string]any{
+		"id":        id,
+		"revisions": out,
+	})
+}
+
 func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	did := authDID(r)
 	priv := authPrivKey(r)

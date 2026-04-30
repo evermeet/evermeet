@@ -8,6 +8,7 @@
 
 	let event = $state<any>(null);
 	let founding = $state<any>(null);
+let currentHash = $state('');
 	let loading = $state(true);
 	let error = $state('');
 
@@ -26,6 +27,7 @@
 			event = res.state;
 			event.id = res.id;
 			founding = res.founded;
+			currentHash = res.hash;
 
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
@@ -119,6 +121,12 @@
 						</div>
 					</div>
 				{/if}
+
+				<div class="side-section">
+					<p class="side-label">Revision</p>
+					<code class="revision-id">{currentHash ? `${currentHash.slice(0, 16)}…` : 'n/a'}</code>
+					<a class="revision-link" href="/events/{id}/history">View edit history</a>
+				</div>
 			</aside>
 
 			<!-- Right column -->
@@ -308,6 +316,20 @@
 		font-size: 0.8rem;
 		color: var(--text-secondary);
 	}
+	.revision-id {
+		display: inline-block;
+		font-size: 0.78rem;
+		color: var(--text-secondary);
+		word-break: break-all;
+		margin-bottom: 0.5rem;
+	}
+	.revision-link {
+		display: inline-block;
+		font-size: 0.85rem;
+		color: var(--text-accent);
+		text-decoration: none;
+	}
+	.revision-link:hover { text-decoration: underline; }
 
 	/* ── Right column ── */
 	.right-col {

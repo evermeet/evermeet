@@ -238,6 +238,27 @@ func (d *DB) GetCurrentEventState(ctx context.Context, id string) (*EventState, 
 	return scanEventState(row)
 }
 
+func (d *DB) ListEventStatesByID(ctx context.Context, id string) ([]*EventState, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		 FROM event_states
+		 WHERE id = ?
+		 ORDER BY created_at DESC`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var states []*EventState
+	for rows.Next() {
+		s, err := scanEventStateRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		states = append(states, s)
+	}
+	return states, rows.Err()
+}
+
 func (d *DB) GetEventFounding(ctx context.Context, id string) (*EventFounding, error) {
 	row := d.db.QueryRowContext(ctx,
 		`SELECT id, payload FROM event_founding WHERE id = ?`, id)

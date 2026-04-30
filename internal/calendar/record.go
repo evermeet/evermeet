@@ -44,6 +44,7 @@ type MutableState struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description,omitempty"`
 	Avatar      string     `json:"avatar,omitempty"`
+	BackdropURL string     `json:"backdrop_url,omitempty"`
 	Website     string     `json:"website,omitempty"`
 	Governance  Governance `json:"governance"`
 	UpdatedAt   string     `json:"updated_at"`
@@ -55,6 +56,7 @@ type Fields struct {
 	Name        string
 	Description string
 	Avatar      string
+	BackdropURL string
 	Website     string
 }
 
@@ -125,6 +127,7 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 		Name:        f.Name,
 		Description: f.Description,
 		Avatar:      f.Avatar,
+		BackdropURL: f.BackdropURL,
 		Website:     f.Website,
 		Governance: Governance{
 			Threshold: 1,

@@ -86,6 +86,14 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/auth/passkey/login/start", s.handlePasskeyLoginStart)
 	r.Post("/api/auth/passkey/login/finish", s.handlePasskeyLoginFinish)
 
+	// Calendars
+	r.Get("/api/calendars", s.requireAuth(s.handleListCalendars))
+	r.Post("/api/calendars", s.requireAuth(s.handleCreateCalendar))
+	r.Get("/api/calendars/{id}", s.handleGetCalendar)
+	r.Put("/api/calendars/{id}", s.requireAuth(s.handleUpdateCalendar))
+	r.Post("/api/calendars/{id}/subscribe", s.requireAuth(s.handleSubscribeCalendar))
+	r.Delete("/api/calendars/{id}/subscribe", s.requireAuth(s.handleUnsubscribeCalendar))
+
 	// Events
 	r.Get("/api/events", s.handleListEvents)
 	r.Post("/api/events", s.requireAuth(s.handleCreateEvent))

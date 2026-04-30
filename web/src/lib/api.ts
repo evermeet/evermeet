@@ -95,6 +95,24 @@ export const api = {
 				body: JSON.stringify(data),
 			}),
 	},
+	calendars: {
+		list: () => request<{ owned: Calendar[]; subscribed: Calendar[] }>('/api/calendars'),
+		get: (id: string) => request<CalendarDetail>(`/api/calendars/${id}`),
+		create: (data: CalendarInput) =>
+			request<{ id: string; state: Calendar }>('/api/calendars', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
+		update: (id: string, data: CalendarInput) =>
+			request<{ id: string; state: Calendar }>(`/api/calendars/${id}`, {
+				method: 'PUT',
+				body: JSON.stringify(data),
+			}),
+		subscribe: (id: string) =>
+			request<{ subscribed: boolean }>(`/api/calendars/${id}/subscribe`, { method: 'POST' }),
+		unsubscribe: (id: string) =>
+			request<{ subscribed: boolean }>(`/api/calendars/${id}/subscribe`, { method: 'DELETE' }),
+	},
 	node: {
 		status: () => request<any>('/api/instance/status'),
 	},
@@ -119,6 +137,40 @@ export interface Event {
 	rsvp: { limit: number; count: number; deadline?: string; approval: string };
 	tags?: string[];
 	updated_at: string;
+}
+
+export interface Calendar {
+	id: string;
+	name: string;
+	description?: string;
+	avatar?: string;
+	backdrop_url?: string;
+	website?: string;
+	subscribers: number;
+}
+
+export interface CalendarDetail extends Calendar {
+	subscribed: boolean;
+	governance: { threshold: number; owners: { did: string; role: string }[] };
+	updated_at: string;
+	events: CalendarEvent[];
+}
+
+export interface CalendarEvent {
+	id: string;
+	title: string;
+	starts_at: string;
+	ends_at?: string;
+	location?: { name: string; address?: string };
+	cover_url?: string;
+}
+
+export interface CalendarInput {
+	name: string;
+	description?: string;
+	avatar?: string;
+	backdrop_url?: string;
+	website?: string;
 }
 
 export interface CreateEventInput {

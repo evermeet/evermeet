@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { src = '', did = '', size = 100, class: className = '' } = $props();
+	let { src = '', did = '', size = 100, class: className = '', rounded = true } = $props();
 
 	function getIdenticon(did: string) {
 		let hash = 0;
@@ -31,7 +31,7 @@
 	const identicon = $derived(did ? getIdenticon(did) : null);
 </script>
 
-<div class="avatar-box {className}" style="width: {size}px; height: {size}px;">
+<div class="avatar-box {className}" style="width: {size}px; height: {size}px; border-radius: {rounded ? '50%' : 'var(--radius-xl)'}">
 	{#if src}
 		<img {src} alt={did} class="avatar-img" />
 	{:else if identicon}
@@ -49,7 +49,6 @@
 <style>
 	.avatar-box {
 		display: inline-block;
-		border-radius: 50%;
 		overflow: hidden;
 		flex-shrink: 0;
 		background: var(--bg-avatar);

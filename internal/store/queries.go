@@ -329,6 +329,117 @@ func (d *DB) GetCurrentCalendarState(ctx context.Context, id string) (*CalendarS
 	return s, nil
 }
 
+func (d *DB) InsertCalendarOwner(ctx context.Context, calendarID, did string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO calendar_owners (calendar_id, did) VALUES (?, ?)`,
+			calendarID, did,
+		)
+		return err
+	})
+}
+
+func (d *DB) ListOwnedCalendars(ctx context.Context, did string) ([]*CalendarState, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT cs.hash, cs.id, COALESCE(cs.prev,''), cs.payload, cs.is_current, cs.created_at
+		FROM calendar_states cs
+		JOIN calendar_owners co ON co.calendar_id = cs.id
+		WHERE co.did = ? AND cs.is_current = 1
+		ORDER BY cs.created_at DESC`, did)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanCalendarStates(rows)
+}
+
+func (d *DB) SubscribeCalendar(ctx context.Context, calendarID, did string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO calendar_subscriptions (calendar_id, did, subscribed_at) VALUES (?, ?, ?)`,
+			calendarID, did, time.Now().UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) UnsubscribeCalendar(ctx context.Context, calendarID, did string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`DELETE FROM calendar_subscriptions WHERE calendar_id = ? AND did = ?`,
+			calendarID, did,
+		)
+		return err
+	})
+}
+
+func (d *DB) IsSubscribed(ctx context.Context, calendarID, did string) (bool, error) {
+	var count int
+	err := d.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM calendar_subscriptions WHERE calendar_id = ? AND did = ?`,
+		calendarID, did,
+	).Scan(&count)
+	return count > 0, err
+}
+
+func (d *DB) ListSubscribedCalendars(ctx context.Context, did string) ([]*CalendarState, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT cs.hash, cs.id, COALESCE(cs.prev,''), cs.payload, cs.is_current, cs.created_at
+		FROM calendar_states cs
+		JOIN calendar_subscriptions sub ON sub.calendar_id = cs.id
+		WHERE sub.did = ? AND cs.is_current = 1
+		ORDER BY sub.subscribed_at DESC`, did)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanCalendarStates(rows)
+}
+
+func (d *DB) CountCalendarSubscribers(ctx context.Context, calendarID string) (int, error) {
+	var count int
+	err := d.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM calendar_subscriptions WHERE calendar_id = ?`, calendarID,
+	).Scan(&count)
+	return count, err
+}
+
+func (d *DB) ListEventsByCalendar(ctx context.Context, calendarID string) ([]*EventState, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT es.hash, es.id, COALESCE(es.prev,''), es.payload, es.is_current, es.created_at
+		FROM event_states es
+		JOIN event_founding ef ON ef.id = es.id
+		WHERE json_extract(es.payload, '$.calendar') = ? AND es.is_current = 1
+		ORDER BY json_extract(es.payload, '$.starts_at') ASC`, calendarID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*EventState
+	for rows.Next() {
+		s, err := scanEventStateRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, s)
+	}
+	return out, rows.Err()
+}
+
+func scanCalendarStates(rows *sql.Rows) ([]*CalendarState, error) {
+	var out []*CalendarState
+	for rows.Next() {
+		s := &CalendarState{}
+		var createdAt string
+		if err := rows.Scan(&s.Hash, &s.ID, &s.Prev, &s.Payload, &s.IsCurrent, &createdAt); err != nil {
+			return nil, err
+		}
+		s.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+		out = append(out, s)
+	}
+	return out, rows.Err()
+}
+
 // ---- RSVP envelopes ----
 
 type RSVPEnvelope struct {

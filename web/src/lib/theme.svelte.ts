@@ -14,7 +14,7 @@ export const themes: ThemeInfo[] = [
 const STORAGE_KEY = 'evermeet-theme';
 
 function createTheme() {
-	let current = $state<ThemeId>('default');
+	let current = $state<ThemeId>('luma');
 
 	function apply(id: ThemeId) {
 		current = id;
@@ -24,7 +24,7 @@ function createTheme() {
 
 	function load() {
 		const saved = localStorage.getItem(STORAGE_KEY) as ThemeId | null;
-		const id = saved && themes.find(t => t.id === saved) ? saved : 'default';
+		const id = saved && themes.find(t => t.id === saved) ? saved : 'luma';
 		apply(id);
 	}
 

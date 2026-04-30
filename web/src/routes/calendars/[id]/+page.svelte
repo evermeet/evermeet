@@ -11,10 +11,27 @@
 	let loading = $state(true);
 	let error = $state('');
 	let subscribing = $state(false);
+let hostProfiles = $state<Record<string, { displayName: string; avatar: string }>>({});
 
 	onMount(async () => {
 		try {
 			cal = await api.calendars.get(id);
+			const uniqueHosts = Array.from(
+				new Set((cal.events ?? []).flatMap((ev) => ev.hosts ?? []))
+			);
+			if (uniqueHosts.length > 0) {
+				const entries = await Promise.all(
+					uniqueHosts.map(async (did) => {
+						try {
+							const user = await api.users.get(did);
+							return [did, { displayName: user.display_name || did, avatar: user.avatar || '' }] as const;
+						} catch {
+							return [did, { displayName: did, avatar: '' }] as const;
+						}
+					})
+				);
+				hostProfiles = Object.fromEntries(entries);
+			}
 		} catch (e: any) {
 			error = e.message;
 		} finally {
@@ -147,6 +164,20 @@
 										<div class="event-main">
 											<div class="event-time">{d.time}</div>
 											<div class="event-title">{ev.title}</div>
+											{#if ev.hosts && ev.hosts.length > 0}
+												<div class="event-hosts">
+													<div class="host-avatars">
+														{#each ev.hosts.slice(0, 4) as did}
+															<Avatar src={hostProfiles[did]?.avatar} did={did} size={24} />
+														{/each}
+													</div>
+													<span>
+														By {ev.hosts
+															.map((did) => hostProfiles[did]?.displayName || did)
+															.join(', ')}
+													</span>
+												</div>
+											{/if}
 											{#if ev.location}
 												<div class="event-location">
 													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -301,13 +332,31 @@
 	}
 	.event-card:hover { border-color: var(--border-input); background: var(--bg-raised); }
 	.event-main { display: flex; flex-direction: column; gap: 0.25rem; }
-	.event-time { font-size: 0.8rem; color: var(--text-muted); }
-	.event-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+	.event-time { font-size: 0.92rem; color: var(--text-muted); }
+	.event-title { font-size: 1.18rem; font-weight: 700; color: var(--text); }
+	.event-hosts {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.95rem;
+		color: var(--text-muted);
+		margin-top: 0.2rem;
+	}
+	.host-avatars {
+		display: flex;
+		align-items: center;
+	}
+	.host-avatars :global(.avatar-box) {
+		border: 2px solid var(--bg-card);
+	}
+	.host-avatars :global(.avatar-box:not(:first-child)) {
+		margin-left: -8px;
+	}
 	.event-location {
 		display: flex;
 		align-items: center;
 		gap: 0.3rem;
-		font-size: 0.8rem;
+		font-size: 0.95rem;
 		color: var(--text-muted);
 		margin-top: 0.1rem;
 	}

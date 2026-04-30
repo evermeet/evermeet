@@ -232,6 +232,7 @@ func (s *Server) handleGetCalendar(w http.ResponseWriter, r *http.Request) {
 		EndsAt   string `json:"ends_at,omitempty"`
 		Location any    `json:"location,omitempty"`
 		CoverURL string `json:"cover_url,omitempty"`
+		Hosts    []string `json:"hosts,omitempty"`
 	}
 
 	eventList := make([]eventSummary, 0, len(events))
@@ -255,6 +256,21 @@ func (s *Server) handleGetCalendar(w http.ResponseWriter, r *http.Request) {
 		}
 		if v, ok := raw["cover_url"].(string); ok {
 			es.CoverURL = v
+		}
+		if gov, ok := raw["governance"].(map[string]any); ok {
+			if owners, ok := gov["owners"].([]any); ok {
+				hosts := make([]string, 0, len(owners))
+				for _, owner := range owners {
+					ownerMap, ok := owner.(map[string]any)
+					if !ok {
+						continue
+					}
+					if did, ok := ownerMap["did"].(string); ok && did != "" {
+						hosts = append(hosts, did)
+					}
+				}
+				es.Hosts = hosts
+			}
 		}
 		eventList = append(eventList, es)
 	}

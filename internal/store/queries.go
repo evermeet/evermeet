@@ -290,6 +290,21 @@ func (d *DB) ListCurrentEventStates(ctx context.Context, limit, offset int) ([]*
 	return states, rows.Err()
 }
 
+func (d *DB) DeleteEvent(ctx context.Context, id string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`DELETE FROM rsvp_envelopes WHERE event_id = ?`, id); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(`DELETE FROM event_states WHERE id = ?`, id); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(`DELETE FROM event_founding WHERE id = ?`, id); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 // ---- Calendar records ----
 
 type CalendarFounding struct {
@@ -388,6 +403,15 @@ func (d *DB) ReplaceCalendarOwners(ctx context.Context, calendarID string, dids 
 		}
 		return nil
 	})
+}
+
+func (d *DB) IsCalendarOwner(ctx context.Context, calendarID, did string) (bool, error) {
+	var count int
+	err := d.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM calendar_owners WHERE calendar_id = ? AND did = ?`,
+		calendarID, did,
+	).Scan(&count)
+	return count > 0, err
 }
 
 func (d *DB) ListOwnedCalendars(ctx context.Context, did string) ([]*CalendarState, error) {

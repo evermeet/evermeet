@@ -85,6 +85,7 @@ type Fields struct {
 	EndsAt       *time.Time
 	Location     *Location
 	CalendarID   *string
+	Owners       []GovernanceOwner
 	Visibility   string
 	RSVPLimit    int
 	RSVPApproval string
@@ -95,10 +96,6 @@ type Fields struct {
 // New creates a new founding doc and signed initial mutable state.
 // Returns (foundingDoc, eventID, mutableState, stateHash, error).
 func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
-	if f.CalendarID == nil || *f.CalendarID == "" {
-		return nil, "", nil, "", fmt.Errorf("calendar_id is required")
-	}
-
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, "", nil, "", fmt.Errorf("nonce: %w", err)
@@ -134,6 +131,15 @@ func Update(current *MutableState, currentHash string, signerDID string, priv ed
 	// Verify the signer is an authorized owner.
 	if !isOwner(current.Governance, signerDID) {
 		return nil, "", fmt.Errorf("signer %s is not an owner of event %s", signerDID, current.ID)
+	}
+	if f.Owners == nil {
+		f.Owners = current.Governance.Owners
+	}
+	if len(f.Owners) == 0 {
+		return nil, "", fmt.Errorf("at least one owner is required")
+	}
+	if !isOwner(Governance{Owners: f.Owners}, signerDID) {
+		return nil, "", fmt.Errorf("signer %s must remain an owner", signerDID)
 	}
 
 	state, hash, err := buildState(current.ID, currentHash, signerDID, priv, f, now)
@@ -199,6 +205,10 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 	if f.EndsAt != nil {
 		endsAt = f.EndsAt.UTC().Format(time.RFC3339)
 	}
+	owners := f.Owners
+	if len(owners) == 0 {
+		owners = []GovernanceOwner{{DID: signerDID, Role: "owner"}}
+	}
 
 	state := &MutableState{
 		ID:          id,
@@ -213,7 +223,7 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 		Location:    f.Location,
 		Governance: Governance{
 			Threshold: 1,
-			Owners:    []GovernanceOwner{{DID: signerDID, Role: "owner"}},
+			Owners:    owners,
 		},
 		RSVP:       rsvp,
 		Visibility: vis,

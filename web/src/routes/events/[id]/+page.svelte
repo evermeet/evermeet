@@ -10,6 +10,7 @@
 	let founding = $state<any>(null);
 let calendar = $state<CalendarDetail | null>(null);
 let currentHash = $state('');
+	let hosts = $state<{ did: string; displayName: string; avatar: string }[]>([]);
 	let loading = $state(true);
 	let error = $state('');
 
@@ -37,6 +38,32 @@ let currentHash = $state('');
 					calendar = null;
 				}
 			}
+
+			const hostDIDs = Array.from(
+				new Set([
+					...(Array.isArray(event.governance?.owners)
+						? event.governance.owners
+								.map((o: any) => o?.did)
+								.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+						: []),
+					...(event.organizer ? [event.organizer] : [])
+				])
+			);
+			const hostProfiles = await Promise.all(
+				hostDIDs.map(async (did) => {
+					try {
+						const profile = await api.users.get(did);
+						return {
+							did,
+							displayName: profile.display_name || did,
+							avatar: profile.avatar || ''
+						};
+					} catch {
+						return { did, displayName: did, avatar: '' };
+					}
+				})
+			);
+			hosts = hostProfiles;
 
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
@@ -125,12 +152,23 @@ let currentHash = $state('');
 				<!-- Hosted By -->
 				<div class="side-section">
 					<p class="side-label">Hosted By</p>
-					<div class="host-row">
-						<Avatar did={event.organizer} size={36} />
-						<a href="/u/{event.organizer}" class="host-name">
-							{event.organizer.slice(0, 20)}…
-						</a>
-					</div>
+					{#if hosts.length > 0}
+						<div class="host-list">
+							{#each hosts as host}
+								<div class="host-row">
+									<Avatar src={host.avatar} did={host.did} size={36} />
+									<a href="/u/{host.did}" class="host-name">{host.displayName}</a>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="host-row">
+							<Avatar did={event.organizer} size={36} />
+							<a href="/u/{event.organizer}" class="host-name">
+								{event.organizer.slice(0, 20)}…
+							</a>
+						</div>
+					{/if}
 				</div>
 
 				<!-- Going -->
@@ -328,6 +366,11 @@ let currentHash = $state('');
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+	}
+	.host-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
 	}
 	.host-name {
 		font-weight: 600;

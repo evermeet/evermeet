@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/events"
@@ -143,6 +144,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		EndsAt       string           `json:"ends_at"`
 		Location     *events.Location `json:"location"`
 		CalendarID   *string          `json:"calendar_id"`
+		Owners       []string         `json:"owners"`
 		Visibility   string           `json:"visibility"`
 		RSVPLimit    int              `json:"rsvp_limit"`
 		RSVPApproval string           `json:"rsvp_approval"`
@@ -160,18 +162,30 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusBadRequest, "starts_at required")
 		return
 	}
-	if req.CalendarID == nil || *req.CalendarID == "" {
-		jsonErr(w, http.StatusBadRequest, "calendar_id required")
-		return
-	}
-	calendar, err := s.db.GetCurrentCalendarState(ctx, *req.CalendarID)
-	if err != nil {
-		jsonErr(w, http.StatusInternalServerError, "check calendar failed")
-		return
-	}
-	if calendar == nil {
-		jsonErr(w, http.StatusBadRequest, "calendar not found")
-		return
+	var calendarID *string
+	if req.CalendarID != nil {
+		trimmed := strings.TrimSpace(*req.CalendarID)
+		if trimmed != "" {
+			calendarID = &trimmed
+			calendar, err := s.db.GetCurrentCalendarState(ctx, trimmed)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "check calendar failed")
+				return
+			}
+			if calendar == nil {
+				jsonErr(w, http.StatusBadRequest, "calendar not found")
+				return
+			}
+			isOwner, err := s.db.IsCalendarOwner(ctx, trimmed, did)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "check calendar ownership failed")
+				return
+			}
+			if !isOwner {
+				jsonErr(w, http.StatusForbidden, "you are not an owner of this calendar")
+				return
+			}
+		}
 	}
 
 	startsAt, err := time.Parse(time.RFC3339, req.StartsAt)
@@ -186,7 +200,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		CoverURL:     req.CoverURL,
 		StartsAt:     startsAt,
 		Location:     req.Location,
-		CalendarID:   req.CalendarID,
+		CalendarID:   calendarID,
 		Visibility:   req.Visibility,
 		RSVPLimit:    req.RSVPLimit,
 		RSVPApproval: req.RSVPApproval,
@@ -275,6 +289,8 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		StartsAt     string           `json:"starts_at"`
 		EndsAt       string           `json:"ends_at"`
 		Location     *events.Location `json:"location"`
+		CalendarID   *string          `json:"calendar_id"`
+		Owners       []string         `json:"owners"`
 		Visibility   string           `json:"visibility"`
 		RSVPLimit    int              `json:"rsvp_limit"`
 		RSVPApproval string           `json:"rsvp_approval"`
@@ -291,6 +307,50 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	nextCalendar := ms.Calendar
+	if req.CalendarID != nil {
+		trimmed := strings.TrimSpace(*req.CalendarID)
+		if trimmed == "" {
+			nextCalendar = nil
+		} else {
+			calendar, err := s.db.GetCurrentCalendarState(ctx, trimmed)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "check calendar failed")
+				return
+			}
+			if calendar == nil {
+				jsonErr(w, http.StatusBadRequest, "calendar not found")
+				return
+			}
+			isOwner, err := s.db.IsCalendarOwner(ctx, trimmed, did)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "check calendar ownership failed")
+				return
+			}
+			if !isOwner {
+				jsonErr(w, http.StatusForbidden, "you are not an owner of this calendar")
+				return
+			}
+			nextCalendar = &trimmed
+		}
+	}
+	var owners []events.GovernanceOwner
+	if req.Owners != nil {
+		seen := map[string]struct{}{}
+		owners = make([]events.GovernanceOwner, 0, len(req.Owners))
+		for _, owner := range req.Owners {
+			owner = strings.TrimSpace(owner)
+			if owner == "" {
+				continue
+			}
+			if _, ok := seen[owner]; ok {
+				continue
+			}
+			seen[owner] = struct{}{}
+			owners = append(owners, events.GovernanceOwner{DID: owner, Role: "owner"})
+		}
+	}
+
 	f := events.Fields{
 		Title:        req.Title,
 		Description:  req.Description,
@@ -301,7 +361,8 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		RSVPLimit:    req.RSVPLimit,
 		RSVPApproval: req.RSVPApproval,
 		Tags:         req.Tags,
-		CalendarID:   ms.Calendar,
+		CalendarID:   nextCalendar,
+		Owners:       owners,
 	}
 	if req.EndsAt != "" {
 		t, err := time.Parse(time.RFC3339, req.EndsAt)
@@ -354,6 +415,35 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		"hash":  newHash,
 		"state": json.RawMessage(statePayload),
 	})
+}
+
+func (s *Server) handleDeleteEvent(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	ctx := r.Context()
+
+	current, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || current == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+
+	var ms events.MutableState
+	if err := json.Unmarshal([]byte(current.Payload), &ms); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "parse current state")
+		return
+	}
+	if ms.Organizer != did {
+		jsonErr(w, http.StatusForbidden, "only organizer can delete event")
+		return
+	}
+
+	if err := s.db.DeleteEvent(ctx, id); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "delete event failed")
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {

@@ -115,7 +115,7 @@ let owners = $state<string[]>([]);
 
 			<div class="field">
 				<div class="owners-header">
-					<label>Owners (DIDs)</label>
+					<p class="owners-title">Owners (DIDs)</p>
 					<button type="button" class="btn-add-owner" onclick={addOwner}>+ Add owner</button>
 				</div>
 				<div class="owner-list">
@@ -171,6 +171,12 @@ let owners = $state<string[]>([]);
 
 	.actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; }
 	.owners-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+	.owners-title {
+		margin: 0;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--text-label);
+	}
 	.owner-list { display: flex; flex-direction: column; gap: 0.5rem; }
 	.owner-row { display: flex; gap: 0.5rem; }
 	.btn-add-owner, .btn-remove-owner {

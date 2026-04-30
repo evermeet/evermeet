@@ -90,6 +90,10 @@ export const api = {
 				method: 'PUT',
 				body: JSON.stringify(data),
 			}),
+		delete: (id: string) =>
+			request<{ status: string }>(`/api/events/${id}`, {
+				method: 'DELETE',
+			}),
 		listRSVPs: (id: string) => request<any[]>(`/api/events/${id}/rsvps`),
 		rsvp: (id: string, data: { name: string; email: string; note?: string }) =>
 			request<{ status: string }>(`/api/events/${id}/rsvp`, {
@@ -130,6 +134,7 @@ export const api = {
 export interface Event {
 	id: string;
 	organizer: string;
+	calendar?: string;
 	title: string;
 	description?: string;
 	cover_url?: string;
@@ -178,6 +183,7 @@ export interface CalendarEvent {
 	ends_at?: string;
 	location?: { name: string; address?: string };
 	cover_url?: string;
+	hosts?: string[];
 }
 
 export interface CalendarInput {
@@ -195,6 +201,7 @@ export interface CreateEventInput {
 	cover_url?: string;
 	starts_at: string;
 	calendar_id?: string;
+	owners?: string[];
 	ends_at?: string;
 	location?: { name: string; address?: string };
 	visibility?: string;

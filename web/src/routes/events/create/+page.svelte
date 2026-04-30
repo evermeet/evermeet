@@ -20,10 +20,7 @@
 	onMount(async () => {
 		try {
 			const res = await api.calendars.list();
-			calendars = [...(res.owned ?? []), ...(res.subscribed ?? [])];
-			if (calendars.length > 0) {
-				calendarId = calendars[0].id;
-			}
+			calendars = res.owned ?? [];
 		} catch (e: any) {
 			error = e.message;
 		}
@@ -31,10 +28,6 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!calendarId) {
-			error = 'Please select a calendar';
-			return;
-		}
 		loading = true;
 		error = '';
 
@@ -97,14 +90,11 @@
 		<div class="grid">
 			<div class="field">
 				<label for="calendar">Calendar</label>
-				<select id="calendar" bind:value={calendarId} required>
-					{#if calendars.length === 0}
-						<option value="" disabled selected>No calendars available</option>
-					{:else}
-						{#each calendars as cal}
-							<option value={cal.id}>{cal.name}</option>
-						{/each}
-					{/if}
+				<select id="calendar" bind:value={calendarId}>
+					<option value="">Personal event (no calendar)</option>
+					{#each calendars as cal}
+						<option value={cal.id}>{cal.name}</option>
+					{/each}
 				</select>
 			</div>
 			<div class="field">

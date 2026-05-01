@@ -12,7 +12,6 @@ export const messages = {
 	'nav.signOut': 'Sign out',
 	'nav.exploreEvents': 'Explore events',
 	'nav.signIn': 'Sign In',
-	'nav.instanceStatus': 'Instance Status',
 	'footer.tagline': 'Evermeet - Decentralized Event Platform',
 	'user.anonymous': 'Anonymous',
 	'common.loading': 'Loading...',

@@ -469,6 +469,35 @@ func (d *DB) IsAdmin(ctx context.Context, did string) (bool, error) {
 	return exists != 0, nil
 }
 
+func (d *DB) CountAdminAccounts(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM admin_accounts`)
+}
+
+func (d *DB) CountUsers(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM users`)
+}
+
+func (d *DB) CountCurrentEvents(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM event_states WHERE is_current = 1`)
+}
+
+func (d *DB) CountCalendars(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM calendar_founding`)
+}
+
+func (d *DB) CountBlobs(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM blobs`)
+}
+
+func (d *DB) count(ctx context.Context, query string) (int, error) {
+	row := d.db.QueryRowContext(ctx, query)
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // ---- Event records ----
 
 type EventFounding struct {

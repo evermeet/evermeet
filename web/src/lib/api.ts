@@ -42,6 +42,9 @@ export const api = {
 				body: JSON.stringify(data),
 			}),
 	},
+	admin: {
+		overview: () => request<AdminOverview>('/api/admin/overview'),
+	},
 	blobs: {
 		upload: async (file: File): Promise<{ hash: string; url: string }> => {
 			const form = new FormData();
@@ -197,9 +200,6 @@ export const api = {
 			request<{ subscribed: boolean }>(`/api/calendars/${id}/subscribe`, { method: 'DELETE' }),
 	},
 	node: {
-		status: () => request<any>('/api/instance/status'),
-	},
-	instance: {
 		status: () => request<any>('/api/instance/status'),
 	},
 	users: {
@@ -402,6 +402,31 @@ export interface AuthUser {
 	auth_kind: 'local' | 'remote';
 	home_instance_url: string;
 	is_admin?: boolean;
+}
+
+export interface AdminOverview {
+	instance_id: string;
+	base_url: string;
+	version: string;
+	started_at: string;
+	uptime: string;
+	counts: {
+		admins: number;
+		users: number;
+		events: number;
+		calendars: number;
+		blobs: number;
+	};
+	p2p: {
+		id?: string;
+		addresses?: string[];
+		peers?: Array<{ id: string; addresses?: string[] }>;
+		[key: string]: any;
+	};
+	config: {
+		node: Record<string, any>;
+		p2p: Record<string, any>;
+	};
 }
 
 export interface AuthMethods {

@@ -90,6 +90,12 @@
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
 				{intl.t('nav.discover')}
 			</a>
+			{#if auth.user.is_admin}
+				<a href="/admin" class="nav-item">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v5c0 5-3 9-7 11-4-2-7-6-7-11V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+					Admin
+				</a>
+			{/if}
 		</div>
 	{/if}
 
@@ -149,8 +155,6 @@
 
 <footer>
 	<div class="footer-links">
-		<a href="/instance">{intl.t('nav.instanceStatus')}</a>
-		<span>•</span>
 		<span class="version">v0.1.0-alpha</span>
 		<span>•</span>
 		<a href="https://github.com/evermeet/evermeet" target="_blank" rel="noopener" class="footer-source">

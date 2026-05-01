@@ -113,6 +113,7 @@ func (s *Server) Router() http.Handler {
 	// Auth
 	r.Get("/api/setup/status", s.handleSetupStatus)
 	r.Post("/api/setup/complete", s.handleSetupComplete)
+	r.Get("/api/admin/overview", s.requireAdmin(s.handleAdminOverview))
 	r.Post("/api/auth/magic-link", s.handleMagicLinkRequest)
 	r.Post("/api/auth/magic-link/status", s.handleMagicLinkStatus)
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)
@@ -221,6 +222,21 @@ func (s *Server) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+func (s *Server) requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return s.requireAuth(func(w http.ResponseWriter, r *http.Request) {
+		ok, err := s.db.IsAdmin(r.Context(), authDID(r))
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "admin lookup failed")
+			return
+		}
+		if !ok {
+			jsonErr(w, http.StatusForbidden, "admin access required")
+			return
+		}
+		next(w, r)
+	})
 }
 
 // StartDHTHeartbeat starts the background goroutine that re-publishes all

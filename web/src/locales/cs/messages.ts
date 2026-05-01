@@ -12,7 +12,6 @@ export const messages = {
 	'nav.signOut': 'Odhlásit se',
 	'nav.exploreEvents': 'Prozkoumat události',
 	'nav.signIn': 'Přihlásit se',
-	'nav.instanceStatus': 'Stav instance',
 	'footer.tagline': 'Evermeet - decentralizovaná platforma pro události',
 	'user.anonymous': 'Anonym',
 	'common.loading': 'Načítám...',

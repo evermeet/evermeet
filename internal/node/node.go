@@ -12,10 +12,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/evermeet/evermeet/internal/routing"
 	"github.com/evermeet/evermeet/internal/store"
+	"github.com/ipfs/boxo/ipns"
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	record "github.com/libp2p/go-libp2p-record"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -29,7 +32,8 @@ const (
 	EventFetchProtocol = "/evermeet/event-fetch/1.0.0"
 	UserFetchProtocol  = "/evermeet/user-fetch/1.0.0"
 
-	dhtNamespace = "evermeet"
+	dhtProtocolPrefix = "/evermeet"
+	dhtNamespace      = "evermeet"
 )
 
 type Node struct {
@@ -78,7 +82,13 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir string) (*Node, er
 	// mDNS-only bootstrap for now — no hardcoded bootstrap peers.
 	kad, err := dht.New(ctx, h,
 		dht.Mode(dht.ModeServer),
+		dht.ProtocolPrefix(dhtProtocolPrefix),
 		dht.BootstrapPeers(), // empty — mDNS will populate routing table
+		dht.Validator(record.NamespacedValidator{
+			"pk":         record.PublicKeyValidator{},
+			"ipns":       ipns.Validator{KeyBook: h.Peerstore()},
+			dhtNamespace: evermeetValidator{},
+		}),
 	)
 	if err != nil {
 		h.Close()
@@ -148,6 +158,41 @@ func (n *Node) DHTPublish(ctx context.Context, key []byte, value []byte) error {
 func (n *Node) DHTPeerLookup(ctx context.Context, key []byte) ([]byte, error) {
 	hexKey := hex.EncodeToString(key)
 	return n.dht.GetValue(ctx, "/evermeet/"+hexKey)
+}
+
+type evermeetValidator struct{}
+
+func (evermeetValidator) Validate(key string, value []byte) error {
+	if _, _, err := record.SplitKey(key); err != nil {
+		return err
+	}
+	rec, err := routing.UnmarshalRecord(value)
+	if err != nil {
+		return err
+	}
+	if rec.HomeInstanceURL == "" || rec.Timestamp <= 0 || rec.Sig == "" {
+		return fmt.Errorf("invalid evermeet routing record")
+	}
+	return nil
+}
+
+func (evermeetValidator) Select(key string, values [][]byte) (int, error) {
+	var selected int
+	var selectedTimestamp int64 = -1
+	for i, value := range values {
+		rec, err := routing.UnmarshalRecord(value)
+		if err != nil {
+			continue
+		}
+		if rec.Timestamp > selectedTimestamp {
+			selected = i
+			selectedTimestamp = rec.Timestamp
+		}
+	}
+	if selectedTimestamp < 0 {
+		return 0, fmt.Errorf("no valid evermeet routing records")
+	}
+	return selected, nil
 }
 
 func (n *Node) joinEvents() error {

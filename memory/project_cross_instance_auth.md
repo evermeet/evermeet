@@ -15,7 +15,7 @@ type: project
 - **Bootstrap:** mDNS-only to start. No hardcoded bootstrap peers yet.
 - **return_to validation:** Foreign instance signs the return_to URL with its instance Ed25519 key. Home instance verifies before issuing delegation.
 - **Token format:** Simple JSON envelope signed with Ed25519. NOT JWT. Consistent with rest of codebase.
-- **Email hash:** `blake3("evermeet-home-routing-v1:" + email)` hex-encoded. Public domain separator, not a secret.
+- **Email routing key:** `argon2id(normalized_email, "evermeet-home-routing-v1")` hex-encoded. Public domain separator, high-cost KDF to slow dictionary enumeration.
 - **DHT record value:** `{homeInstanceURL, timestamp}` signed by the **instance** Ed25519 key (not user key).
 - **Delegation token signed by:** the **user's** Ed25519 key (unlocked during local auth on home instance).
 

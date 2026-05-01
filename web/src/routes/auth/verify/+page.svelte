@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { intl } from '$lib/i18n.svelte.js';
 
-	let status = $state<'verifying' | 'error'>('verifying');
+	let status = $state<'verifying' | 'approved' | 'error'>('verifying');
 	let error = $state('');
 
 	onMount(async () => {
-		const token = new URLSearchParams(window.location.search).get('token');
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('approved') === '1') {
+			status = 'approved';
+			return;
+		}
+		const token = params.get('token');
 		if (!token) {
 			status = 'error';
 			error = 'Missing token.';
@@ -21,7 +26,10 @@
 
 <main>
 	{#if status === 'verifying'}
-		<p>Signing you in…</p>
+		<p>{intl.t('auth.lookingUp')}</p>
+	{:else if status === 'approved'}
+		<h1>{intl.t('auth.magicLinkApproved')}</h1>
+		<p>{intl.t('auth.magicLinkApprovedHelp')}</p>
 	{:else}
 		<p class="error">{error}</p>
 		<a href="/auth/login">Try again</a>

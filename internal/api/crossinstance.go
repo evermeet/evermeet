@@ -30,48 +30,95 @@ import (
 // Body: {"email": "user@example.com", "event_id": "optional"}
 // Response: {"home_instance_url": "https://...", "nonce": "..."}
 func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
-	if s.node == nil {
-		jsonErr(w, http.StatusServiceUnavailable, "p2p not available")
-		return
-	}
-
 	var req struct {
+		Type    string `json:"type"`
 		Email   string `json:"email"`
+		ChainID string `json:"chain_id"`
+		Address string `json:"address"`
 		EventID string `json:"event_id"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Email == "" {
-		jsonErr(w, http.StatusBadRequest, "email required")
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid request")
 		return
 	}
 
-	// 1. Compute email hash and query DHT.
-	emailHash := routing.EmailHash(req.Email)
+	// 1. Compute identity hash and query DHT.
+	var identityHash []byte
+	var localHome bool
+	switch req.Type {
+	case "", "email":
+		if req.Email == "" {
+			jsonErr(w, http.StatusBadRequest, "email required")
+			return
+		}
+		identityHash = routing.EmailHash(req.Email)
+		existing, err := s.db.GetUserPrivateByEmail(r.Context(), req.Email)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "local identity lookup failed")
+			return
+		}
+		localHome = existing != nil
+	case "ethereum":
+		if req.ChainID == "" || req.Address == "" {
+			jsonErr(w, http.StatusBadRequest, "chain_id and address required")
+			return
+		}
+		address, err := normalizeEthereumAddress(req.Address)
+		if err != nil {
+			jsonErr(w, http.StatusBadRequest, "invalid ethereum address")
+			return
+		}
+		identityHash = routing.EthereumHash(req.ChainID, address)
+		existing, err := s.db.GetUserPrivateBySIWE(r.Context(), req.ChainID, address)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "local identity lookup failed")
+			return
+		}
+		localHome = existing != nil
+	default:
+		jsonErr(w, http.StatusBadRequest, "unsupported identity type")
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 
-	data, err := s.node.DHTPeerLookup(ctx, emailHash)
-	if err != nil {
-		// Not found in DHT — could be a new user or a peer-less network.
-		jsonErr(w, http.StatusNotFound, "home instance not found for this email")
-		return
-	}
+	var rec *routing.HomeRecord
+	var err error
+	if localHome {
+		rec, err = routing.NewRecord(s.baseURL, s.instancePriv)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "local home record failed")
+			return
+		}
+	} else {
+		if s.node == nil {
+			jsonErr(w, http.StatusServiceUnavailable, "p2p not available")
+			return
+		}
+		data, err := s.node.DHTPeerLookup(ctx, identityHash)
+		if err != nil {
+			// Not found in DHT — could be a new user or a peer-less network.
+			jsonErr(w, http.StatusNotFound, "home instance not found for this identity")
+			return
+		}
 
-	// 2. Unmarshal the record.
-	rec, err := routing.UnmarshalRecord(data)
-	if err != nil {
-		jsonErr(w, http.StatusBadGateway, "malformed home record")
-		return
+		// 2. Unmarshal the record.
+		rec, err = routing.UnmarshalRecord(data)
+		if err != nil {
+			jsonErr(w, http.StatusBadGateway, "malformed home record")
+			return
+		}
 	}
 
 	// 3. Fetch the home instance's public key and verify the record.
-	instancePub, err := fetchInstancePubKey(ctx, rec.HomeInstanceURL)
+	instanceMeta, err := fetchInstanceMetadata(ctx, rec.HomeInstanceURL)
 	if err != nil {
 		s.log.Printf("resolve-home: fetch instance key %s: %v", rec.HomeInstanceURL, err)
 		jsonErr(w, http.StatusBadGateway, "could not verify home instance")
 		return
 	}
-	if err := routing.VerifyRecord(rec, instancePub); err != nil {
+	if err := routing.VerifyRecord(rec, instanceMeta.PublicKey); err != nil {
 		s.log.Printf("resolve-home: invalid record signature from %s: %v", rec.HomeInstanceURL, err)
 		jsonErr(w, http.StatusBadGateway, "home record signature invalid")
 		return
@@ -118,12 +165,30 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 		"return_to":         s.baseURL,
 		"foreign_sig":       foreignSig,
 		"delegate_url":      delegateURL,
+		"instance": map[string]any{
+			"id":         instanceMeta.ID,
+			"public_key": base64.RawURLEncoding.EncodeToString(instanceMeta.PublicKey),
+			"verified":   true,
+		},
 	})
+}
+
+type instanceMetadata struct {
+	ID        string
+	PublicKey ed25519.PublicKey
 }
 
 // fetchInstancePubKey fetches and returns the Ed25519 public key from a
 // remote instance's /.well-known/evermeet-node-key endpoint.
 func fetchInstancePubKey(ctx context.Context, instanceURL string) (ed25519.PublicKey, error) {
+	meta, err := fetchInstanceMetadata(ctx, instanceURL)
+	if err != nil {
+		return nil, err
+	}
+	return meta.PublicKey, nil
+}
+
+func fetchInstanceMetadata(ctx context.Context, instanceURL string) (*instanceMetadata, error) {
 	url := strings.TrimRight(instanceURL, "/") + "/.well-known/evermeet-node-key"
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -144,7 +209,8 @@ func fetchInstancePubKey(ctx context.Context, instanceURL string) (ed25519.Publi
 	}
 
 	var payload struct {
-		PublicKey []byte `json:"public_key"` // raw marshaled libp2p key bytes (base64 by JSON)
+		InstanceID string `json:"instance_id"`
+		PublicKey  []byte `json:"public_key"` // raw Ed25519 key bytes (base64 by JSON)
 	}
 	if err := json.Unmarshal(body, &payload); err != nil {
 		return nil, fmt.Errorf("parse well-known: %w", err)
@@ -156,7 +222,7 @@ func fetchInstancePubKey(ctx context.Context, instanceURL string) (ed25519.Publi
 	if err != nil {
 		return nil, fmt.Errorf("extract ed25519 key: %w", err)
 	}
-	return pub, nil
+	return &instanceMetadata{ID: payload.InstanceID, PublicKey: pub}, nil
 }
 
 // extractEd25519PubKey extracts a raw ed25519.PublicKey from libp2p's
@@ -244,7 +310,7 @@ type SignedDelegationToken struct {
 func (s *Server) handleCreateDelegation(w http.ResponseWriter, r *http.Request) {
 	did := authDID(r)
 	priv := authPrivKey(r)
-	if did == "" || len(priv) == 0 {
+	if did == "" {
 		jsonErr(w, http.StatusUnauthorized, "authentication required")
 		return
 	}
@@ -288,9 +354,16 @@ func (s *Server) handleCreateDelegation(w http.ResponseWriter, r *http.Request) 
 		Nonce:   req.Nonce,
 		EventID: req.EventID,
 	}
-	sig, err := identity.Sign(priv, token)
-	if err != nil {
-		jsonErr(w, http.StatusInternalServerError, "token signing failed")
+	var sig string
+	if len(priv) > 0 {
+		var err error
+		sig, err = identity.Sign(priv, token)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "token signing failed")
+			return
+		}
+	} else {
+		jsonErr(w, http.StatusUnauthorized, "authentication required")
 		return
 	}
 

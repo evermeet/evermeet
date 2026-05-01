@@ -91,6 +91,7 @@ func (s *Server) Router() http.Handler {
 
 	// Auth
 	r.Post("/api/auth/magic-link", s.handleMagicLinkRequest)
+	r.Post("/api/auth/magic-link/status", s.handleMagicLinkStatus)
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)
 	r.Post("/api/auth/logout", s.handleLogout)
 	r.Get("/api/auth/me", s.handleMe)
@@ -104,6 +105,8 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/auth/passkey/register/finish", s.requireAuth(s.handlePasskeyRegisterFinish))
 	r.Post("/api/auth/passkey/login/start", s.handlePasskeyLoginStart)
 	r.Post("/api/auth/passkey/login/finish", s.handlePasskeyLoginFinish)
+	r.Post("/api/auth/siwe/start", s.handleSIWEStart)
+	r.Post("/api/auth/siwe/finish", s.handleSIWEFinish)
 
 	// Calendars
 	r.Get("/api/calendars", s.requireAuth(s.handleListCalendars))
@@ -198,6 +201,43 @@ func (s *Server) StartDHTHeartbeat(ctx context.Context) {
 	s.dhtPublisher.StartHeartbeat(ctx, 12*time.Hour, func(ctx context.Context) ([]string, error) {
 		return s.db.GetAllUserEmails(ctx)
 	})
+	go s.startSIWEDHTHeartbeat(ctx, 12*time.Hour)
+}
+
+func (s *Server) startSIWEDHTHeartbeat(ctx context.Context, interval time.Duration) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(30 * time.Second):
+	}
+	s.publishSIWERouting(ctx)
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.publishSIWERouting(ctx)
+		}
+	}
+}
+
+func (s *Server) publishSIWERouting(ctx context.Context) {
+	identities, err := s.db.GetLocalSIWEIdentities(ctx)
+	if err != nil {
+		s.log.Printf("dht siwe identities: %v", err)
+		return
+	}
+	for _, identity := range identities {
+		if ctx.Err() != nil {
+			return
+		}
+		if err := s.dhtPublisher.PublishEthereum(ctx, identity.ChainID, identity.Address); err != nil {
+			s.log.Printf("dht publish siwe %s:%s: %v", identity.ChainID, identity.Address, err)
+		}
+	}
 }
 
 // homeHost returns the canonical instance address: "instanceID@hostname".

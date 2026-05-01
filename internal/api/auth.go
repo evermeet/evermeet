@@ -35,8 +35,10 @@ func (s *Server) handleMagicLinkRequest(w http.ResponseWriter, r *http.Request) 
 	_ = priv
 
 	token := randomHex(32)
+	pollToken := randomHex(32)
 	ml := &store.MagicLink{
 		Token:     token,
+		PollToken: pollToken,
 		Email:     req.Email,
 		DID:       did,
 		ExpiresAt: time.Now().Add(15 * time.Minute),
@@ -55,7 +57,7 @@ func (s *Server) handleMagicLinkRequest(w http.ResponseWriter, r *http.Request) 
 		s.log.Printf("MAGIC LINK (dev): %s", verifyURL)
 	}
 
-	jsonOK(w, map[string]string{"status": "sent"})
+	jsonOK(w, map[string]string{"status": "sent", "poll_token": pollToken})
 }
 
 func (s *Server) handleMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
@@ -67,38 +69,98 @@ func (s *Server) handleMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	ml, err := s.db.GetMagicLink(ctx, token)
-	if err != nil || ml == nil || ml.Used || time.Now().After(ml.ExpiresAt) {
+	if err != nil || ml == nil || time.Now().After(ml.ExpiresAt) {
 		jsonErr(w, http.StatusUnauthorized, "invalid or expired token")
 		return
 	}
 
-	if err := s.db.MarkMagicLinkUsed(ctx, token); err != nil {
+	if !ml.Used {
+		if err := s.db.MarkMagicLinkUsed(ctx, token); err != nil {
+			jsonErr(w, http.StatusInternalServerError, "internal error")
+			return
+		}
+	}
+	sess, err := s.ensureMagicLinkSession(ctx, ml)
+	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "internal error")
 		return
 	}
+	setSessionCookie(w, sess)
 
-	sessionToken := randomHex(32)
-	sess := &store.Session{
-		Token:     sessionToken,
-		DID:       ml.DID,
-		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
+	http.Redirect(w, r, "/auth/verify?approved=1", http.StatusFound)
+}
+
+func (s *Server) handleMagicLinkStatus(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		PollToken string `json:"poll_token"`
 	}
-	if err := s.db.InsertSession(ctx, sess); err != nil {
-		jsonErr(w, http.StatusInternalServerError, "internal error")
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.PollToken == "" {
+		jsonErr(w, http.StatusBadRequest, "poll_token required")
 		return
 	}
 
+	ctx := r.Context()
+	ml, err := s.db.GetMagicLinkByPollToken(ctx, req.PollToken)
+	if err != nil || ml == nil {
+		jsonErr(w, http.StatusNotFound, "magic link request not found")
+		return
+	}
+	if time.Now().After(ml.ExpiresAt) {
+		jsonErr(w, http.StatusUnauthorized, "magic link expired")
+		return
+	}
+	if !ml.Used {
+		jsonOK(w, map[string]string{"status": "pending"})
+		return
+	}
+
+	sess, err := s.ensureMagicLinkSession(ctx, ml)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	setSessionCookie(w, sess)
+
+	jsonOK(w, map[string]string{"status": "signed_in"})
+}
+
+func (s *Server) ensureMagicLinkSession(ctx context.Context, ml *store.MagicLink) (*store.Session, error) {
+	sessionToken := ml.SessionToken
+	if sessionToken == "" {
+		sessionToken = randomHex(32)
+		sess := &store.Session{
+			Token:     sessionToken,
+			DID:       ml.DID,
+			CreatedAt: time.Now(),
+			ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
+		}
+		if err := s.db.InsertSession(ctx, sess); err != nil {
+			return nil, err
+		}
+		if ml.PollToken != "" {
+			if err := s.db.SetMagicLinkSession(ctx, ml.PollToken, sessionToken); err != nil {
+				return nil, err
+			}
+		}
+		return sess, nil
+	}
+
+	sess, err := s.db.GetSession(ctx, sessionToken)
+	if err != nil || sess == nil {
+		return nil, fmt.Errorf("magic link session missing")
+	}
+	return sess, nil
+}
+
+func setSessionCookie(w http.ResponseWriter, sess *store.Session) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session",
-		Value:    sessionToken,
+		Value:    sess.Token,
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  sess.ExpiresAt,
 	})
-
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
@@ -171,8 +233,8 @@ func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.node != nil {
-		if err := s.node.BroadcastUserProfile(user, authPrivKey(r)); err != nil {
+	if priv := authPrivKey(r); s.node != nil && len(priv) > 0 {
+		if err := s.node.BroadcastUserProfile(user, priv); err != nil {
 			s.log.Printf("broadcast profile: %v", err)
 		}
 	}

@@ -7,6 +7,78 @@ import (
 	"time"
 )
 
+// ---- SIWE nonces ----
+
+type SIWENonce struct {
+	Nonce     string
+	Address   string
+	ChainID   string
+	CreatedAt time.Time
+	ExpiresAt time.Time
+	Used      bool
+}
+
+type SIWEIdentity struct {
+	ChainID string
+	Address string
+}
+
+func (d *DB) InsertSIWENonce(ctx context.Context, n *SIWENonce) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO siwe_nonces (nonce, address, chain_id, created_at, expires_at, used)
+			 VALUES (?, ?, ?, ?, ?, 0)`,
+			n.Nonce, n.Address, n.ChainID,
+			n.CreatedAt.UTC().Format(time.RFC3339),
+			n.ExpiresAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetSIWENonce(ctx context.Context, nonce string) (*SIWENonce, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT nonce, address, chain_id, created_at, expires_at, used
+		 FROM siwe_nonces WHERE nonce = ?`, nonce)
+	var n SIWENonce
+	var ca, ea string
+	var used int
+	if err := row.Scan(&n.Nonce, &n.Address, &n.ChainID, &ca, &ea, &used); err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("get siwe nonce: %w", err)
+	}
+	n.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	n.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	n.Used = used != 0
+	return &n, nil
+}
+
+func (d *DB) MarkSIWENonceUsed(ctx context.Context, nonce string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE siwe_nonces SET used = 1 WHERE nonce = ?`, nonce)
+		return err
+	})
+}
+
+func (d *DB) GetLocalSIWEIdentities(ctx context.Context) ([]SIWEIdentity, error) {
+	rows, err := d.db.QueryContext(ctx, `SELECT siwe_chain_id, siwe_address FROM user_private WHERE siwe_chain_id != '' AND siwe_address != ''`)
+	if err != nil {
+		return nil, fmt.Errorf("get local siwe identities: %w", err)
+	}
+	defer rows.Close()
+
+	var identities []SIWEIdentity
+	for rows.Next() {
+		var identity SIWEIdentity
+		if err := rows.Scan(&identity.ChainID, &identity.Address); err != nil {
+			return nil, err
+		}
+		identities = append(identities, identity)
+	}
+	return identities, rows.Err()
+}
+
 // ---- Cross-instance nonces ----
 
 type CrossInstanceNonce struct {
@@ -194,6 +266,8 @@ type UserPrivate struct {
 	Email         string
 	EmailVerified bool
 	GoogleSub     string
+	SIWEChainID   string
+	SIWEAddress   string
 	PasskeyIDs    string // JSON array
 	EncSigningKey string // AES-256-GCM encrypted Ed25519 seed
 }
@@ -201,16 +275,18 @@ type UserPrivate struct {
 func (d *DB) UpsertUserPrivate(ctx context.Context, p *UserPrivate) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
-			`INSERT INTO user_private (did, email, email_verified, google_sub, passkey_ids, enc_signing_key)
-			 VALUES (?, ?, ?, ?, ?, ?)
+			`INSERT INTO user_private (did, email, email_verified, google_sub, siwe_chain_id, siwe_address, passkey_ids, enc_signing_key)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			 ON CONFLICT(did) DO UPDATE SET
 			   email          = excluded.email,
 			   email_verified = excluded.email_verified,
 			   google_sub     = excluded.google_sub,
 			   passkey_ids    = excluded.passkey_ids,
-			   enc_signing_key = excluded.enc_signing_key`,
+			   enc_signing_key = excluded.enc_signing_key,
+			   siwe_chain_id  = COALESCE(NULLIF(excluded.siwe_chain_id, ''), siwe_chain_id),
+			   siwe_address   = COALESCE(NULLIF(excluded.siwe_address, ''), siwe_address)`,
 			p.DID, p.Email, boolInt(p.EmailVerified),
-			p.GoogleSub, p.PasskeyIDs, p.EncSigningKey,
+			p.GoogleSub, p.SIWEChainID, p.SIWEAddress, p.PasskeyIDs, p.EncSigningKey,
 		)
 		return err
 	})
@@ -218,12 +294,12 @@ func (d *DB) UpsertUserPrivate(ctx context.Context, p *UserPrivate) error {
 
 func (d *DB) GetUserPrivate(ctx context.Context, did string) (*UserPrivate, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
 		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
 		 FROM user_private WHERE did = ?`, did)
 	p := &UserPrivate{}
 	var ev int
-	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.SIWEChainID, &p.SIWEAddress, &p.PasskeyIDs, &p.EncSigningKey)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -236,12 +312,12 @@ func (d *DB) GetUserPrivate(ctx context.Context, did string) (*UserPrivate, erro
 
 func (d *DB) GetUserPrivateByEmail(ctx context.Context, email string) (*UserPrivate, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
 		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
-		 FROM user_private WHERE email = ?`, email)
+		 FROM user_private WHERE lower(trim(email)) = lower(trim(?))`, email)
 	p := &UserPrivate{}
 	var ev int
-	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.SIWEChainID, &p.SIWEAddress, &p.PasskeyIDs, &p.EncSigningKey)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -271,14 +347,39 @@ func (d *DB) GetAllUserEmails(ctx context.Context) ([]string, error) {
 	return emails, rows.Err()
 }
 
+func (d *DB) GetUserPrivateBySIWE(ctx context.Context, chainID, address string) (*UserPrivate, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
+		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
+		 FROM user_private WHERE siwe_chain_id = ? AND siwe_address = ?`, chainID, address)
+	p := &UserPrivate{}
+	var ev int
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.SIWEChainID, &p.SIWEAddress, &p.PasskeyIDs, &p.EncSigningKey)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.EmailVerified = ev != 0
+	return p, nil
+}
+
+func (d *DB) SetUserSIWE(ctx context.Context, did, chainID, address string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE user_private SET siwe_chain_id = ?, siwe_address = ? WHERE did = ?`, chainID, address, did)
+		return err
+	})
+}
+
 func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPrivate, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''),
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
 		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
 		 FROM user_private WHERE google_sub = ?`, sub)
 	p := &UserPrivate{}
 	var ev int
-	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.PasskeyIDs, &p.EncSigningKey)
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.SIWEChainID, &p.SIWEAddress, &p.PasskeyIDs, &p.EncSigningKey)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -716,18 +817,21 @@ func (d *DB) DeleteSession(ctx context.Context, token string) error {
 // ---- Magic links ----
 
 type MagicLink struct {
-	Token     string
-	Email     string
-	DID       string // empty if new user
-	ExpiresAt time.Time
-	Used      bool
+	Token        string
+	PollToken    string
+	SessionToken string
+	Email        string
+	DID          string // empty if new user
+	ExpiresAt    time.Time
+	ApprovedAt   time.Time
+	Used         bool
 }
 
 func (d *DB) InsertMagicLink(ctx context.Context, ml *MagicLink) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
-			`INSERT INTO magic_links (token, email, did, expires_at, used) VALUES (?, ?, ?, ?, 0)`,
-			ml.Token, ml.Email, nullString(ml.DID),
+			`INSERT INTO magic_links (token, poll_token, email, did, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)`,
+			ml.Token, ml.PollToken, ml.Email, nullString(ml.DID),
 			ml.ExpiresAt.UTC().Format(time.RFC3339),
 		)
 		return err
@@ -736,11 +840,27 @@ func (d *DB) InsertMagicLink(ctx context.Context, ml *MagicLink) error {
 
 func (d *DB) GetMagicLink(ctx context.Context, token string) (*MagicLink, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT token, email, COALESCE(did,''), expires_at, used FROM magic_links WHERE token = ?`, token)
+		`SELECT token, COALESCE(poll_token,''), COALESCE(session_token,''), email, COALESCE(did,''), expires_at, COALESCE(approved_at,''), used
+		 FROM magic_links WHERE token = ?`, token)
+	return scanMagicLink(row)
+}
+
+func (d *DB) GetMagicLinkByPollToken(ctx context.Context, pollToken string) (*MagicLink, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT token, COALESCE(poll_token,''), COALESCE(session_token,''), email, COALESCE(did,''), expires_at, COALESCE(approved_at,''), used
+		 FROM magic_links WHERE poll_token = ?`, pollToken)
+	return scanMagicLink(row)
+}
+
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanMagicLink(row rowScanner) (*MagicLink, error) {
 	ml := &MagicLink{}
-	var ea string
+	var ea, approvedAt string
 	var used int
-	err := row.Scan(&ml.Token, &ml.Email, &ml.DID, &ea, &used)
+	err := row.Scan(&ml.Token, &ml.PollToken, &ml.SessionToken, &ml.Email, &ml.DID, &ea, &approvedAt, &used)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -748,13 +868,24 @@ func (d *DB) GetMagicLink(ctx context.Context, token string) (*MagicLink, error)
 		return nil, err
 	}
 	ml.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	if approvedAt != "" {
+		ml.ApprovedAt, _ = time.Parse(time.RFC3339, approvedAt)
+	}
 	ml.Used = used != 0
 	return ml, nil
 }
 
 func (d *DB) MarkMagicLinkUsed(ctx context.Context, token string) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
-		_, err := tx.Exec(`UPDATE magic_links SET used = 1 WHERE token = ?`, token)
+		_, err := tx.Exec(`UPDATE magic_links SET used = 1, approved_at = ? WHERE token = ?`,
+			time.Now().UTC().Format(time.RFC3339), token)
+		return err
+	})
+}
+
+func (d *DB) SetMagicLinkSession(ctx context.Context, pollToken, sessionToken string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE magic_links SET session_token = ? WHERE poll_token = ?`, sessionToken, pollToken)
 		return err
 	})
 }

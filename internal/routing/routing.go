@@ -1,10 +1,10 @@
 // Package routing implements the DHT-based home-instance discovery protocol.
 //
 // Privacy model: emails are never published to the network. Only their
-// blake3 hash (with a fixed domain separator) is used as a DHT key. The
-// value is a signed JSON record that maps the hash to a home instance URL.
-// An observer watching DHT traffic learns neither the email address nor the
-// user's DID — only that some instance claims to be home for this hash.
+// Argon2id-derived routing key (with a fixed domain separator) is used as a
+// DHT key. The value is a signed JSON record that maps the routing key to a
+// home instance URL. This raises the cost of offline email enumeration, but it
+// does not make public email discovery fully private.
 package routing
 
 import (
@@ -14,14 +14,25 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
-	"lukechampine.com/blake3"
+	"golang.org/x/crypto/argon2"
 )
 
-// domain is the fixed domain separator used in all email hashes.
-// It is a public constant — its purpose is domain separation, not secrecy.
-const domain = "evermeet-home-routing-v1"
+// Domain separators are public constants. Their purpose is separating routing
+// key spaces, not secrecy.
+const (
+	emailDomain    = "evermeet-home-routing-v1"
+	ethereumDomain = "evermeet-home-routing-ethereum-v1"
+)
+
+const (
+	emailKeyTime    uint32 = 3
+	emailKeyMemory  uint32 = 64 * 1024 // KiB, 64 MiB
+	emailKeyThreads uint8  = 1
+	emailKeyLength  uint32 = 32
+)
 
 // HomeRecord is the signed value stored in the DHT under an email hash.
 // It is signed by the home instance's Ed25519 key (the libp2p node key),
@@ -29,16 +40,33 @@ const domain = "evermeet-home-routing-v1"
 type HomeRecord struct {
 	HomeInstanceURL string `json:"home_instance_url"`
 	Timestamp       int64  `json:"timestamp"` // Unix seconds — newer wins on conflict
-	Sig             string `json:"sig"`        // Ed25519 sig over canonical fields, base64url
+	Sig             string `json:"sig"`       // Ed25519 sig over canonical fields, base64url
 }
 
 // EmailHash returns the DHT key for a given email address.
-// blake3(domain + ":" + email), hex-encoded.
+// Argon2id(normalized email, domain), hex-encoded. The intentionally high cost
+// makes dictionary enumeration substantially more expensive than a fast hash.
 func EmailHash(email string) []byte {
-	h := blake3.Sum256([]byte(domain + ":" + email))
+	normalized := strings.ToLower(strings.TrimSpace(email))
+	return routingHash(normalized, emailDomain)
+}
+
+// EthereumHash returns the DHT key for a wallet identity.
+// The key material is normalized as eip155:<chainID>:<lowercase-address>.
+func EthereumHash(chainID, address string) []byte {
+	normalized := normalizeEthereumIdentity(chainID, address)
+	return routingHash(normalized, ethereumDomain)
+}
+
+func routingHash(normalized, domain string) []byte {
+	h := argon2.IDKey([]byte(normalized), []byte(domain), emailKeyTime, emailKeyMemory, emailKeyThreads, emailKeyLength)
 	dst := make([]byte, hex.EncodedLen(len(h)))
-	hex.Encode(dst, h[:])
+	hex.Encode(dst, h)
 	return dst
+}
+
+func normalizeEthereumIdentity(chainID, address string) string {
+	return "eip155:" + strings.TrimSpace(chainID) + ":" + strings.ToLower(strings.TrimSpace(address))
 }
 
 // NewRecord builds and signs a HomeRecord for the given home instance URL
@@ -107,8 +135,7 @@ func NewPublisher(
 	return &Publisher{publish: publish, priv: priv, homeURL: homeURL}
 }
 
-// Publish publishes the email → homeURL mapping for a single email.
-func (p *Publisher) Publish(ctx context.Context, email string) error {
+func (p *Publisher) publishRecord(ctx context.Context, key []byte) error {
 	rec, err := NewRecord(p.homeURL, p.priv)
 	if err != nil {
 		return err
@@ -117,7 +144,22 @@ func (p *Publisher) Publish(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	return p.publish(ctx, EmailHash(email), data)
+	return p.publish(ctx, key, data)
+}
+
+// PublishEmail publishes the email → homeURL mapping for a single email.
+func (p *Publisher) PublishEmail(ctx context.Context, email string) error {
+	return p.publishRecord(ctx, EmailHash(email))
+}
+
+// Publish preserves the original email-only API for existing callers.
+func (p *Publisher) Publish(ctx context.Context, email string) error {
+	return p.PublishEmail(ctx, email)
+}
+
+// PublishEthereum publishes the Ethereum wallet → homeURL mapping.
+func (p *Publisher) PublishEthereum(ctx context.Context, chainID, address string) error {
+	return p.publishRecord(ctx, EthereumHash(chainID, address))
 }
 
 // StartHeartbeat launches a goroutine that re-publishes all emails every
@@ -157,7 +199,7 @@ func (p *Publisher) publishAll(ctx context.Context, emailsFn func(ctx context.Co
 		if ctx.Err() != nil {
 			return
 		}
-		_ = p.Publish(ctx, email)
+		_ = p.PublishEmail(ctx, email)
 	}
 }
 

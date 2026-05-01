@@ -53,25 +53,46 @@ export const api = {
 	auth: {
 		me: () => request<{ did: string; display_name: string; avatar: string; bio: string }>('/api/auth/me'),
 		requestMagicLink: (email: string) =>
-			request<{ status: string }>('/api/auth/magic-link', {
+			request<{ status: string; poll_token: string }>('/api/auth/magic-link', {
 				method: 'POST',
 				body: JSON.stringify({ email }),
+			}),
+		magicLinkStatus: (pollToken: string) =>
+			request<{ status: 'pending' | 'signed_in' }>('/api/auth/magic-link/status', {
+				method: 'POST',
+				body: JSON.stringify({ poll_token: pollToken }),
 			}),
 		updateProfile: (data: { display_name: string; avatar: string; bio: string }) =>
 			request<{ status: string }>('/api/auth/profile', {
 				method: 'PUT',
 				body: JSON.stringify(data),
 			}),
-		resolveHome: (email: string, eventId = '') =>
-			request<ResolveHomeResponse>('/api/auth/resolve-home', {
+		resolveHome: (input: ResolveHomeRequest | string, eventId = '') => {
+			const body = typeof input === 'string'
+				? { type: 'email', email: input, event_id: eventId }
+				: input;
+			return request<ResolveHomeResponse>('/api/auth/resolve-home', {
 				method: 'POST',
-				body: JSON.stringify({ email, event_id: eventId }),
-			}),
+				body: JSON.stringify(body),
+			});
+		},
 		delegate: (data: DelegateRequest) =>
 			request<SignedDelegationToken>('/api/auth/delegate', {
 				method: 'POST',
 				body: JSON.stringify(data),
 			}),
+		siwe: {
+			start: (address: string, chainId: string) =>
+				request<SIWEStartResponse>('/api/auth/siwe/start', {
+					method: 'POST',
+					body: JSON.stringify({ address, chain_id: chainId }),
+				}),
+			finish: (message: string, signature: string) =>
+				request<{ status: string }>('/api/auth/siwe/finish', {
+					method: 'POST',
+					body: JSON.stringify({ message, signature }),
+				}),
+		},
 		logout: () => request<{ status: string }>('/api/auth/logout', { method: 'POST' }),
 		passkey: {
 			signupStart: () => requestWithSession<any>('/api/auth/passkey/signup/start', null, { method: 'POST' }),
@@ -276,6 +297,17 @@ export interface ResolveHomeResponse {
 	return_to: string;
 	foreign_sig: ForeignInstanceSig;
 	delegate_url: string;
+	instance?: ResolvedInstanceInfo;
+}
+
+export type ResolveHomeRequest =
+	| { type: 'email'; email: string; event_id?: string }
+	| { type: 'ethereum'; chain_id: string; address: string; event_id?: string };
+
+export interface ResolvedInstanceInfo {
+	id: string;
+	public_key: string;
+	verified: boolean;
 }
 
 export interface DelegateRequest {
@@ -299,4 +331,9 @@ export interface SignedDelegationToken {
 	sig: string;
 	public_key: string;
 	home_instance_url: string;
+}
+
+export interface SIWEStartResponse {
+	message: string;
+	nonce: string;
 }

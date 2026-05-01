@@ -13,6 +13,8 @@ export const messages = {
 	'nav.exploreEvents': 'Explore events',
 	'nav.signIn': 'Sign In',
 	'footer.tagline': 'Evermeet - Decentralized Event Platform',
+	'footer.switchToDark': 'Use dark mode',
+	'footer.switchToLight': 'Use light mode',
 	'user.anonymous': 'Anonymous',
 	'common.loading': 'Loading...',
 	'common.back': 'Back',

@@ -63,6 +63,10 @@
 		intl.activate((e.target as HTMLSelectElement).value as Locale);
 		updateClock();
 	}
+
+	function toggleColorScheme() {
+		theme.apply(theme.current === 'luma' ? 'default' : 'luma');
+	}
 </script>
 
 <svelte:window onclick={handleClickOutside} />
@@ -163,9 +167,89 @@
 		</a>
 		<span>•</span>
 		<a href="https://radicle.network/nodes/rosa.radicle.network/rad%3Az2t188nFbqetZnwj1tfe4ZBD1Ky3Z" target="_blank" rel="noopener" class="footer-source">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 44 44" fill="none" class="footer-radicle-icon" aria-hidden="true">
+				<g shape-rendering="crispEdges">
+					<rect x="8" y="0" width="4" height="4" fill="#5555FF" />
+					<rect x="32" y="0" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="4" width="4" height="4" fill="#5555FF" />
+					<rect x="28" y="4" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="8" width="4" height="4" fill="#5555FF" />
+					<rect x="16" y="8" width="4" height="4" fill="#3333DD" />
+					<rect x="20" y="8" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="8" width="4" height="4" fill="#3333DD" />
+					<rect x="28" y="8" width="4" height="4" fill="#5555FF" />
+					<rect x="8" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="16" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="20" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="28" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="32" y="12" width="4" height="4" fill="#5555FF" />
+					<rect x="4" y="16" width="4" height="4" fill="#5555FF" />
+					<rect x="8" y="16" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="16" width="4" height="4" fill="#F4F4F4" />
+					<rect x="16" y="16" width="4" height="4" fill="#F4F4F4" />
+					<rect x="20" y="16" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="16" width="4" height="4" fill="#5555FF" />
+					<rect x="28" y="16" width="4" height="4" fill="#F4F4F4" />
+					<rect x="32" y="16" width="4" height="4" fill="#F4F4F4" />
+					<rect x="36" y="16" width="4" height="4" fill="#5555FF" />
+					<rect x="4" y="20" width="4" height="4" fill="#5555FF" />
+					<rect x="8" y="20" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="20" width="4" height="4" fill="#F4F4F4" />
+					<rect x="16" y="20" width="4" height="4" fill="#FF55FF" />
+					<rect x="20" y="20" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="20" width="4" height="4" fill="#5555FF" />
+					<rect x="28" y="20" width="4" height="4" fill="#F4F4F4" />
+					<rect x="32" y="20" width="4" height="4" fill="#FF55FF" />
+					<rect x="36" y="20" width="4" height="4" fill="#5555FF" />
+					<rect x="0" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="4" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="8" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="12" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="16" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="20" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="24" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="28" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="32" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="36" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="40" y="24" width="4" height="4" fill="#3333DD" />
+					<rect x="8" y="28" width="4" height="4" fill="#3333DD" />
+					<rect x="16" y="28" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="28" width="4" height="4" fill="#5555FF" />
+					<rect x="32" y="28" width="4" height="4" fill="#3333DD" />
+					<rect x="8" y="32" width="4" height="4" fill="#3333DD" />
+					<rect x="16" y="32" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="32" width="4" height="4" fill="#5555FF" />
+					<rect x="32" y="32" width="4" height="4" fill="#3333DD" />
+					<rect x="16" y="36" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="36" width="4" height="4" fill="#5555FF" />
+					<rect x="12" y="40" width="4" height="4" fill="#5555FF" />
+					<rect x="16" y="40" width="4" height="4" fill="#5555FF" />
+					<rect x="24" y="40" width="4" height="4" fill="#5555FF" />
+					<rect x="28" y="40" width="4" height="4" fill="#5555FF" />
+				</g>
+			</svg>
 			Radicle
 		</a>
+		<span>•</span>
+		<button
+			type="button"
+			class="footer-theme-toggle"
+			onclick={toggleColorScheme}
+			aria-label={theme.current === 'luma' ? intl.t('footer.switchToLight') : intl.t('footer.switchToDark')}
+		>
+			{#if theme.current === 'luma'}
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<circle cx="12" cy="12" r="5"/>
+					<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+				</svg>
+			{:else}
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+				</svg>
+			{/if}
+		</button>
 		<span>•</span>
 		<select class="locale-select" aria-label="Language" value={intl.locale} onchange={changeLocale}>
 			{#each locales as locale}
@@ -384,7 +468,39 @@
 	.footer-source {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
+		gap: 0.35rem;
+	}
+	.footer-radicle-icon {
+		display: inline-block;
+		flex-shrink: 0;
+		vertical-align: text-bottom;
+		image-rendering: pixelated;
+		filter: grayscale(100%) contrast(170%);
+		transition: filter 0.15s ease;
+	}
+	.footer-source:hover .footer-radicle-icon {
+		filter: none;
+	}
+	.footer-theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.2rem;
+		margin: 0;
+		border: none;
+		background: transparent;
+		color: var(--text-subtle);
+		border-radius: var(--radius-md);
+		cursor: pointer;
+		vertical-align: middle;
+		transition: color 0.15s, background 0.15s;
+	}
+	.footer-theme-toggle:hover {
+		color: var(--text);
+		background: var(--bg-hover);
+	}
+	.footer-theme-toggle svg {
+		display: block;
 	}
 	.version {
 		font-family: monospace;

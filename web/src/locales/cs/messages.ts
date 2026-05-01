@@ -13,6 +13,8 @@ export const messages = {
 	'nav.exploreEvents': 'Prozkoumat události',
 	'nav.signIn': 'Přihlásit se',
 	'footer.tagline': 'Evermeet - decentralizovaná platforma pro události',
+	'footer.switchToDark': 'Přepnout na tmavý režim',
+	'footer.switchToLight': 'Přepnout na světlý režim',
 	'user.anonymous': 'Anonym',
 	'common.loading': 'Načítám...',
 	'common.back': 'Zpět',

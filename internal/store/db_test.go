@@ -141,6 +141,54 @@ func TestDB_SessionRoundTrip(t *testing.T) {
 	}
 }
 
+func TestDB_RSVPReceiptUpsert(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	receipt := &RSVPReceipt{
+		EventInstanceURL: "http://event.example",
+		EventID:          "event1",
+		DID:              "did:em:abc",
+		Status:           "confirmed",
+		GuestVisible:     true,
+		EventURL:         "http://event.example/events/event1",
+		EventTitle:       "First title",
+		EventStartsAt:    "2026-05-01T12:00:00Z",
+		IssuedAt:         time.Now(),
+		UpdatedAt:        time.Now(),
+		Sig:              "sig1",
+	}
+	if err := db.UpsertRSVPReceipt(ctx, receipt); err != nil {
+		t.Fatalf("UpsertRSVPReceipt: %v", err)
+	}
+
+	receipt.Status = "cancelled"
+	receipt.GuestVisible = false
+	receipt.EventTitle = "Updated title"
+	receipt.Sig = "sig2"
+	receipt.UpdatedAt = receipt.UpdatedAt.Add(time.Minute)
+	if err := db.UpsertRSVPReceipt(ctx, receipt); err != nil {
+		t.Fatalf("UpsertRSVPReceipt update: %v", err)
+	}
+	older := *receipt
+	older.Status = "pending"
+	older.UpdatedAt = receipt.UpdatedAt.Add(-2 * time.Minute)
+	if err := db.UpsertRSVPReceipt(ctx, &older); err != nil {
+		t.Fatalf("UpsertRSVPReceipt older update: %v", err)
+	}
+
+	got, err := db.ListRSVPReceiptsForDID(ctx, "did:em:abc")
+	if err != nil {
+		t.Fatalf("ListRSVPReceiptsForDID: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 receipt, got %d", len(got))
+	}
+	if got[0].Status != "cancelled" || got[0].GuestVisible || got[0].EventTitle != "Updated title" || got[0].Sig != "sig2" {
+		t.Fatalf("receipt was not updated: %+v", got[0])
+	}
+}
+
 func openTestDB(t *testing.T) *DB {
 	t.Helper()
 	f, err := os.CreateTemp("", "evermeet-test-*.db")

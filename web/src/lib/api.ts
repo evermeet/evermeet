@@ -53,6 +53,7 @@ export const api = {
 	auth: {
 		me: () => request<AuthUser>('/api/auth/me'),
 		methods: () => request<AuthMethods>('/api/auth/methods'),
+		rsvpReceipts: () => request<{ receipts: RSVPReceipt[] }>('/api/auth/rsvp-receipts'),
 		requestMagicLink: (email: string) =>
 			request<{ status: string; poll_token: string }>('/api/auth/magic-link', {
 				method: 'POST',
@@ -227,6 +228,19 @@ export interface MyRSVPStatus {
 	status?: 'pending' | 'confirmed' | 'rejected' | 'waitlisted' | 'cancelled' | string;
 	guest_visible?: boolean;
 	received_at?: string;
+}
+
+export interface RSVPReceipt {
+	event_instance_url: string;
+	event_id: string;
+	did: string;
+	status: 'pending' | 'confirmed' | 'rejected' | 'waitlisted' | 'cancelled' | string;
+	guest_visible: boolean;
+	event_url?: string;
+	event_title?: string;
+	event_starts_at?: string;
+	issued_at: string;
+	updated_at: string;
 }
 
 export interface EventAttendee {

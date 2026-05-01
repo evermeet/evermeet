@@ -800,6 +800,82 @@ func (d *DB) GetRSVPForEventSender(ctx context.Context, eventID, senderDID strin
 	return e, nil
 }
 
+// ---- Mirrored RSVP receipts ----
+
+type RSVPReceipt struct {
+	EventInstanceURL string
+	EventID          string
+	DID              string
+	Status           string
+	GuestVisible     bool
+	EventURL         string
+	EventTitle       string
+	EventStartsAt    string
+	IssuedAt         time.Time
+	UpdatedAt        time.Time
+	Sig              string
+}
+
+func (d *DB) UpsertRSVPReceipt(ctx context.Context, r *RSVPReceipt) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO rsvp_receipts (
+				event_instance_url, event_id, did, status, guest_visible,
+				event_url, event_title, event_starts_at, issued_at, updated_at, sig
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(event_instance_url, event_id, did) DO UPDATE SET
+				status = excluded.status,
+				guest_visible = excluded.guest_visible,
+				event_url = excluded.event_url,
+				event_title = excluded.event_title,
+				event_starts_at = excluded.event_starts_at,
+				issued_at = excluded.issued_at,
+				updated_at = excluded.updated_at,
+				sig = excluded.sig
+			WHERE excluded.updated_at >= rsvp_receipts.updated_at`,
+			r.EventInstanceURL, r.EventID, r.DID, r.Status, boolInt(r.GuestVisible),
+			nullString(r.EventURL), nullString(r.EventTitle), nullString(r.EventStartsAt),
+			r.IssuedAt.UTC().Format(time.RFC3339),
+			r.UpdatedAt.UTC().Format(time.RFC3339),
+			r.Sig,
+		)
+		return err
+	})
+}
+
+func (d *DB) ListRSVPReceiptsForDID(ctx context.Context, did string) ([]*RSVPReceipt, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT event_instance_url, event_id, did, status, guest_visible,
+		        COALESCE(event_url, ''), COALESCE(event_title, ''), COALESCE(event_starts_at, ''),
+		        issued_at, updated_at, sig
+		 FROM rsvp_receipts
+		 WHERE did = ?
+		 ORDER BY updated_at DESC`, did)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []*RSVPReceipt
+	for rows.Next() {
+		r := &RSVPReceipt{}
+		var guestVisible int
+		var issuedAt, updatedAt string
+		if err := rows.Scan(
+			&r.EventInstanceURL, &r.EventID, &r.DID, &r.Status, &guestVisible,
+			&r.EventURL, &r.EventTitle, &r.EventStartsAt,
+			&issuedAt, &updatedAt, &r.Sig,
+		); err != nil {
+			return nil, err
+		}
+		r.GuestVisible = guestVisible != 0
+		r.IssuedAt, _ = time.Parse(time.RFC3339, issuedAt)
+		r.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
 // ---- Sessions ----
 
 type Session struct {

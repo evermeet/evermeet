@@ -96,6 +96,7 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/auth/logout", s.handleLogout)
 	r.Get("/api/auth/me", s.handleMe)
 	r.Get("/api/auth/methods", s.requireAuth(s.handleAuthMethods))
+	r.Get("/api/auth/rsvp-receipts", s.requireAuth(s.handleListRSVPReceipts))
 	r.Put("/api/auth/profile", s.requireAuth(s.handleUpdateProfile))
 	r.Get("/api/users/{did}", s.handleGetUser)
 
@@ -140,6 +141,9 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/auth/resolve-home", s.handleResolveHome)
 	r.Post("/api/auth/delegate", s.requireAuth(s.handleCreateDelegation))
 	r.Post("/api/auth/delegate-verify", s.handleVerifyDelegation)
+
+	// Federation
+	r.Post("/api/federation/rsvp-receipts", s.handleReceiveRSVPReceipt)
 
 	// Blobs
 	r.Post("/api/blobs", s.requireAuth(s.handleUploadBlob))
@@ -247,8 +251,8 @@ func (s *Server) publishSIWERouting(ctx context.Context) {
 
 // homeHost returns the canonical instance address: "instanceID@hostname".
 func (s *Server) homeHost() string {
-	if u, err := url.Parse(s.baseURL); err == nil && u.Hostname() != "" {
-		return s.instanceID + "@" + u.Hostname()
+	if u, err := url.Parse(s.baseURL); err == nil && u.Host != "" {
+		return s.instanceID + "@" + u.Host
 	}
 	return s.instanceID
 }

@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -80,6 +83,16 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "parse event state")
 		return
 	}
+	var fd events.FoundingDoc
+	if err := json.Unmarshal([]byte(founding.Payload), &fd); err == nil {
+		if hostURL := s.eventHostURL(ctx, &fd, ms); hostURL != "" {
+			if err := proxyPublicEventAPI(w, r, hostURL, "/api/events/"+url.PathEscape(id)); err != nil {
+				s.log.Printf("proxy remote event %s via %s failed, using cached replica: %v", id, hostURL, err)
+			} else {
+				return
+			}
+		}
+	}
 
 	// Private events: only visible to organizer (for now; recipient list comes in Phase 8).
 	if ms.Visibility == "private" {
@@ -148,6 +161,11 @@ func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	ctx := r.Context()
 
+	founding, err := s.db.GetEventFounding(ctx, id)
+	if err != nil || founding == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
 	state, err := s.db.GetCurrentEventState(ctx, id)
 	if err != nil || state == nil {
 		jsonErr(w, http.StatusNotFound, "event not found")
@@ -157,6 +175,16 @@ func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal([]byte(state.Payload), &ms); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "parse event state")
 		return
+	}
+	var fd events.FoundingDoc
+	if err := json.Unmarshal([]byte(founding.Payload), &fd); err == nil {
+		if hostURL := s.eventHostURL(ctx, &fd, ms); hostURL != "" {
+			if err := proxyPublicEventAPI(w, r, hostURL, "/api/events/"+url.PathEscape(id)+"/attendees"); err != nil {
+				s.log.Printf("proxy remote attendees %s via %s failed, using local cache: %v", id, hostURL, err)
+			} else {
+				return
+			}
+		}
 	}
 	if ms.Visibility == "private" {
 		did := authDID(r)
@@ -268,7 +296,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		f.EndsAt = &t
 	}
 
-	founding, eventID, state, stateHash, err := events.New(did, priv, s.homeHost(), f)
+	founding, eventID, state, stateHash, err := events.New(did, priv, s.homeHost(), s.baseURL, f)
 	if err != nil {
 		s.log.Printf("create event: %v", err)
 		jsonErr(w, http.StatusInternalServerError, "create event failed")
@@ -589,6 +617,7 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "save rsvp failed")
 		return
 	}
+	s.emitRSVPReceiptAsync(did, ms, rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval), envelope.GuestVisible)
 
 	jsonOK(w, map[string]any{
 		"status":        envelope.Status,
@@ -607,6 +636,8 @@ func (s *Server) handleCancelRSVP(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusNotFound, "event not found")
 		return
 	}
+	var ms events.MutableState
+	json.Unmarshal([]byte(state.Payload), &ms)
 
 	envelope, err := s.db.GetRSVPForEventSender(ctx, id, did)
 	if err != nil {
@@ -624,6 +655,7 @@ func (s *Server) handleCancelRSVP(w http.ResponseWriter, r *http.Request) {
 		}
 		envelope.Status = "cancelled"
 	}
+	s.emitRSVPReceiptAsync(did, ms, envelope.Status, envelope.GuestVisible)
 
 	jsonOK(w, map[string]any{
 		"has_rsvp":      true,
@@ -668,6 +700,7 @@ func (s *Server) handleUpdateRSVPGuestVisibility(w http.ResponseWriter, r *http.
 		return
 	}
 	envelope.GuestVisible = req.Visible
+	s.emitRSVPReceiptAsync(did, ms, rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval), envelope.GuestVisible)
 
 	jsonOK(w, map[string]any{
 		"has_rsvp":      true,
@@ -784,6 +817,73 @@ func (s *Server) publicRSVPCount(ctx context.Context, eventID, approval string) 
 		}
 	}
 	return count, nil
+}
+
+func (s *Server) eventHostURL(ctx context.Context, founding *events.FoundingDoc, ms events.MutableState) string {
+	localBase := strings.TrimRight(s.baseURL, "/")
+	if founding != nil {
+		if instanceURL := strings.TrimRight(founding.InstanceURL, "/"); instanceURL != "" && instanceURL != localBase {
+			return instanceURL
+		}
+		if s.isLocalInstanceID(founding.InstanceID) {
+			return ""
+		}
+		if founding.InstanceID != "" && founding.InstanceID != s.homeHost() {
+			if instanceURL := s.instanceIDURL(founding.InstanceID); instanceURL != "" && instanceURL != localBase {
+				return instanceURL
+			}
+			user, err := s.db.GetUser(ctx, ms.Organizer)
+			if err == nil && user != nil {
+				if endpoint := strings.TrimRight(user.Endpoint, "/"); endpoint != "" && endpoint != localBase {
+					return endpoint
+				}
+			}
+		}
+	}
+	return ""
+}
+
+func (s *Server) isLocalInstanceID(instanceID string) bool {
+	if instanceID == "" {
+		return false
+	}
+	if instanceID == s.homeHost() {
+		return true
+	}
+	id, _, ok := strings.Cut(instanceID, "@")
+	return ok && id == s.instanceID
+}
+
+func (s *Server) instanceIDURL(instanceID string) string {
+	_, host, ok := strings.Cut(instanceID, "@")
+	if !ok || host == "" {
+		return ""
+	}
+	scheme := "http"
+	if u, err := url.Parse(s.baseURL); err == nil && u.Scheme != "" {
+		scheme = u.Scheme
+	}
+	return scheme + "://" + host
+}
+
+func proxyPublicEventAPI(w http.ResponseWriter, r *http.Request, hostURL, path string) error {
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, strings.TrimRight(hostURL, "/")+path, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("remote returned %s", resp.Status)
+	}
+	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
+	w.WriteHeader(resp.StatusCode)
+	_, err = io.Copy(w, resp.Body)
+	return err
 }
 
 type publicRSVPAttendee struct {

@@ -13,12 +13,13 @@ import (
 // FoundingDoc is hashed to produce the permanent event ID.
 // It is immutable — stored once, never modified.
 type FoundingDoc struct {
-	Type       string  `json:"type"`      // always "event"
-	Organizer  string  `json:"organizer"` // did:em: of creator
-	Calendar   *string `json:"calendar"`  // optional calendar ID
-	CreatedAt  string  `json:"created_at"`
-	Nonce      string  `json:"nonce"` // random hex, ensures uniqueness
-	InstanceID string  `json:"instance_id,omitempty"`
+	Type        string  `json:"type"`      // always "event"
+	Organizer   string  `json:"organizer"` // did:em: of creator
+	Calendar    *string `json:"calendar"`  // optional calendar ID
+	CreatedAt   string  `json:"created_at"`
+	Nonce       string  `json:"nonce"` // random hex, ensures uniqueness
+	InstanceID  string  `json:"instance_id,omitempty"`
+	InstanceURL string  `json:"instance_url,omitempty"`
 }
 
 // Location is the physical or virtual location of an event.
@@ -97,7 +98,7 @@ type Fields struct {
 
 // New creates a new founding doc and signed initial mutable state.
 // Returns (foundingDoc, eventID, mutableState, stateHash, error).
-func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
+func New(organizerDID string, priv ed25519.PrivateKey, homeHost, instanceURL string, f Fields) (*FoundingDoc, string, *MutableState, string, error) {
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, "", nil, "", fmt.Errorf("nonce: %w", err)
@@ -105,12 +106,13 @@ func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields
 
 	now := time.Now().UTC()
 	founding := &FoundingDoc{
-		Type:       "event",
-		Organizer:  organizerDID,
-		Calendar:   f.CalendarID,
-		CreatedAt:  now.Format(time.RFC3339),
-		Nonce:      hex.EncodeToString(nonce),
-		InstanceID: homeHost,
+		Type:        "event",
+		Organizer:   organizerDID,
+		Calendar:    f.CalendarID,
+		CreatedAt:   now.Format(time.RFC3339),
+		Nonce:       hex.EncodeToString(nonce),
+		InstanceID:  homeHost,
+		InstanceURL: instanceURL,
 	}
 
 	eventID, err := identity.ContentHash(founding)

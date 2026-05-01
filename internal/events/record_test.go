@@ -30,7 +30,7 @@ func TestEvent_NewAndVerify(t *testing.T) {
 		CalendarID: strPtr("cal_1"),
 	}
 
-	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", f)
+	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", "http://localhost:8080", f)
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
@@ -70,7 +70,7 @@ func TestEvent_Update(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", Fields{
+	founding, eventID, state, stateHash, err := New(did, priv, "test@localhost", "http://localhost:8080", Fields{
 		Title:      "Original Title",
 		StartsAt:   time.Now().Add(24 * time.Hour),
 		CalendarID: strPtr("cal_1"),
@@ -108,7 +108,7 @@ func TestEvent_UnauthorizedUpdate(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	_, _, state, stateHash, err := New(did, priv, "test@localhost", Fields{
+	_, _, state, stateHash, err := New(did, priv, "test@localhost", "http://localhost:8080", Fields{
 		Title:      "My Event",
 		StartsAt:   time.Now().Add(24 * time.Hour),
 		CalendarID: strPtr("cal_1"),
@@ -135,7 +135,7 @@ func TestEvent_IDStability(t *testing.T) {
 	pub, priv := newKeypair(t)
 	did := identity.DeriveDID(pub)
 
-	_, eventID, state, stateHash, _ := New(did, priv, "test@localhost", Fields{
+	_, eventID, state, stateHash, _ := New(did, priv, "test@localhost", "http://localhost:8080", Fields{
 		Title:      "Stable",
 		StartsAt:   time.Now().Add(24 * time.Hour),
 		CalendarID: strPtr("cal_1"),

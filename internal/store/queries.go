@@ -168,6 +168,27 @@ func (d *DB) GetBlob(ctx context.Context, hash string) (*BlobRecord, error) {
 	return &b, nil
 }
 
+func (d *DB) ListBlobs(ctx context.Context, limit, offset int) ([]*BlobRecord, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT hash, content_type, size, uploaded_by, created_at FROM blobs ORDER BY created_at DESC LIMIT ? OFFSET ?`, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var blobs []*BlobRecord
+	for rows.Next() {
+		var b BlobRecord
+		var createdAt string
+		if err := rows.Scan(&b.Hash, &b.ContentType, &b.Size, &b.UploadedBy, &createdAt); err != nil {
+			return nil, err
+		}
+		b.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+		blobs = append(blobs, &b)
+	}
+	return blobs, rows.Err()
+}
+
 func (d *DB) InsertBlobSource(ctx context.Context, src *BlobSource) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
@@ -294,6 +315,28 @@ func (d *DB) GetUser(ctx context.Context, did string) (*User, error) {
 	}
 	u.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
 	return u, nil
+}
+
+func (d *DB) ListUsers(ctx context.Context, limit, offset int) ([]*User, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT did, display_name, avatar, bio, current_pk, rotation_pk, endpoint, sig, updated_at, COALESCE(home_host,'')
+		 FROM users ORDER BY updated_at DESC LIMIT ? OFFSET ?`, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		u := &User{}
+		var updatedAt string
+		if err := rows.Scan(&u.DID, &u.DisplayName, &u.Avatar, &u.Bio, &u.CurrentPK, &u.RotationPK, &u.Endpoint, &u.Sig, &updatedAt, &u.InstanceID); err != nil {
+			return nil, err
+		}
+		u.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
+		users = append(users, u)
+	}
+	return users, rows.Err()
 }
 
 // ---- User private ----
@@ -477,6 +520,15 @@ func (d *DB) CountUsers(ctx context.Context) (int, error) {
 	return d.count(ctx, `SELECT COUNT(*) FROM users`)
 }
 
+func (d *DB) CountLocalUsers(ctx context.Context, baseURL string) (int, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE rtrim(endpoint, '/') = rtrim(?, '/')`, baseURL)
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (d *DB) CountCurrentEvents(ctx context.Context) (int, error) {
 	return d.count(ctx, `SELECT COUNT(*) FROM event_states WHERE is_current = 1`)
 }
@@ -489,6 +541,34 @@ func (d *DB) CountBlobs(ctx context.Context) (int, error) {
 	return d.count(ctx, `SELECT COUNT(*) FROM blobs`)
 }
 
+func (d *DB) CountLocalBlobs(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM blobs WHERE uploaded_by != 'remote'`)
+}
+
+func (d *DB) EstimateUserBytes(ctx context.Context) (int64, error) {
+	return d.sumInt64(ctx, `SELECT COALESCE(SUM(
+		LENGTH(did) + LENGTH(COALESCE(display_name, '')) + LENGTH(COALESCE(avatar, '')) +
+		LENGTH(COALESCE(bio, '')) + LENGTH(COALESCE(current_pk, '')) + LENGTH(COALESCE(rotation_pk, '')) +
+		LENGTH(COALESCE(endpoint, '')) + LENGTH(COALESCE(sig, '')) + LENGTH(COALESCE(home_host, ''))
+	), 0) FROM users`)
+}
+
+func (d *DB) EstimateCurrentEventBytes(ctx context.Context) (int64, error) {
+	return d.sumInt64(ctx, `SELECT COALESCE(SUM(LENGTH(payload)), 0) FROM event_states WHERE is_current = 1`)
+}
+
+func (d *DB) EstimateCurrentCalendarBytes(ctx context.Context) (int64, error) {
+	return d.sumInt64(ctx, `SELECT COALESCE(SUM(LENGTH(payload)), 0) FROM calendar_states WHERE is_current = 1`)
+}
+
+func (d *DB) SumBlobBytes(ctx context.Context) (int64, error) {
+	return d.sumInt64(ctx, `SELECT COALESCE(SUM(size), 0) FROM blobs`)
+}
+
+func (d *DB) CountBlobSources(ctx context.Context) (int, error) {
+	return d.count(ctx, `SELECT COUNT(*) FROM blob_sources`)
+}
+
 func (d *DB) count(ctx context.Context, query string) (int, error) {
 	row := d.db.QueryRowContext(ctx, query)
 	var count int
@@ -496,6 +576,15 @@ func (d *DB) count(ctx context.Context, query string) (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (d *DB) sumInt64(ctx context.Context, query string) (int64, error) {
+	row := d.db.QueryRowContext(ctx, query)
+	var sum int64
+	if err := row.Scan(&sum); err != nil {
+		return 0, err
+	}
+	return sum, nil
 }
 
 // ---- Event records ----
@@ -642,6 +731,16 @@ func (d *DB) InsertCalendarFounding(ctx context.Context, f *CalendarFounding) er
 	})
 }
 
+func (d *DB) GetCalendarFounding(ctx context.Context, id string) (*CalendarFounding, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT id, payload FROM calendar_founding WHERE id = ?`, id)
+	f := &CalendarFounding{}
+	err := row.Scan(&f.ID, &f.Payload)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return f, err
+}
+
 func (d *DB) AppendCalendarState(ctx context.Context, s *CalendarState) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		if _, err := tx.Exec(
@@ -682,6 +781,21 @@ func (d *DB) ListCurrentCalendars(ctx context.Context) ([]*CalendarState, error)
 		FROM calendar_states
 		WHERE is_current = 1
 		ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanCalendarStates(rows)
+}
+
+func (d *DB) ListCurrentCalendarsPaginated(ctx context.Context, limit, offset int) ([]*CalendarState, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT hash, id, COALESCE(prev,''), payload, is_current, created_at
+		FROM calendar_states
+		WHERE is_current = 1
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`, limit, offset)
 	if err != nil {
 		return nil, err
 	}

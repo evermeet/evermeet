@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { api, type AdminOverview } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import AdminNav from '$lib/components/AdminNav.svelte';
 	import { onMount } from 'svelte';
 
 	let overview = $state<AdminOverview | null>(null);
@@ -30,11 +31,11 @@
 	const countCards = $derived(
 		overview
 			? [
-					['Admins', overview.counts.admins],
-					['Users', overview.counts.users],
-					['Events', overview.counts.events],
-					['Calendars', overview.counts.calendars],
-					['Blobs', overview.counts.blobs],
+					['Admins', overview.counts.admins, '/admin/objects/users'],
+					['Users', overview.counts.users, '/admin/objects/users'],
+					['Events', overview.counts.events, '/admin/objects/events'],
+					['Calendars', overview.counts.calendars, '/admin/objects/calendars'],
+					['Blobs', overview.counts.blobs, '/admin/objects/blobs'],
 				]
 			: []
 	);
@@ -51,6 +52,7 @@
 			<p class="muted">Basic status and operational overview for this Evermeet instance.</p>
 		</div>
 	</div>
+	<AdminNav active="overview" />
 
 	{#if loading}
 		<p class="muted">Loading admin overview...</p>
@@ -58,11 +60,11 @@
 		<p class="error">{error}</p>
 	{:else if overview}
 		<section class="stats-grid" aria-label="Instance counts">
-			{#each countCards as [label, value]}
-				<div class="stat-card">
+			{#each countCards as [label, value, href]}
+				<a class="stat-card" href={href}>
 					<span>{label}</span>
 					<strong>{value}</strong>
-				</div>
+				</a>
 			{/each}
 		</section>
 
@@ -243,7 +245,16 @@
 	}
 
 	.stat-card {
+		display: block;
 		padding: 1rem;
+		color: inherit;
+		text-decoration: none;
+		transition: border-color 0.15s, transform 0.15s;
+	}
+
+	.stat-card:hover {
+		border-color: var(--text-accent);
+		transform: translateY(-1px);
 	}
 
 	.stat-card span {

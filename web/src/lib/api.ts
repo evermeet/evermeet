@@ -44,6 +44,9 @@ export const api = {
 	},
 	admin: {
 		overview: () => request<AdminOverview>('/api/admin/overview'),
+		objects: () => request<AdminObjectsOverview>('/api/admin/objects'),
+		objectsByType: (type: AdminObjectType, limit = 50, offset = 0) =>
+			request<AdminObjectList>(`/api/admin/objects/${type}?limit=${limit}&offset=${offset}`),
 	},
 	blobs: {
 		upload: async (file: File): Promise<{ hash: string; url: string }> => {
@@ -427,6 +430,41 @@ export interface AdminOverview {
 		node: Record<string, any>;
 		p2p: Record<string, any>;
 	};
+}
+
+export type AdminObjectType = 'users' | 'events' | 'calendars' | 'blobs';
+
+export interface AdminObjectItem {
+	type: AdminObjectType;
+	id: string;
+	label: string;
+	subtitle?: string;
+	updated_at?: string;
+	meta?: Record<string, any>;
+}
+
+export interface AdminObjectGroup {
+	type: AdminObjectType;
+	label: string;
+	count: number;
+	items: AdminObjectItem[];
+}
+
+export interface AdminObjectSummary {
+	type: AdminObjectType;
+	label: string;
+	count: number;
+	hosted_here: number;
+	bytes: number;
+}
+
+export interface AdminObjectsOverview {
+	objects: AdminObjectSummary[];
+}
+
+export interface AdminObjectList extends AdminObjectGroup {
+	limit: number;
+	offset: number;
 }
 
 export interface AuthMethods {

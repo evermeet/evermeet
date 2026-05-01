@@ -114,6 +114,8 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/setup/status", s.handleSetupStatus)
 	r.Post("/api/setup/complete", s.handleSetupComplete)
 	r.Get("/api/admin/overview", s.requireAdmin(s.handleAdminOverview))
+	r.Get("/api/admin/objects", s.requireAdmin(s.handleAdminObjectsOverview))
+	r.Get("/api/admin/objects/{type}", s.requireAdmin(s.handleAdminObjectsByType))
 	r.Post("/api/auth/magic-link", s.handleMagicLinkRequest)
 	r.Post("/api/auth/magic-link/status", s.handleMagicLinkStatus)
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)

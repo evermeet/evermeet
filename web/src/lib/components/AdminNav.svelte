@@ -1,0 +1,35 @@
+<script lang="ts">
+	let { active = 'overview' }: { active?: 'overview' | 'objects' } = $props();
+</script>
+
+<nav class="admin-nav" aria-label="Admin sections">
+	<a href="/admin" class:active={active === 'overview'}>Overview</a>
+	<a href="/admin/objects" class:active={active === 'objects'}>Objects</a>
+</nav>
+
+<style>
+	.admin-nav {
+		display: flex;
+		gap: 0.5rem;
+		margin: 1.5rem 0;
+		border-bottom: 1px solid var(--border-subtle);
+	}
+
+	a {
+		padding: 0.7rem 0.9rem;
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 0.95rem;
+		font-weight: 700;
+		border-bottom: 2px solid transparent;
+	}
+
+	a:hover {
+		color: var(--text);
+	}
+
+	a.active {
+		color: var(--text);
+		border-bottom-color: var(--text-accent);
+	}
+</style>

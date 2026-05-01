@@ -162,12 +162,15 @@
 
 	<div class="header-wrap" class:no-backdrop={!cal.backdrop_url}>
 		<!-- Avatar overlapping backdrop -->
-		<div class="avatar-row">
-			<div class="cal-avatar">
-				<Avatar src={cal.avatar} did={cal.id} size={80} rounded={false} />
+		<div class="avatar-row" class:with-backdrop={!!cal.backdrop_url}>
+			<div class="cal-avatar" class:with-backdrop={!!cal.backdrop_url}>
+				<div class="cal-avatar-inner">
+					<Avatar src={cal.avatar} did={cal.id} size={80} rounded={false} />
+				</div>
 			</div>
 			{#if auth.user && !isOwner()}
 				<button
+					type="button"
 					class="btn-subscribe"
 					class:subscribed={cal.subscribed}
 					onclick={toggleSubscribe}
@@ -455,16 +458,34 @@
 		margin-top: -43px;
 		margin-bottom: 1rem;
 	}
+	.avatar-row.with-backdrop {
+		padding-top: 1.1rem;
+	}
 	.header-wrap.no-backdrop .avatar-row {
 		margin-top: 0;
 	}
 	.cal-avatar {
-		border: 4px solid var(--bg);
+		display: inline-block;
+		padding: 2px;
 		border-radius: var(--radius-xl);
-		overflow: hidden;
-		background: var(--bg-raised);
+		background: var(--bg);
+		line-height: 0;
 		position: relative;
 		z-index: 1;
+	}
+	.cal-avatar.with-backdrop {
+		background: color-mix(in srgb, var(--bg-card) 25%, transparent);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+	}
+	.cal-avatar-inner {
+		border-radius: calc(var(--radius-xl) - 2px);
+		overflow: hidden;
+		line-height: 0;
+	}
+	/* Profile only: frame is .cal-avatar; strip default avatar border so the 2px gutter shows */
+	.cal-avatar-inner :global(.avatar-box) {
+		border: none;
 	}
 
 	.btn-subscribe {
@@ -501,7 +522,13 @@
 	.btn-edit:hover { background: var(--bg-hover); }
 
 	.cal-info { margin-bottom: 1.5rem; }
-	h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; color: var(--text); line-height: 1.1; }
+	.cal-info > h1 {
+		font-size: 2rem;
+		font-weight: 800;
+		margin: 0 0 0.5rem;
+		color: var(--text);
+		line-height: 1.1;
+	}
 	.cal-desc { font-size: 0.95rem; color: var(--text-secondary); margin: 0 0 0.75rem; line-height: 1.6; }
 	.cal-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
 	.cal-links {

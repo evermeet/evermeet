@@ -3,6 +3,8 @@ package api
 import (
 	"net/http"
 	"time"
+
+	"github.com/evermeet/evermeet/internal/version"
 )
 
 func (s *Server) handleInstanceStatus(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +23,7 @@ func (s *Server) handleInstanceStatus(w http.ResponseWriter, r *http.Request) {
 
 	jsonOK(w, map[string]any{
 		"instance_id": s.homeHost(),
-		"version":     "v0.1.0-alpha",
+		"version":     version.Version,
 		"started_at":  s.startTime.UTC().Format(time.RFC3339),
 		"uptime_s":    int(uptime.Seconds()),
 		"uptime":      formatUptime(uptime),

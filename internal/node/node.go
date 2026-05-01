@@ -173,9 +173,9 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 		},
 	})
 
-	l.Printf("P2P node started: %s", h.ID())
+	l.Printf("P2P started peer_id=%s", h.ID())
 	for _, addr := range h.Addrs() {
-		l.Printf("  Listening on %s/p2p/%s", addr, h.ID())
+		l.Printf("  listen %s", addr.String())
 	}
 
 	return n, nil

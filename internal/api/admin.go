@@ -12,6 +12,7 @@ import (
 	"github.com/evermeet/evermeet/internal/calendar"
 	"github.com/evermeet/evermeet/internal/events"
 	"github.com/evermeet/evermeet/internal/store"
+	"github.com/evermeet/evermeet/internal/version"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -60,7 +61,7 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]any{
 		"instance_id": s.homeHost(),
 		"base_url":    s.baseURL,
-		"version":     "v0.1.0-alpha",
+		"version":     version.Version,
 		"started_at":  s.startTime.UTC().Format(time.RFC3339),
 		"uptime":      formatUptime(uptime),
 		"counts": map[string]int{

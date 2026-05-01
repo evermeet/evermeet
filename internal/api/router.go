@@ -17,6 +17,7 @@ import (
 	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/routing"
 	"github.com/evermeet/evermeet/internal/store"
+	"github.com/evermeet/evermeet/internal/version"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -78,7 +79,7 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 	if !hasAdmins {
 		setupToken = randomHex(32)
 		logger.Println("============================================================")
-		logger.Println("Evermeet first-time setup required")
+		logger.Printf("Evermeet %s — first-time setup required", version.Version)
 		logger.Printf("Admin setup token: %s", setupToken)
 		logger.Println("Open this instance in a browser and paste this token to create the first admin account.")
 		logger.Println("This token is one-time and only kept in memory for this server process.")
@@ -145,7 +146,7 @@ func (s *Server) PeerCount() int {
 // HandleHealth writes JSON health including live P2P peer count.
 func (s *Server) HandleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, s.homeHost(), s.PeerCount())
+	fmt.Fprintf(w, `{"status":"ok","version":%q,"instance_id":%q,"p2p_peers":%d}`, version.Version, s.homeHost(), s.PeerCount())
 }
 
 // ensureP2P starts the libp2p node and DHT publisher if they are not already running.

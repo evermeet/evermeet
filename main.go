@@ -24,6 +24,7 @@ import (
 	"github.com/evermeet/evermeet/internal/email"
 	"github.com/evermeet/evermeet/internal/node"
 	"github.com/evermeet/evermeet/internal/store"
+	"github.com/evermeet/evermeet/internal/version"
 	"github.com/go-chi/chi/v5"
 	"lukechampine.com/blake3"
 )
@@ -67,7 +68,19 @@ func main() {
 		logger.Fatalf("instance key: %v", err)
 	}
 	instanceID := deriveInstanceID(instancePriv.Public().(ed25519.PublicKey))
-	logger.Printf("instance id: %s", instanceID)
+
+	baseURL := cfg.Node.BaseURL
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
+	}
+	homeHostStr := instanceID
+	if u, err := url.Parse(baseURL); err == nil && u.Host != "" {
+		homeHostStr = instanceID + "@" + u.Host
+	}
+
+	logger.Printf("evermeet %s starting", version.Version)
+	logger.Printf("  instance: %s", homeHostStr)
+	logger.Printf("  public base URL: %s  (HTTP listen :%d)", baseURL, cfg.Node.Port)
 
 	// SQLite database.
 	dbPath := filepath.Join(cfg.Node.DataDir, "evermeet.db")
@@ -89,20 +102,10 @@ func main() {
 		})
 	}
 
-	baseURL := cfg.Node.BaseURL
-	if baseURL == "" {
-		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
-	}
-
 	ctxBoot := context.Background()
 	hasAdmins, err := db.HasAdminAccounts(ctxBoot)
 	if err != nil {
 		logger.Fatalf("admin check: %v", err)
-	}
-
-	homeHostStr := instanceID
-	if u, err := url.Parse(baseURL); err == nil && u.Host != "" {
-		homeHostStr = instanceID + "@" + u.Host
 	}
 
 	var p2pNode *node.Node
@@ -112,7 +115,7 @@ func main() {
 			logger.Fatalf("start p2p node: %v", err)
 		}
 	} else {
-		logger.Println("P2P: not started yet (first-time setup). P2P will start automatically when setup completes.")
+		logger.Printf("P2P: not started (%s); first-time setup — will start automatically when setup completes.", version.Version)
 	}
 
 	blobStore, err := blob.New(filepath.Join(cfg.Node.DataDir, "blobs"))
@@ -146,7 +149,7 @@ func main() {
 	apiServer.StartDHTHeartbeat(ctx)
 
 	go func() {
-		logger.Printf("evermeet running on http://localhost:%d", cfg.Node.Port)
+		logger.Printf("listening on http://localhost:%d", cfg.Node.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("server: %v", err)
 		}

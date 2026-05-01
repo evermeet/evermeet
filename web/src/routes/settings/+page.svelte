@@ -3,6 +3,7 @@
 	import { auth } from '$lib/auth.svelte.js';
 	import { theme, themes } from '$lib/theme.svelte.js';
 	import { bufferToBase64, recursiveBase64ToBuffer } from '$lib/webauthn.js';
+	import ImageUpload from '$lib/components/ImageUpload.svelte';
 
 	let registering = $state(false);
 	let savingProfile = $state(false);
@@ -80,8 +81,8 @@
 				<textarea id="bio" bind:value={bio} placeholder="Tell us about yourself…"></textarea>
 			</div>
 			<div class="field">
-				<label for="avatar">Avatar URL</label>
-				<input type="text" id="avatar" bind:value={avatar} placeholder="https://…" />
+				<span class="field-label">Avatar</span>
+				<ImageUpload bind:value={avatar} rounded={true} previewSize={120} />
 			</div>
 			<button type="submit" disabled={savingProfile}>
 				{savingProfile ? 'Saving…' : 'Save Profile'}
@@ -151,7 +152,7 @@
 
 	form { display: flex; flex-direction: column; gap: 1rem; }
 	.field { display: flex; flex-direction: column; gap: 0.3rem; }
-	label { font-size: 0.85rem; font-weight: 600; color: var(--text-label); }
+	label, .field-label { font-size: 0.85rem; font-weight: 600; color: var(--text-label); }
 	input, textarea {
 		padding: 0.6rem;
 		border: 1px solid var(--border-input);

@@ -3,11 +3,13 @@
 	import { intl } from '$lib/i18n.svelte.js';
 
 	interface Props {
-		value: string;        // current URL (bound by parent)
+		value: string;
 		onchange?: (url: string) => void;
+		rounded?: boolean;   // show preview as circle (for avatars)
+		previewSize?: number; // preview height in px, default 200
 	}
 
-	let { value = $bindable(''), onchange }: Props = $props();
+	let { value = $bindable(''), onchange, rounded = false, previewSize = 200 }: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state('');
@@ -38,7 +40,11 @@
 
 <div class="image-upload">
 	{#if value}
-		<div class="preview">
+		<div
+			class="preview"
+			class:preview-rounded={rounded}
+			style={rounded ? `width: ${previewSize}px; height: ${previewSize}px;` : `max-height: ${previewSize}px;`}
+		>
 			<img src={value} alt={intl.t('upload.coverPreview')} />
 			<button type="button" class="clear-btn" onclick={clear} title={intl.t('upload.removeImage')}>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -99,16 +105,25 @@
 	.preview {
 		position: relative;
 		display: inline-block;
-		border-radius: var(--radius-md);
 		overflow: visible;
+		border-radius: var(--radius-md);
+	}
+	.preview-rounded {
+		border-radius: 50%;
+		overflow: hidden;
+		border: 1px solid var(--border-input);
 	}
 	.preview img {
 		display: block;
 		width: 100%;
-		max-height: 200px;
+		height: 100%;
 		object-fit: cover;
 		border-radius: var(--radius-md);
 		border: 1px solid var(--border-input);
+	}
+	.preview-rounded img {
+		border-radius: 50%;
+		border: none;
 	}
 	.clear-btn {
 		position: absolute;

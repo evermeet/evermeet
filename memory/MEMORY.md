@@ -1,1 +1,0 @@
-- [Cross-instance auth plan](project_cross_instance_auth.md) — DHT blind routing for cross-instance login/RSVP; mDNS bootstrap, instance-signed return_to, Ed25519 envelope tokens

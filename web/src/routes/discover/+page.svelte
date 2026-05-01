@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { api, type DiscoverCalendar } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 
 	let calendars = $state<DiscoverCalendar[]>([]);
@@ -47,15 +48,15 @@
 </script>
 
 <main>
-	<h1>Discover</h1>
-	<h2>Featured Calendars</h2>
+	<h1>{intl.t('discover.title')}</h1>
+	<h2>{intl.t('discover.featured')}</h2>
 
 	{#if loading}
-		<p class="muted">Loading…</p>
+		<p class="muted">{intl.t('common.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if calendars.length === 0}
-		<p class="muted">No featured calendars yet.</p>
+		<p class="muted">{intl.t('discover.empty')}</p>
 	{:else}
 		<div class="calendar-grid">
 			{#each calendars as cal}
@@ -71,7 +72,7 @@
 							onclick={() => toggleSubscribe(cal)}
 							disabled={pending[cal.id]}
 						>
-							{cal.subscribed ? 'Subscribed' : 'Subscribe'}
+							{cal.subscribed ? intl.t('discover.subscribed') : intl.t('discover.subscribe')}
 						</button>
 					</div>
 					<a href="/calendars/{cal.id}" class="card-name">{cal.name}</a>
@@ -79,7 +80,9 @@
 						<p class="card-desc">{cal.description}</p>
 					{/if}
 					<p class="card-subs">
-						{cal.subscribers === 0 ? 'No subscribers yet' : `${cal.subscribers} subscriber${cal.subscribers === 1 ? '' : 's'}`}
+						{cal.subscribers === 0
+							? intl.t('discover.noSubscribers')
+							: intl.t(cal.subscribers === 1 ? 'discover.subscriberCount.one' : 'discover.subscriberCount.other', { count: cal.subscribers })}
 					</p>
 				</div>
 			{/each}

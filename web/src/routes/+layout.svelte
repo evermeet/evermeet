@@ -287,6 +287,8 @@
 		color: var(--text);
 		text-decoration: none;
 		flex-shrink: 0;
+		position: relative;
+		z-index: 1;
 	}
 	.logo:hover { opacity: 0.7; }
 
@@ -297,9 +299,8 @@
 		display: flex;
 		align-items: center;
 		/* First link lines up with medium `main` text (same centering as margin: auto main + 1.5rem pad) */
-		padding-left: max(0px, calc((100vw - var(--layout-page-medium)) / 2 - 20px));
-		/* Nudge left: must be translate, not less padding — max(0,…) would erase small shifts */
-		transform: translateX(-1rem);
+		/* Include former translateX(-1rem) here — transform would shift hit-testing over the logo */
+		padding-left: max(0px, calc((100vw - var(--layout-page-medium)) / 2 - 20px - 1rem));
 	}
 	.nav-center {
 		display: flex;

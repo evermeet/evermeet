@@ -115,7 +115,7 @@
 
 <style>
 	main {
-		max-width: 980px;
+		max-width: var(--layout-page-wide);
 		margin: 2.5rem auto;
 		padding: 0 1.5rem 4rem;
 		font-family: system-ui, sans-serif;

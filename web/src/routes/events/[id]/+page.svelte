@@ -572,7 +572,7 @@ let currentHash = $state('');
 
 <style>
 	main {
-		max-width: 900px;
+		max-width: var(--layout-page-medium);
 		margin: 2.5rem auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;

@@ -53,6 +53,11 @@
 	--radius-2xl: 12px;
 	--radius-full: 999px;
 
+	/* Standard page content widths (use on <main> / wrappers) */
+	--layout-page-narrow: 640px;
+	--layout-page-medium: 900px;
+	--layout-page-wide: 1100px; /* admin / dense tooling only */
+
 	color-scheme: light;
 }
 

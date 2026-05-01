@@ -388,7 +388,7 @@
 
 <style>
 	main {
-		max-width: 720px;
+		max-width: var(--layout-page-narrow);
 		margin: 4rem auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
@@ -542,9 +542,6 @@
 	}
 	.error { color: var(--text-error); font-size: 0.875rem; }
 	@media (max-width: 640px) {
-		main {
-			max-width: 420px;
-		}
 		.instance-details,
 		.actions.two-up {
 			grid-template-columns: 1fr;

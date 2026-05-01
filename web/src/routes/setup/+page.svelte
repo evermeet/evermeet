@@ -110,7 +110,7 @@
 	}
 
 	.card {
-		width: min(100%, 520px);
+		width: min(100%, var(--layout-page-narrow));
 		padding: 2rem;
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);

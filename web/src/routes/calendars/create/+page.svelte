@@ -70,7 +70,7 @@
 
 <style>
 	main {
-		max-width: 560px;
+		max-width: var(--layout-page-narrow);
 		margin: 2.5rem auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;

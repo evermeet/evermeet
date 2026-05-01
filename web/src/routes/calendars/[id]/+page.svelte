@@ -411,7 +411,7 @@
 {/if}
 
 <style>
-	.status-msg { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; }
+	.status-msg { max-width: var(--layout-page-medium); margin: 2rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; }
 
 	/* Backdrop */
 	.backdrop {
@@ -425,7 +425,7 @@
 
 	/* Full-width header section */
 	.header-wrap {
-		max-width: 1100px;
+		max-width: var(--layout-page-medium);
 		margin: 0 auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
@@ -436,7 +436,7 @@
 
 	/* Two-column layout below the divider */
 	.page-wrap {
-		max-width: 1100px;
+		max-width: var(--layout-page-medium);
 		margin: 0 auto;
 		padding: 0 1.5rem 3rem;
 		font-family: system-ui, sans-serif;

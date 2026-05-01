@@ -235,7 +235,7 @@ let deleting = $state(false);
 
 <style>
 	main {
-		max-width: 600px;
+		max-width: var(--layout-page-narrow);
 		margin: 2rem auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;

@@ -169,7 +169,7 @@
 
 <style>
 	main {
-		max-width: 780px;
+		max-width: var(--layout-page-medium);
 		margin: 2.5rem auto;
 		padding: 0 1.5rem 3rem;
 		font-family: system-ui, sans-serif;

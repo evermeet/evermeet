@@ -92,7 +92,7 @@
 
 <style>
 	.admin-container {
-		max-width: 800px;
+		max-width: var(--layout-page-medium);
 		margin: 2rem auto;
 		padding: 0 1rem;
 		font-family: system-ui, sans-serif;

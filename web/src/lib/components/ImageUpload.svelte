@@ -5,11 +5,12 @@
 	interface Props {
 		value: string;
 		onchange?: (url: string) => void;
-		rounded?: boolean;   // show preview as circle (for avatars)
-		previewSize?: number; // preview height in px, default 200
+		rounded?: boolean;    // show preview as circle (for avatars)
+		square?: boolean;     // fixed square preview (avatar without circle)
+		previewSize?: number; // size in px: height for wide, width+height for square/rounded
 	}
 
-	let { value = $bindable(''), onchange, rounded = false, previewSize = 200 }: Props = $props();
+	let { value = $bindable(''), onchange, rounded = false, square = false, previewSize = 200 }: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state('');
@@ -43,7 +44,9 @@
 		<div
 			class="preview"
 			class:preview-rounded={rounded}
-			style={rounded ? `width: ${previewSize}px; height: ${previewSize}px;` : `max-height: ${previewSize}px;`}
+			style={(rounded || square)
+				? `width: ${previewSize}px; height: ${previewSize}px;`
+				: `width: 100%; height: ${previewSize}px;`}
 		>
 			<img src={value} alt={intl.t('upload.coverPreview')} />
 			<button type="button" class="clear-btn" onclick={clear} title={intl.t('upload.removeImage')}>

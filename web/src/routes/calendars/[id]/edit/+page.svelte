@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { api, type CalendarLink, type CalendarLinkType } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
+	import ImageUpload from '$lib/components/ImageUpload.svelte';
 
 	const id = $page.params.id;
 
@@ -23,6 +24,10 @@
 
 	onMount(async () => {
 		try {
+			await new Promise<void>(resolve => {
+				if (!auth.loading) { resolve(); return; }
+				const iv = setInterval(() => { if (!auth.loading) { clearInterval(iv); resolve(); } }, 20);
+			});
 			const cal = await api.calendars.get(id);
 			const isOwner = cal.governance.owners.some(o => o.did === auth.user?.did);
 			if (!isOwner) {
@@ -114,13 +119,13 @@
 			</div>
 
 			<div class="field">
-				<label for="avatar">Avatar URL</label>
-				<input type="url" id="avatar" bind:value={avatar} placeholder="https://…" />
+				<span class="field-label">Avatar</span>
+				<ImageUpload bind:value={avatar} square={true} previewSize={120} />
 			</div>
 
 			<div class="field">
-				<label for="backdrop_url">Backdrop Image URL</label>
-				<input type="url" id="backdrop_url" bind:value={backdrop_url} placeholder="https://…" />
+				<span class="field-label">Backdrop Image</span>
+				<ImageUpload bind:value={backdrop_url} previewSize={160} />
 			</div>
 
 			<div class="field">
@@ -190,7 +195,7 @@
 
 	form { display: flex; flex-direction: column; gap: 1.25rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
-	label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
+	label, .field-label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
 	input, textarea, select {
 		padding: 0.6rem 0.75rem;

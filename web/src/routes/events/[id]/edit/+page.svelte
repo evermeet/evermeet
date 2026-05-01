@@ -27,6 +27,10 @@ let deleting = $state(false);
 
 	onMount(async () => {
 		try {
+			await new Promise<void>(resolve => {
+				if (!auth.loading) { resolve(); return; }
+				const iv = setInterval(() => { if (!auth.loading) { clearInterval(iv); resolve(); } }, 20);
+			});
 			const res = await api.events.get(id);
 			const e = res.state;
 

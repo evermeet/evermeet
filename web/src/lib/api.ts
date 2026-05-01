@@ -158,6 +158,15 @@ export const api = {
 				method: 'POST',
 				body: JSON.stringify(data),
 			}),
+		cancelRSVP: (id: string) =>
+			request<MyRSVPStatus>(`/api/events/${id}/rsvp`, {
+				method: 'DELETE',
+			}),
+		setRSVPGuestVisible: (id: string, visible: boolean) =>
+			request<MyRSVPStatus>(`/api/events/${id}/rsvp/guest-list`, {
+				method: 'PUT',
+				body: JSON.stringify({ visible }),
+			}),
 	},
 	calendars: {
 		list: () => request<{ owned: Calendar[]; subscribed: Calendar[] }>('/api/calendars'),
@@ -216,6 +225,7 @@ export interface EventRevision {
 export interface MyRSVPStatus {
 	has_rsvp: boolean;
 	status?: 'pending' | 'confirmed' | 'rejected' | 'waitlisted' | 'cancelled' | string;
+	guest_visible?: boolean;
 	received_at?: string;
 }
 

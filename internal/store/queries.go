@@ -721,20 +721,22 @@ func scanCalendarStates(rows *sql.Rows) ([]*CalendarState, error) {
 // ---- RSVP envelopes ----
 
 type RSVPEnvelope struct {
-	ID         string
-	EventID    string
-	SenderDID  string
-	Payload    string // encrypted blob (JSON of private.Envelope)
-	Status     string // pending | confirmed | rejected | waitlisted | cancelled
-	ReceivedAt time.Time
+	ID           string
+	EventID      string
+	SenderDID    string
+	Payload      string // encrypted blob (JSON of private.Envelope)
+	Status       string // pending | confirmed | rejected | waitlisted | cancelled
+	GuestVisible bool
+	ReceivedAt   time.Time
 }
 
 func (d *DB) InsertRSVPEnvelope(ctx context.Context, e *RSVPEnvelope) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
-			`INSERT OR IGNORE INTO rsvp_envelopes (id, event_id, sender_did, payload, status, received_at)
-			 VALUES (?, ?, ?, ?, ?, ?)`,
+			`INSERT OR IGNORE INTO rsvp_envelopes (id, event_id, sender_did, payload, status, guest_visible, received_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)`,
 			e.ID, e.EventID, e.SenderDID, e.Payload, e.Status,
+			boolInt(e.GuestVisible),
 			e.ReceivedAt.UTC().Format(time.RFC3339),
 		)
 		return err
@@ -748,9 +750,16 @@ func (d *DB) UpdateRSVPStatus(ctx context.Context, id, status string) error {
 	})
 }
 
+func (d *DB) UpdateRSVPGuestVisible(ctx context.Context, id string, visible bool) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE rsvp_envelopes SET guest_visible = ? WHERE id = ?`, boolInt(visible), id)
+		return err
+	})
+}
+
 func (d *DB) ListRSVPsForEvent(ctx context.Context, eventID string) ([]*RSVPEnvelope, error) {
 	rows, err := d.db.QueryContext(ctx,
-		`SELECT id, event_id, sender_did, payload, status, received_at
+		`SELECT id, event_id, sender_did, payload, status, COALESCE(guest_visible, 1), received_at
 		 FROM rsvp_envelopes WHERE event_id = ? ORDER BY received_at ASC`, eventID)
 	if err != nil {
 		return nil, err
@@ -760,9 +769,11 @@ func (d *DB) ListRSVPsForEvent(ctx context.Context, eventID string) ([]*RSVPEnve
 	for rows.Next() {
 		e := &RSVPEnvelope{}
 		var ra string
-		if err := rows.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &ra); err != nil {
+		var guestVisible int
+		if err := rows.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &guestVisible, &ra); err != nil {
 			return nil, err
 		}
+		e.GuestVisible = guestVisible != 0
 		e.ReceivedAt, _ = time.Parse(time.RFC3339, ra)
 		out = append(out, e)
 	}
@@ -771,18 +782,20 @@ func (d *DB) ListRSVPsForEvent(ctx context.Context, eventID string) ([]*RSVPEnve
 
 func (d *DB) GetRSVPForEventSender(ctx context.Context, eventID, senderDID string) (*RSVPEnvelope, error) {
 	row := d.db.QueryRowContext(ctx,
-		`SELECT id, event_id, sender_did, payload, status, received_at
+		`SELECT id, event_id, sender_did, payload, status, COALESCE(guest_visible, 1), received_at
 		 FROM rsvp_envelopes
 		 WHERE event_id = ? AND sender_did = ?
 		 ORDER BY received_at DESC
 		 LIMIT 1`, eventID, senderDID)
 	e := &RSVPEnvelope{}
 	var receivedAt string
-	if err := row.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &receivedAt); err == sql.ErrNoRows {
+	var guestVisible int
+	if err := row.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &guestVisible, &receivedAt); err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
 	}
+	e.GuestVisible = guestVisible != 0
 	e.ReceivedAt, _ = time.Parse(time.RFC3339, receivedAt)
 	return e, nil
 }

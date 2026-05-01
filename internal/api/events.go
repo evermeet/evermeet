@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -88,10 +89,12 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if err := s.applyPublicRSVPCount(ctx, id, &ms); err != nil {
+	rsvpCount, err := s.publicRSVPCount(ctx, id, ms.RSVP.Approval)
+	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "load rsvp count failed")
 		return
 	}
+	ms.RSVP.Count = rsvpCount
 	payload, err := json.Marshal(ms)
 	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "render event state")
@@ -167,7 +170,7 @@ func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attendees, err := s.publicRSVPAttendees(ctx, id, ms.RSVP.Approval)
+	attendees, count, err := s.publicRSVPAttendees(ctx, id, ms.RSVP.Approval)
 	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "load attendees failed")
 		return
@@ -175,7 +178,7 @@ func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
 
 	jsonOK(w, map[string]any{
 		"attendees": attendees,
-		"count":     len(attendees),
+		"count":     count,
 	})
 }
 
@@ -535,10 +538,11 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "check rsvp status failed")
 		return
 	}
-	if existing != nil {
+	if existing != nil && existing.Status != "cancelled" {
 		jsonOK(w, map[string]any{
-			"status":      rsvpEffectiveStatus(existing.Status, ms.RSVP.Approval),
-			"received_at": existing.ReceivedAt,
+			"status":        rsvpEffectiveStatus(existing.Status, ms.RSVP.Approval),
+			"guest_visible": existing.GuestVisible,
+			"received_at":   existing.ReceivedAt,
 		})
 		return
 	}
@@ -573,12 +577,13 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Save envelope
 	envelope := &store.RSVPEnvelope{
-		ID:         randomHex(16),
-		EventID:    id,
-		SenderDID:  did,
-		Payload:    encrypted,
-		Status:     rsvpInitialStatus(ms.RSVP.Approval),
-		ReceivedAt: time.Now(),
+		ID:           randomHex(16),
+		EventID:      id,
+		SenderDID:    did,
+		Payload:      encrypted,
+		Status:       rsvpInitialStatus(ms.RSVP.Approval),
+		GuestVisible: true,
+		ReceivedAt:   time.Now(),
 	}
 	if err := s.db.InsertRSVPEnvelope(ctx, envelope); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "save rsvp failed")
@@ -586,8 +591,89 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]any{
-		"status":      envelope.Status,
-		"received_at": envelope.ReceivedAt,
+		"status":        envelope.Status,
+		"guest_visible": envelope.GuestVisible,
+		"received_at":   envelope.ReceivedAt,
+	})
+}
+
+func (s *Server) handleCancelRSVP(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	ctx := r.Context()
+
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+
+	envelope, err := s.db.GetRSVPForEventSender(ctx, id, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "check rsvp status failed")
+		return
+	}
+	if envelope == nil {
+		jsonOK(w, map[string]any{"has_rsvp": false})
+		return
+	}
+	if envelope.Status != "cancelled" {
+		if err := s.db.UpdateRSVPStatus(ctx, envelope.ID, "cancelled"); err != nil {
+			jsonErr(w, http.StatusInternalServerError, "cancel rsvp failed")
+			return
+		}
+		envelope.Status = "cancelled"
+	}
+
+	jsonOK(w, map[string]any{
+		"has_rsvp":      true,
+		"status":        envelope.Status,
+		"guest_visible": envelope.GuestVisible,
+		"received_at":   envelope.ReceivedAt,
+	})
+}
+
+func (s *Server) handleUpdateRSVPGuestVisibility(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	ctx := r.Context()
+
+	var req struct {
+		Visible bool `json:"visible"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+	var ms events.MutableState
+	json.Unmarshal([]byte(state.Payload), &ms)
+
+	envelope, err := s.db.GetRSVPForEventSender(ctx, id, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "check rsvp status failed")
+		return
+	}
+	if envelope == nil || envelope.Status == "cancelled" {
+		jsonErr(w, http.StatusNotFound, "active rsvp not found")
+		return
+	}
+	if err := s.db.UpdateRSVPGuestVisible(ctx, envelope.ID, req.Visible); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "update guest list visibility failed")
+		return
+	}
+	envelope.GuestVisible = req.Visible
+
+	jsonOK(w, map[string]any{
+		"has_rsvp":      true,
+		"status":        rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval),
+		"guest_visible": envelope.GuestVisible,
+		"received_at":   envelope.ReceivedAt,
 	})
 }
 
@@ -615,9 +701,10 @@ func (s *Server) handleMyRSVPStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]any{
-		"has_rsvp":    true,
-		"status":      rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval),
-		"received_at": envelope.ReceivedAt,
+		"has_rsvp":      true,
+		"status":        rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval),
+		"guest_visible": envelope.GuestVisible,
+		"received_at":   envelope.ReceivedAt,
 	})
 }
 
@@ -685,13 +772,18 @@ func rsvpEffectiveStatus(status, approval string) string {
 	return status
 }
 
-func (s *Server) applyPublicRSVPCount(ctx context.Context, eventID string, ms *events.MutableState) error {
-	attendees, err := s.publicRSVPAttendees(ctx, eventID, ms.RSVP.Approval)
+func (s *Server) publicRSVPCount(ctx context.Context, eventID, approval string) (int, error) {
+	latest, err := s.latestRSVPEnvelopes(ctx, eventID)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	ms.RSVP.Count = len(attendees)
-	return nil
+	count := 0
+	for _, env := range latest {
+		if rsvpEffectiveStatus(env.Status, approval) == "confirmed" {
+			count++
+		}
+	}
+	return count, nil
 }
 
 type publicRSVPAttendee struct {
@@ -700,28 +792,29 @@ type publicRSVPAttendee struct {
 	Avatar      string `json:"avatar"`
 }
 
-func (s *Server) publicRSVPAttendees(ctx context.Context, eventID, approval string) ([]publicRSVPAttendee, error) {
-	envelopes, err := s.db.ListRSVPsForEvent(ctx, eventID)
+func (s *Server) publicRSVPAttendees(ctx context.Context, eventID, approval string) ([]publicRSVPAttendee, int, error) {
+	latest, err := s.latestRSVPEnvelopes(ctx, eventID)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	seen := map[string]struct{}{}
-	attendees := make([]publicRSVPAttendee, 0, len(envelopes))
-	for _, env := range envelopes {
+
+	count := 0
+	attendees := make([]publicRSVPAttendee, 0, len(latest))
+	for _, env := range latest {
 		if rsvpEffectiveStatus(env.Status, approval) != "confirmed" {
 			continue
 		}
-		if _, ok := seen[env.SenderDID]; ok {
+		count++
+		if !env.GuestVisible {
 			continue
 		}
-		seen[env.SenderDID] = struct{}{}
 		attendee := publicRSVPAttendee{
 			DID:         env.SenderDID,
 			DisplayName: shortDID(env.SenderDID),
 		}
 		user, err := s.db.GetUser(ctx, env.SenderDID)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if user != nil {
 			attendee.DisplayName = strings.TrimSpace(user.DisplayName)
@@ -732,7 +825,26 @@ func (s *Server) publicRSVPAttendees(ctx context.Context, eventID, approval stri
 		}
 		attendees = append(attendees, attendee)
 	}
-	return attendees, nil
+	return attendees, count, nil
+}
+
+func (s *Server) latestRSVPEnvelopes(ctx context.Context, eventID string) ([]*store.RSVPEnvelope, error) {
+	envelopes, err := s.db.ListRSVPsForEvent(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+	latestBySender := make(map[string]*store.RSVPEnvelope, len(envelopes))
+	for _, env := range envelopes {
+		latestBySender[env.SenderDID] = env
+	}
+	latest := make([]*store.RSVPEnvelope, 0, len(latestBySender))
+	for _, env := range latestBySender {
+		latest = append(latest, env)
+	}
+	sort.Slice(latest, func(i, j int) bool {
+		return latest[i].ReceivedAt.Before(latest[j].ReceivedAt)
+	})
+	return latest, nil
 }
 
 func shortDID(did string) string {

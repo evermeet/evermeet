@@ -13,6 +13,7 @@ let calendar = $state<CalendarDetail | null>(null);
 let currentHash = $state('');
 	let hosts = $state<{ did: string; displayName: string; avatar: string }[]>([]);
 	let attendees = $state<EventAttendee[]>([]);
+	let anonymousAttendeeCount = $state(0);
 	let showAttendees = $state(false);
 	let loading = $state(true);
 	let error = $state('');
@@ -25,6 +26,8 @@ let currentHash = $state('');
 	let rsvpNote = $state('');
 	let showRsvpDetails = $state(false);
 	let rsvpSubmitting = $state(false);
+	let rsvpCancelling = $state(false);
+	let rsvpPrivacySaving = $state(false);
 
 	const id = $derived($page.params.id);
 
@@ -70,8 +73,7 @@ let currentHash = $state('');
 			);
 			hosts = hostProfiles;
 			if (event.rsvp?.visible !== false) {
-				const attendeeRes = await api.events.attendees(id);
-				attendees = attendeeRes.attendees ?? [];
+				await refreshAttendees();
 			}
 
 			await waitForAuth();
@@ -127,12 +129,25 @@ let currentHash = $state('');
 		return intl.t('events.rsvpPending');
 	}
 
+	function hasActiveRSVP() {
+		return myRsvpStatus?.has_rsvp === true && myRsvpStatus.status !== 'cancelled';
+	}
+
+	async function refreshAttendees() {
+		const attendeeRes = await api.events.attendees(id);
+		attendees = attendeeRes.attendees ?? [];
+		anonymousAttendeeCount = Math.max(0, attendeeRes.count - attendees.length);
+		if (event?.rsvp) {
+			event = { ...event, rsvp: { ...event.rsvp, count: attendeeRes.count } };
+		}
+	}
+
 	async function submitRSVP(e?: SubmitEvent) {
 		e?.preventDefault();
 		rsvpSubmitting = true;
 		error = '';
 		try {
-			const hadRsvp = myRsvpStatus?.has_rsvp === true;
+			const hadRsvp = hasActiveRSVP();
 			const res = await api.events.rsvp(id, {
 				name: rsvpName || auth.user?.display_name || '',
 				email: rsvpEmail,
@@ -146,11 +161,7 @@ let currentHash = $state('');
 				rsvps = await api.events.listRSVPs(id);
 			}
 			if (event?.rsvp?.visible !== false) {
-				const attendeeRes = await api.events.attendees(id);
-				attendees = attendeeRes.attendees ?? [];
-				if (event?.rsvp) {
-					event = { ...event, rsvp: { ...event.rsvp, count: attendeeRes.count } };
-				}
+				await refreshAttendees();
 			}
 			rsvpSent = true;
 		} catch (e: any) {
@@ -160,15 +171,71 @@ let currentHash = $state('');
 		}
 	}
 
+	async function cancelRSVP() {
+		if (!hasActiveRSVP()) return;
+		if (!window.confirm(intl.t('events.cancelRsvpConfirm'))) return;
+
+		rsvpCancelling = true;
+		error = '';
+		try {
+			myRsvpStatus = await api.events.cancelRSVP(id);
+			rsvpSent = false;
+			if (isOrganizer()) {
+				rsvps = await api.events.listRSVPs(id);
+			}
+			if (event?.rsvp?.visible !== false) {
+				await refreshAttendees();
+			}
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			rsvpCancelling = false;
+		}
+	}
+
+	async function setGuestListVisibility(visible: boolean) {
+		if (!hasActiveRSVP()) return;
+		rsvpPrivacySaving = true;
+		error = '';
+		try {
+			myRsvpStatus = await api.events.setRSVPGuestVisible(id, visible);
+			if (event?.rsvp?.visible !== false) {
+				await refreshAttendees();
+			}
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			rsvpPrivacySaving = false;
+		}
+	}
+
 	function attendeeSummary() {
 		const names = attendees.map((attendee) => attendee.display_name || attendee.did);
-		if (names.length === 0) return '';
-		if (names.length === 1) return intl.t('events.attendeeSummaryOne', { name: names[0] });
-		if (names.length === 2) return intl.t('events.attendeeSummaryTwo', { first: names[0], second: names[1] });
-		return intl.t('events.attendeeSummaryMany', {
+		if (names.length === 0) {
+			if (anonymousAttendeeCount === 1) return intl.t('events.anonymousAttendeeSummaryOne');
+			if (anonymousAttendeeCount > 1) return intl.t('events.anonymousAttendeeSummaryMany', { count: anonymousAttendeeCount });
+			return '';
+		}
+		if (names.length === 1) {
+			const summary = intl.t('events.attendeeSummaryOne', { name: names[0] });
+			return anonymousAttendeeCount > 0 ? `${summary}, ${intl.t('events.anonymousAttendeeSuffix', { count: anonymousAttendeeCount })}` : summary;
+		}
+		if (names.length === 2) {
+			const summary = intl.t('events.attendeeSummaryTwo', { first: names[0], second: names[1] });
+			return anonymousAttendeeCount > 0 ? `${summary}, ${intl.t('events.anonymousAttendeeSuffix', { count: anonymousAttendeeCount })}` : summary;
+		}
+		const visibleSummary = intl.t('events.attendeeSummaryMany', {
 			names: `${names[0]}, ${names[1]}`,
 			count: names.length - 2
 		});
+		if (anonymousAttendeeCount > 0) {
+			return `${visibleSummary}, ${intl.t('events.anonymousAttendeeSuffix', { count: anonymousAttendeeCount })}`;
+		}
+		return visibleSummary;
+	}
+
+	function attendeeTotalCount() {
+		return attendees.length + anonymousAttendeeCount;
 	}
 </script>
 
@@ -271,11 +338,14 @@ let currentHash = $state('');
 				{#if canShowRSVP() && event.rsvp?.count !== undefined}
 					<div class="side-section">
 						<p class="side-label">{intl.t('events.going', { count: event.rsvp.count, limit: event.rsvp.limit ? `/${event.rsvp.limit}` : '' })}</p>
-						{#if attendees.length > 0}
+						{#if attendees.length > 0 || anonymousAttendeeCount > 0}
 							<button type="button" class="attendee-summary" onclick={() => (showAttendees = true)}>
 								<div class="avatar-stack" aria-hidden="true">
 									{#each attendees.slice(0, 6) as attendee}
 										<Avatar src={attendee.avatar || ''} did={attendee.did} size={32} />
+									{/each}
+									{#each Array(Math.min(anonymousAttendeeCount, Math.max(0, 6 - attendees.length))) as _, i}
+										<div class="anonymous-avatar">?</div>
 									{/each}
 								</div>
 								<span>{attendeeSummary()}</span>
@@ -345,10 +415,26 @@ let currentHash = $state('');
 					<div class="rsvp-panel">
 						{#if isOrganizer()}
 							<p class="panel-label">{intl.t('events.register')}</p>
-							{#if auth.user && (myRsvpStatus?.has_rsvp || rsvpSent)}
-								<div class="success-box">
+							{#if auth.user && (hasActiveRSVP() || rsvpSent)}
+								<div class="rsvp-status-card">
 									<strong>{rsvpStatusText(myRsvpStatus?.status)}</strong>
 									<p>{intl.t('events.rsvpPrivateStatus')}</p>
+									<label class="guest-visibility-switch">
+										<span>
+											<strong>{intl.t('events.guestListVisibility')}</strong>
+											<small>{intl.t('events.guestListVisibilityHelp')}</small>
+										</span>
+										<input
+											type="checkbox"
+											role="switch"
+											checked={myRsvpStatus?.guest_visible !== false}
+											disabled={rsvpPrivacySaving}
+											onchange={(e) => setGuestListVisibility(e.currentTarget.checked)}
+										/>
+									</label>
+									<button type="button" class="cancel-rsvp-btn" onclick={cancelRSVP} disabled={rsvpCancelling}>
+										{rsvpCancelling ? intl.t('common.saving') : intl.t('events.cancelRsvp')}
+									</button>
 								</div>
 							{:else if auth.user}
 								<button type="button" class="rsvp-btn" onclick={() => submitRSVP()} disabled={rsvpSubmitting}>
@@ -393,10 +479,26 @@ let currentHash = $state('');
 									{/each}
 								</div>
 							{/if}
-						{:else if auth.user && (myRsvpStatus?.has_rsvp || rsvpSent)}
-							<div class="success-box">
+						{:else if auth.user && (hasActiveRSVP() || rsvpSent)}
+							<div class="rsvp-status-card">
 								<strong>{rsvpStatusText(myRsvpStatus?.status)}</strong>
 								<p>{intl.t('events.rsvpPrivateStatus')}</p>
+								<label class="guest-visibility-switch">
+									<span>
+										<strong>{intl.t('events.guestListVisibility')}</strong>
+										<small>{intl.t('events.guestListVisibilityHelp')}</small>
+									</span>
+									<input
+										type="checkbox"
+										role="switch"
+										checked={myRsvpStatus?.guest_visible !== false}
+										disabled={rsvpPrivacySaving}
+										onchange={(e) => setGuestListVisibility(e.currentTarget.checked)}
+									/>
+								</label>
+								<button type="button" class="cancel-rsvp-btn" onclick={cancelRSVP} disabled={rsvpCancelling}>
+									{rsvpCancelling ? intl.t('common.saving') : intl.t('events.cancelRsvp')}
+								</button>
 							</div>
 						{:else if auth.user}
 							<p class="panel-label">{intl.t('events.register')}</p>
@@ -445,7 +547,7 @@ let currentHash = $state('');
 			}}>
 				<div class="attendee-modal" role="dialog" aria-modal="true" aria-labelledby="attendees-title" tabindex="-1">
 					<div class="modal-header">
-						<h2 id="attendees-title">{intl.t('events.attendeesTitle', { count: attendees.length })}</h2>
+						<h2 id="attendees-title">{intl.t('events.attendeesTitle', { count: attendeeTotalCount() })}</h2>
 						<button type="button" class="modal-close" aria-label={intl.t('common.close')} onclick={() => (showAttendees = false)}>×</button>
 					</div>
 					<div class="attendee-list">
@@ -454,6 +556,12 @@ let currentHash = $state('');
 								<Avatar src={attendee.avatar || ''} did={attendee.did} size={40} />
 								<span>{attendee.display_name || attendee.did}</span>
 							</a>
+						{/each}
+						{#each Array(anonymousAttendeeCount) as _, i}
+							<div class="attendee-row anonymous-row">
+								<div class="anonymous-avatar large">?</div>
+								<span>{anonymousAttendeeCount === 1 ? intl.t('events.anonymousGuest') : intl.t('events.anonymousGuestNumber', { number: i + 1 })}</span>
+							</div>
 						{/each}
 					</div>
 				</div>
@@ -567,6 +675,27 @@ let currentHash = $state('');
 	.avatar-stack :global(.avatar-box) {
 		margin-left: -0.35rem;
 		border: 2px solid var(--bg);
+	}
+	.anonymous-avatar {
+		width: 32px;
+		height: 32px;
+		margin-left: -0.35rem;
+		border: 2px solid var(--bg);
+		border-radius: 50%;
+		background: linear-gradient(135deg, var(--bg-subtle), var(--bg-card));
+		color: var(--text-muted);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 800;
+		font-size: 0.8rem;
+		flex-shrink: 0;
+	}
+	.anonymous-avatar.large {
+		width: 40px;
+		height: 40px;
+		margin-left: 0;
+		border-color: var(--border-subtle);
 	}
 	.presenter-section { border-top: none; padding-top: 0; }
 	.presenter-row {
@@ -727,10 +856,15 @@ let currentHash = $state('');
 		background: var(--bg-subtle);
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		padding: 1.25rem 1.5rem;
+		padding: 1.5rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+	}
+	.rsvp-panel:has(.rsvp-status-card:only-child) {
+		background: transparent;
+		border: none;
+		padding: 0;
 	}
 	.panel-label {
 		font-size: 0.8rem;
@@ -803,13 +937,105 @@ let currentHash = $state('');
 	.rsvp-note { margin: 0.4rem 0; font-size: 0.9rem; color: var(--text-secondary); }
 	.rsvp-meta { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem; }
 
-	.success-box {
-		background: var(--bg-success);
-		color: var(--text-success);
-		padding: 1rem 1.25rem;
-		border-radius: var(--radius-md);
+	.rsvp-status-card {
+		background: color-mix(in srgb, var(--bg-card) 86%, white 14%);
+		border: 1px solid color-mix(in srgb, var(--border-card) 70%, white 30%);
+		color: var(--text);
+		padding: 1.25rem 1.5rem;
+		border-radius: var(--radius-lg);
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
 	}
-	.success-box p { margin: 0.25rem 0 0; font-size: 0.9rem; }
+	.rsvp-status-card strong {
+		font-size: 1.05rem;
+	}
+	.rsvp-status-card p {
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--text-secondary);
+	}
+	.guest-visibility-switch {
+		margin-top: 0.35rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 0;
+		border-top: 1px solid var(--border-subtle);
+		border-bottom: 1px solid var(--border-subtle);
+		color: var(--text);
+	}
+	.guest-visibility-switch span {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+	.guest-visibility-switch span strong {
+		font-size: 0.9rem;
+	}
+	.guest-visibility-switch small {
+		color: var(--text-muted);
+		font-size: 0.78rem;
+		line-height: 1.35;
+	}
+	.guest-visibility-switch input {
+		appearance: none;
+		width: 2.55rem;
+		height: 1.4rem;
+		padding: 0;
+		border: 1px solid var(--border-input);
+		border-radius: 999px;
+		background: var(--bg-input);
+		cursor: pointer;
+		position: relative;
+		flex-shrink: 0;
+	}
+	.guest-visibility-switch input::before {
+		content: '';
+		position: absolute;
+		width: 1rem;
+		height: 1rem;
+		left: 0.15rem;
+		top: 50%;
+		transform: translateY(-50%);
+		border-radius: 50%;
+		background: var(--text-muted);
+		transition: left 0.16s ease, background 0.16s ease;
+	}
+	.guest-visibility-switch input:checked {
+		background: color-mix(in srgb, var(--text) 18%, transparent);
+		border-color: color-mix(in srgb, var(--text) 45%, var(--border-input));
+	}
+	.guest-visibility-switch input:checked::before {
+		left: 1.25rem;
+		background: var(--text);
+	}
+	.guest-visibility-switch input:disabled {
+		opacity: 0.55;
+		cursor: default;
+	}
+	.cancel-rsvp-btn {
+		align-self: flex-start;
+		margin-top: 0.25rem;
+		border: 1px solid color-mix(in srgb, #ef4444 65%, var(--border-input));
+		background: color-mix(in srgb, #ef4444 12%, transparent);
+		color: #fca5a5;
+		border-radius: var(--radius-md);
+		padding: 0.45rem 0.7rem;
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.cancel-rsvp-btn:hover {
+		background: color-mix(in srgb, #ef4444 20%, transparent);
+		color: #fecaca;
+	}
+	.cancel-rsvp-btn:disabled {
+		opacity: 0.55;
+		cursor: default;
+	}
 
 	.modal-backdrop {
 		position: fixed;
@@ -869,6 +1095,10 @@ let currentHash = $state('');
 	}
 	.attendee-row:hover {
 		background: var(--bg-hover);
+	}
+	.attendee-row.anonymous-row {
+		color: var(--text-secondary);
+		pointer-events: none;
 	}
 
 	/* About section */

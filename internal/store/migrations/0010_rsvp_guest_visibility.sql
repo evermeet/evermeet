@@ -1,0 +1,1 @@
+ALTER TABLE rsvp_envelopes ADD COLUMN guest_visible INTEGER NOT NULL DEFAULT 1;

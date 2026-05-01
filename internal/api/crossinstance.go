@@ -45,6 +45,7 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 	// 1. Compute identity hash and query DHT.
 	var identityHash []byte
 	var localHome bool
+	var localPasskeyAvailable bool
 	switch req.Type {
 	case "", "email":
 		if req.Email == "" {
@@ -58,6 +59,14 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		localHome = existing != nil
+		if existing != nil {
+			passkeys, err := s.db.GetPasskeysByDID(r.Context(), existing.DID)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "local passkey lookup failed")
+				return
+			}
+			localPasskeyAvailable = len(passkeys) > 0
+		}
 	case "ethereum":
 		if req.ChainID == "" || req.Address == "" {
 			jsonErr(w, http.StatusBadRequest, "chain_id and address required")
@@ -153,7 +162,7 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "redirect signing failed")
 		return
 	}
-	delegateURL, err := buildDelegateURL(rec.HomeInstanceURL, foreignSig)
+	delegateURL, err := buildDelegateURL(rec.HomeInstanceURL, foreignSig, req.Type, req.Email, req.ChainID, req.Address)
 	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "delegate URL failed")
 		return
@@ -169,6 +178,9 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 			"id":         instanceMeta.ID,
 			"public_key": base64.RawURLEncoding.EncodeToString(instanceMeta.PublicKey),
 			"verified":   true,
+		},
+		"auth_methods": map[string]any{
+			"passkey": localPasskeyAvailable,
 		},
 	})
 }
@@ -506,7 +518,7 @@ func foreignSigPayload(fs *ForeignInstanceSig) ([]byte, error) {
 	}{fs.ReturnTo, fs.Nonce, fs.EventID, fs.IssuedAt})
 }
 
-func buildDelegateURL(homeURL string, fs *ForeignInstanceSig) (string, error) {
+func buildDelegateURL(homeURL string, fs *ForeignInstanceSig, authType, email, chainID, address string) (string, error) {
 	u, err := url.Parse(strings.TrimRight(homeURL, "/") + "/auth/delegate")
 	if err != nil {
 		return "", err
@@ -520,6 +532,19 @@ func buildDelegateURL(homeURL string, fs *ForeignInstanceSig) (string, error) {
 	q.Set("nonce", fs.Nonce)
 	q.Set("event_id", fs.EventID)
 	q.Set("foreign_sig", string(sigJSON))
+	switch authType {
+	case "", "email":
+		if email != "" {
+			q.Set("method", "email")
+			q.Set("email", email)
+		}
+	case "ethereum":
+		if chainID != "" && address != "" {
+			q.Set("method", "ethereum")
+			q.Set("chain_id", chainID)
+			q.Set("address", address)
+		}
+	}
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }

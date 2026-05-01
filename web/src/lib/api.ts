@@ -51,7 +51,8 @@ export const api = {
 		},
 	},
 	auth: {
-		me: () => request<{ did: string; display_name: string; avatar: string; bio: string }>('/api/auth/me'),
+		me: () => request<AuthUser>('/api/auth/me'),
+		methods: () => request<AuthMethods>('/api/auth/methods'),
 		requestMagicLink: (email: string) =>
 			request<{ status: string; poll_token: string }>('/api/auth/magic-link', {
 				method: 'POST',
@@ -298,6 +299,7 @@ export interface ResolveHomeResponse {
 	foreign_sig: ForeignInstanceSig;
 	delegate_url: string;
 	instance?: ResolvedInstanceInfo;
+	auth_methods?: ResolvedAuthMethods;
 }
 
 export type ResolveHomeRequest =
@@ -308,6 +310,10 @@ export interface ResolvedInstanceInfo {
 	id: string;
 	public_key: string;
 	verified: boolean;
+}
+
+export interface ResolvedAuthMethods {
+	passkey: boolean;
 }
 
 export interface DelegateRequest {
@@ -336,4 +342,39 @@ export interface SignedDelegationToken {
 export interface SIWEStartResponse {
 	message: string;
 	nonce: string;
+}
+
+export interface AuthUser {
+	did: string;
+	display_name: string;
+	avatar: string;
+	bio: string;
+	is_local: boolean;
+	auth_kind: 'local' | 'remote';
+	home_instance_url: string;
+}
+
+export interface AuthMethods {
+	email: {
+		address: string;
+		verified: boolean;
+		linked: boolean;
+	};
+	ethereum: {
+		chain_id: string;
+		address: string;
+		linked: boolean;
+	};
+	passkeys: AuthPasskey[];
+}
+
+export interface AuthPasskey {
+	id: string;
+	attestation_type: string;
+	counter: number;
+	backup_eligible: boolean;
+	backup_state: boolean;
+	user_verified: boolean;
+	user_present: boolean;
+	created_at: string;
 }

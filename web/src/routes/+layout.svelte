@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte.js';
 	import { intl, localeNames, locales, type Locale } from '$lib/i18n.svelte.js';
 	import { theme } from '$lib/theme.svelte.js';
@@ -32,9 +33,10 @@
 
 	function closeMenu() { menuOpen = false; }
 
-	function handleLogout() {
+	async function handleLogout() {
 		closeMenu();
-		auth.logout();
+		await auth.logout();
+		goto('/');
 	}
 
 	function handleClickOutside(e: MouseEvent) {

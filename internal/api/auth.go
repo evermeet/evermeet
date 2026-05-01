@@ -4,10 +4,12 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/identity"
@@ -85,7 +87,7 @@ func (s *Server) handleMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	setSessionCookie(w, sess)
+	s.setSessionCookie(w, sess)
 
 	http.Redirect(w, r, "/auth/verify?approved=1", http.StatusFound)
 }
@@ -119,7 +121,7 @@ func (s *Server) handleMagicLinkStatus(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	setSessionCookie(w, sess)
+	s.setSessionCookie(w, sess)
 
 	jsonOK(w, map[string]string{"status": "signed_in"})
 }
@@ -152,17 +154,6 @@ func (s *Server) ensureMagicLinkSession(ctx context.Context, ml *store.MagicLink
 	return sess, nil
 }
 
-func setSessionCookie(w http.ResponseWriter, sess *store.Session) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    sess.Token,
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Expires:  sess.ExpiresAt,
-	})
-}
-
 func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	did := authDID(r)
 	if did == "" {
@@ -177,25 +168,87 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	homeInstanceURL := user.Endpoint
+	if homeInstanceURL == "" {
+		homeInstanceURL = s.baseURL
+	}
+	isLocal := strings.TrimRight(homeInstanceURL, "/") == strings.TrimRight(s.baseURL, "/")
+
 	jsonOK(w, map[string]any{
-		"did":          user.DID,
-		"display_name": user.DisplayName,
-		"avatar":       user.Avatar,
-		"bio":          user.Bio,
+		"did":               user.DID,
+		"display_name":      user.DisplayName,
+		"avatar":            user.Avatar,
+		"bio":               user.Bio,
+		"is_local":          isLocal,
+		"auth_kind":         map[bool]string{true: "local", false: "remote"}[isLocal],
+		"home_instance_url": homeInstanceURL,
+	})
+}
+
+func (s *Server) handleAuthMethods(w http.ResponseWriter, r *http.Request) {
+	did := authDID(r)
+	if did == "" {
+		jsonErr(w, http.StatusUnauthorized, "not authenticated")
+		return
+	}
+
+	ctx := r.Context()
+	private, err := s.db.GetUserPrivate(ctx, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "private user lookup failed")
+		return
+	}
+	passkeys, err := s.db.GetPasskeysByDID(ctx, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "passkey lookup failed")
+		return
+	}
+
+	passkeyItems := make([]map[string]any, 0, len(passkeys))
+	for _, passkey := range passkeys {
+		passkeyItems = append(passkeyItems, map[string]any{
+			"id":               base64.RawURLEncoding.EncodeToString(passkey.ID),
+			"attestation_type": passkey.AttestationType,
+			"counter":          passkey.Counter,
+			"backup_eligible":  passkey.BackupEligible,
+			"backup_state":     passkey.BackupState,
+			"user_verified":    passkey.UserVerified,
+			"user_present":     passkey.UserPresent,
+			"created_at":       passkey.CreatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+
+	email := ""
+	emailVerified := false
+	siweChainID := ""
+	siweAddress := ""
+	if private != nil {
+		email = private.Email
+		emailVerified = private.EmailVerified
+		siweChainID = private.SIWEChainID
+		siweAddress = private.SIWEAddress
+	}
+
+	jsonOK(w, map[string]any{
+		"email": map[string]any{
+			"address":  email,
+			"verified": emailVerified,
+			"linked":   email != "",
+		},
+		"ethereum": map[string]any{
+			"chain_id": siweChainID,
+			"address":  siweAddress,
+			"linked":   siweChainID != "" && siweAddress != "",
+		},
+		"passkeys": passkeyItems,
 	})
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
-	if cookie, err := r.Cookie("session"); err == nil {
+	if cookie, err := s.sessionCookie(r); err == nil {
 		s.db.DeleteSession(r.Context(), cookie.Value)
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session",
-		Value:   "",
-		Path:    "/",
-		MaxAge:  -1,
-		Expires: time.Unix(0, 0),
-	})
+	s.clearSessionCookie(w)
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
@@ -653,14 +706,56 @@ func (s *Server) createSessionWithDuration(w http.ResponseWriter, ctx context.Co
 		return
 	}
 
+	s.setSessionCookie(w, sess)
+}
+
+const legacySessionCookieName = "session"
+
+func (s *Server) sessionCookieName() string {
+	if s.instanceID == "" {
+		return legacySessionCookieName
+	}
+	return "session_" + s.instanceID
+}
+
+func (s *Server) sessionCookie(r *http.Request) (*http.Cookie, error) {
+	if cookie, err := r.Cookie(s.sessionCookieName()); err == nil {
+		return cookie, nil
+	}
+	return r.Cookie(legacySessionCookieName)
+}
+
+func (s *Server) setSessionCookie(w http.ResponseWriter, sess *store.Session) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    sessionToken,
+		Name:     s.sessionCookieName(),
+		Value:    sess.Token,
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  sess.ExpiresAt,
 	})
+
+	if s.sessionCookieName() != legacySessionCookieName {
+		http.SetCookie(w, &http.Cookie{
+			Name:    legacySessionCookieName,
+			Value:   "",
+			Path:    "/",
+			MaxAge:  -1,
+			Expires: time.Unix(0, 0),
+		})
+	}
+}
+
+func (s *Server) clearSessionCookie(w http.ResponseWriter) {
+	for _, name := range []string{s.sessionCookieName(), legacySessionCookieName} {
+		http.SetCookie(w, &http.Cookie{
+			Name:    name,
+			Value:   "",
+			Path:    "/",
+			MaxAge:  -1,
+			Expires: time.Unix(0, 0),
+		})
+	}
 }
 
 func randomHex(n int) string {

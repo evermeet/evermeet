@@ -95,6 +95,7 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)
 	r.Post("/api/auth/logout", s.handleLogout)
 	r.Get("/api/auth/me", s.handleMe)
+	r.Get("/api/auth/methods", s.requireAuth(s.handleAuthMethods))
 	r.Put("/api/auth/profile", s.requireAuth(s.handleUpdateProfile))
 	r.Get("/api/users/{did}", s.handleGetUser)
 
@@ -154,7 +155,7 @@ func (s *Server) Router() http.Handler {
 // authenticated DID + decrypted private key to the request context.
 func (s *Server) sessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
+		cookie, err := s.sessionCookie(r)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return

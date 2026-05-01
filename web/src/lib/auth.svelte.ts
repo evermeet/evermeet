@@ -1,11 +1,5 @@
 import { api } from './api.js';
-
-interface AuthUser {
-	did: string;
-	display_name: string;
-	avatar: string;
-	bio: string;
-}
+import type { AuthUser } from './api.js';
 
 function createAuthStore() {
 	let user = $state<AuthUser | null>(null);

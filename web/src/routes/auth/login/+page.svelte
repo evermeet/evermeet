@@ -14,11 +14,17 @@
 	let error = $state('');
 	let submitting = $state(false);
 	let ethereumSupported = $state(false);
+	let next = $state('');
 
 	import { onMount } from 'svelte';
 	onMount(() => {
 		ethereumSupported = !!window.ethereum;
+		next = sanitizeNext(new URLSearchParams(window.location.search).get('next') ?? '');
 	});
+
+	function sanitizeNext(value: string) {
+		return value.startsWith('/') && !value.startsWith('//') ? value : '';
+	}
 
 	async function submit(e: Event) {
 		e.preventDefault();
@@ -29,6 +35,7 @@
 			const eventId = new URLSearchParams(window.location.search).get('event_id') ?? '';
 			const params = new URLSearchParams({ method: 'email', email });
 			if (eventId) params.set('event_id', eventId);
+			if (next) params.set('next', next);
 			goto(`/auth/instance?${params.toString()}`);
 		} catch (err: any) {
 			error = err.message;
@@ -41,6 +48,7 @@
 		const eventId = new URLSearchParams(window.location.search).get('event_id') ?? '';
 		const params = new URLSearchParams({ method: 'ethereum' });
 		if (eventId) params.set('event_id', eventId);
+		if (next) params.set('next', next);
 		goto(`/auth/instance?${params.toString()}`);
 	}
 </script>

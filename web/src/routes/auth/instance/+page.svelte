@@ -6,6 +6,7 @@
 	import type { ResolvedInstanceInfo } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import { intl } from '$lib/i18n.svelte.js';
+	import { bufferToBase64, recursiveBase64ToBuffer } from '$lib/webauthn.js';
 
 	declare global {
 		interface Window {
@@ -20,6 +21,9 @@
 	let method = $state<Method>('email');
 	let email = $state('');
 	let eventId = $state('');
+	let next = $state('');
+	let autoEmail = $state(false);
+	let autoEmailRequested = false;
 	let address = $state('');
 	let chainId = $state('');
 	let identity = $state('');
@@ -27,6 +31,7 @@
 	let instance = $state<ResolvedInstanceInfo | null>(null);
 	let delegateURL = $state('');
 	let homeIsCurrentInstance = $state(false);
+	let passkeyAvailable = $state(false);
 	let noHomeFound = $state(false);
 	let sent = $state(false);
 	let magicLinkPollToken = '';
@@ -40,6 +45,8 @@
 		method = params.get('method') === 'ethereum' ? 'ethereum' : 'email';
 		email = params.get('email') ?? '';
 		eventId = params.get('event_id') ?? '';
+		next = sanitizeNext(params.get('next') ?? '');
+		autoEmail = params.get('auto') === '1';
 
 		if (method === 'email') {
 			identity = email;
@@ -57,6 +64,29 @@
 	onDestroy(() => {
 		stopMagicLinkPolling();
 	});
+
+	function sanitizeNext(value: string) {
+		return value.startsWith('/') && !value.startsWith('//') ? value : '';
+	}
+
+	function afterSignInPath() {
+		return next || (eventId ? `/events/${eventId}` : '/');
+	}
+
+	function isDelegationRequest() {
+		return next.startsWith('/auth/delegate?');
+	}
+
+	function delegationReturnHost() {
+		if (!isDelegationRequest()) return '';
+		try {
+			const query = next.split('?')[1] ?? '';
+			const returnTo = new URLSearchParams(query).get('return_to') ?? '';
+			return returnTo ? new URL(returnTo).host : '';
+		} catch {
+			return '';
+		}
+	}
 
 	async function resolveEmail() {
 		await resolveHome({ type: 'email', email, event_id: eventId });
@@ -89,6 +119,7 @@
 		instance = null;
 		delegateURL = '';
 		homeIsCurrentInstance = false;
+		passkeyAvailable = false;
 		noHomeFound = false;
 		try {
 			const resolved = await api.auth.resolveHome(input);
@@ -96,6 +127,11 @@
 			instance = resolved.instance ?? null;
 			delegateURL = resolved.delegate_url;
 			homeIsCurrentInstance = resolved.home_instance_url.replace(/\/$/, '') === window.location.origin.replace(/\/$/, '');
+			passkeyAvailable = !!resolved.auth_methods?.passkey;
+			if (autoEmail && !isDelegationRequest() && method === 'email' && homeIsCurrentInstance && !passkeyAvailable && !autoEmailRequested) {
+				autoEmailRequested = true;
+				await requestLocalMagicLink();
+			}
 		} catch (err: any) {
 			if (String(err.message).includes('not found')) {
 				noHomeFound = true;
@@ -152,7 +188,7 @@
 			if (res.status !== 'signed_in') return;
 			stopMagicLinkPolling();
 			await auth.load();
-			goto(eventId ? `/events/${eventId}` : '/');
+			goto(afterSignInPath());
 		} catch (err: any) {
 			stopMagicLinkPolling();
 			error = err.message;
@@ -175,9 +211,40 @@
 			}) as string;
 			await api.auth.siwe.finish(message, signature);
 			await auth.load();
-			goto(eventId ? `/events/${eventId}` : '/');
+			goto(afterSignInPath());
 		} catch (err: any) {
 			error = err.code === 4001 ? intl.t('auth.walletCancelled') : err.message;
+		} finally {
+			submitting = false;
+		}
+	}
+
+	async function signInWithPasskeyHere() {
+		submitting = true;
+		error = '';
+		try {
+			const { data: options, session } = await api.auth.passkey.loginStart(email || undefined);
+			const credential: any = await navigator.credentials.get({
+				publicKey: recursiveBase64ToBuffer(options.publicKey)
+			});
+
+			const finishData = {
+				id: credential.id,
+				rawId: bufferToBase64(credential.rawId),
+				type: credential.type,
+				response: {
+					authenticatorData: bufferToBase64(credential.response.authenticatorData),
+					clientDataJSON: bufferToBase64(credential.response.clientDataJSON),
+					signature: bufferToBase64(credential.response.signature),
+					userHandle: credential.response.userHandle ? bufferToBase64(credential.response.userHandle) : null
+				}
+			};
+
+			await api.auth.passkey.loginFinish(finishData, session);
+			await auth.load();
+			goto(afterSignInPath());
+		} catch (err: any) {
+			error = err.name === 'NotAllowedError' ? intl.t('auth.signInCancelled') : err.message;
 		} finally {
 			submitting = false;
 		}
@@ -209,8 +276,10 @@
 		<p class="muted">{intl.t('auth.linkExpires')}</p>
 		<p class="muted">{intl.t('auth.magicLinkWaiting')}</p>
 	{:else}
-		<h1>{intl.t('auth.chooseHomeTitle')}</h1>
-		<p class="muted">{intl.t('auth.chooseHomeHelp')}</p>
+		<h1>{isDelegationRequest() ? intl.t('auth.approveSignInTitle') : intl.t('auth.chooseHomeTitle')}</h1>
+		<p class="muted">
+			{isDelegationRequest() ? intl.t('auth.approveSignInHelp') : intl.t('auth.chooseHomeHelp')}
+		</p>
 
 		{#if loading}
 			<p class="muted">{method === 'ethereum' ? intl.t('auth.connectingWallet') : intl.t('auth.lookingUp')}</p>
@@ -226,7 +295,32 @@
 			</button>
 		{/if}
 
-		{#if discoveredHome}
+		{#if discoveredHome && isDelegationRequest()}
+			<div class="consent-card">
+				<div class="consent-requester">
+					<Avatar did={delegationReturnHost() || next} size={56} rounded={false} />
+					<div>
+						<p class="eyebrow">{intl.t('auth.requestingInstance')}</p>
+						<h2>{delegationReturnHost() || intl.t('auth.unknownInstance')}</h2>
+					</div>
+				</div>
+				<div class="consent-detail">
+					<span>{intl.t('auth.signInAs')}</span>
+					<strong>{identity}</strong>
+				</div>
+				<p class="muted">{intl.t('auth.approveSignInDescription')}</p>
+				<div class="actions" class:two-up={method === 'email' && passkeyAvailable}>
+					<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
+						{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
+					</button>
+					{#if method === 'email' && passkeyAvailable}
+						<button type="button" class="secondary" onclick={signInWithPasskeyHere} disabled={submitting}>
+							{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+						</button>
+					{/if}
+				</div>
+			</div>
+		{:else if discoveredHome}
 			<div class="instance-card">
 				<div class="instance-summary">
 					<Avatar did={instance?.public_key ?? discoveredHome} size={64} rounded={false} />
@@ -260,10 +354,15 @@
 					<p class="verified">{intl.t('auth.instanceVerified')}</p>
 				{/if}
 				{#if homeIsCurrentInstance}
-					<div class="actions">
+					<div class="actions" class:two-up={method === 'email' && passkeyAvailable}>
 						<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
-							{submitting ? intl.t('auth.sending') : intl.t('auth.continueLocal')}
+							{submitting ? intl.t('auth.sending') : (method === 'email' && passkeyAvailable ? intl.t('auth.continueEmailLink') : intl.t('auth.continueLocal'))}
 						</button>
+						{#if method === 'email' && passkeyAvailable}
+							<button type="button" class="secondary" onclick={signInWithPasskeyHere} disabled={submitting}>
+								{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+							</button>
+						{/if}
 					</div>
 				{:else}
 					<div class="actions two-up">
@@ -334,6 +433,44 @@
 		background: var(--bg-card);
 	}
 	.instance-card p { margin-bottom: 0.5rem; }
+	.consent-card {
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--radius-xl);
+		padding: 1.25rem;
+		margin-top: 1rem;
+		background: var(--bg-card);
+	}
+	.consent-requester {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+	.consent-requester h2 {
+		margin: 0.1rem 0 0;
+		color: var(--text);
+		font-size: 1.25rem;
+		word-break: break-word;
+	}
+	.consent-requester p { margin: 0; }
+	.consent-detail {
+		display: grid;
+		gap: 0.15rem;
+		padding: 0.85rem;
+		margin-bottom: 0.75rem;
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--radius-md);
+		background: var(--bg);
+	}
+	.consent-detail span {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.consent-detail strong {
+		color: var(--text);
+		word-break: break-word;
+	}
 	.instance-summary {
 		display: flex;
 		gap: 1rem;

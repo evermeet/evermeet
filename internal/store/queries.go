@@ -769,6 +769,24 @@ func (d *DB) ListRSVPsForEvent(ctx context.Context, eventID string) ([]*RSVPEnve
 	return out, rows.Err()
 }
 
+func (d *DB) GetRSVPForEventSender(ctx context.Context, eventID, senderDID string) (*RSVPEnvelope, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT id, event_id, sender_did, payload, status, received_at
+		 FROM rsvp_envelopes
+		 WHERE event_id = ? AND sender_did = ?
+		 ORDER BY received_at DESC
+		 LIMIT 1`, eventID, senderDID)
+	e := &RSVPEnvelope{}
+	var receivedAt string
+	if err := row.Scan(&e.ID, &e.EventID, &e.SenderDID, &e.Payload, &e.Status, &receivedAt); err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	e.ReceivedAt, _ = time.Parse(time.RFC3339, receivedAt)
+	return e, nil
+}
+
 // ---- Sessions ----
 
 type Session struct {

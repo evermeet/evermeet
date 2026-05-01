@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
@@ -87,10 +88,19 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if err := s.applyPublicRSVPCount(ctx, id, &ms); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "load rsvp count failed")
+		return
+	}
+	payload, err := json.Marshal(ms)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "render event state")
+		return
+	}
 
 	jsonOK(w, map[string]any{
 		"id":      id,
-		"state":   json.RawMessage(state.Payload),
+		"state":   json.RawMessage(payload),
 		"hash":    state.Hash,
 		"founded": json.RawMessage(founding.Payload),
 	})
@@ -148,6 +158,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		Visibility   string           `json:"visibility"`
 		RSVPLimit    int              `json:"rsvp_limit"`
 		RSVPApproval string           `json:"rsvp_approval"`
+		RSVPVisible  *bool            `json:"rsvp_visible"`
 		Tags         []string         `json:"tags"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -204,6 +215,7 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		Visibility:   req.Visibility,
 		RSVPLimit:    req.RSVPLimit,
 		RSVPApproval: req.RSVPApproval,
+		RSVPVisible:  req.RSVPVisible,
 		Tags:         req.Tags,
 	}
 	if req.EndsAt != "" {
@@ -294,6 +306,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		Visibility   string           `json:"visibility"`
 		RSVPLimit    int              `json:"rsvp_limit"`
 		RSVPApproval string           `json:"rsvp_approval"`
+		RSVPVisible  *bool            `json:"rsvp_visible"`
 		Tags         []string         `json:"tags"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -350,6 +363,11 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 			owners = append(owners, events.GovernanceOwner{DID: owner, Role: "owner"})
 		}
 	}
+	rsvpVisible := req.RSVPVisible
+	if rsvpVisible == nil {
+		currentVisible := ms.RSVP.Visible == nil || *ms.RSVP.Visible
+		rsvpVisible = &currentVisible
+	}
 
 	f := events.Fields{
 		Title:        req.Title,
@@ -360,6 +378,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 		Visibility:   req.Visibility,
 		RSVPLimit:    req.RSVPLimit,
 		RSVPApproval: req.RSVPApproval,
+		RSVPVisible:  rsvpVisible,
 		Tags:         req.Tags,
 		CalendarID:   nextCalendar,
 		Owners:       owners,
@@ -469,6 +488,22 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 	}
 	var ms events.MutableState
 	json.Unmarshal([]byte(state.Payload), &ms)
+	if ms.RSVP.Visible != nil && !*ms.RSVP.Visible {
+		jsonErr(w, http.StatusForbidden, "rsvp is not visible for this event")
+		return
+	}
+	existing, err := s.db.GetRSVPForEventSender(ctx, id, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "check rsvp status failed")
+		return
+	}
+	if existing != nil {
+		jsonOK(w, map[string]any{
+			"status":      rsvpEffectiveStatus(existing.Status, ms.RSVP.Approval),
+			"received_at": existing.ReceivedAt,
+		})
+		return
+	}
 
 	// 2. Get organizer's public key
 	organizer, err := s.db.GetUser(ctx, ms.Organizer)
@@ -504,7 +539,7 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 		EventID:    id,
 		SenderDID:  did,
 		Payload:    encrypted,
-		Status:     "pending",
+		Status:     rsvpInitialStatus(ms.RSVP.Approval),
 		ReceivedAt: time.Now(),
 	}
 	if err := s.db.InsertRSVPEnvelope(ctx, envelope); err != nil {
@@ -512,7 +547,40 @@ func (s *Server) handleRSVP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonOK(w, map[string]string{"status": "ok"})
+	jsonOK(w, map[string]any{
+		"status":      envelope.Status,
+		"received_at": envelope.ReceivedAt,
+	})
+}
+
+func (s *Server) handleMyRSVPStatus(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	did := authDID(r)
+	ctx := r.Context()
+
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+	var ms events.MutableState
+	json.Unmarshal([]byte(state.Payload), &ms)
+
+	envelope, err := s.db.GetRSVPForEventSender(ctx, id, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "check rsvp status failed")
+		return
+	}
+	if envelope == nil {
+		jsonOK(w, map[string]any{"has_rsvp": false})
+		return
+	}
+
+	jsonOK(w, map[string]any{
+		"has_rsvp":    true,
+		"status":      rsvpEffectiveStatus(envelope.Status, ms.RSVP.Approval),
+		"received_at": envelope.ReceivedAt,
+	})
 }
 
 func (s *Server) handleListRSVPs(w http.ResponseWriter, r *http.Request) {
@@ -556,11 +624,40 @@ func (s *Server) handleListRSVPs(w http.ResponseWriter, r *http.Request) {
 		out = append(out, map[string]any{
 			"id":          env.ID,
 			"sender_did":  env.SenderDID,
-			"status":      env.Status,
+			"status":      rsvpEffectiveStatus(env.Status, ms.RSVP.Approval),
 			"received_at": env.ReceivedAt,
 			"rsvp":        rsvp,
 		})
 	}
 
 	jsonOK(w, out)
+}
+
+func rsvpInitialStatus(approval string) string {
+	if approval == "manual" {
+		return "pending"
+	}
+	return "confirmed"
+}
+
+func rsvpEffectiveStatus(status, approval string) string {
+	if status == "pending" && approval != "manual" {
+		return "confirmed"
+	}
+	return status
+}
+
+func (s *Server) applyPublicRSVPCount(ctx context.Context, eventID string, ms *events.MutableState) error {
+	envelopes, err := s.db.ListRSVPsForEvent(ctx, eventID)
+	if err != nil {
+		return err
+	}
+	count := 0
+	for _, env := range envelopes {
+		if rsvpEffectiveStatus(env.Status, ms.RSVP.Approval) == "confirmed" {
+			count++
+		}
+	}
+	ms.RSVP.Count = count
+	return nil
 }

@@ -15,6 +15,7 @@
 	let calendarId = $state('');
 	let visibility = $state<'public' | 'unlisted' | 'private'>('public');
 	let rsvpLimit = $state(0);
+	let rsvpVisible = $state(true);
 	let importOpen = $state(false);
 	let importUrl = $state('');
 	let importFetching = $state(false);
@@ -48,6 +49,7 @@
 				location: locationName ? { name: locationName } : undefined,
 				visibility,
 				rsvp_limit: rsvpLimit > 0 ? rsvpLimit : undefined,
+				rsvp_visible: rsvpVisible,
 			});
 			goto(`/events/${res.id}`);
 		} catch (e: any) {
@@ -186,6 +188,11 @@
 			</div>
 		</div>
 
+		<label class="checkbox-field">
+			<input type="checkbox" bind:checked={rsvpVisible} />
+			<span>{intl.t('events.form.rsvpVisible')}</span>
+		</label>
+
 		{#if error}
 			<p class="error">{error}</p>
 		{/if}
@@ -229,6 +236,8 @@
 
 	form { display: flex; flex-direction: column; gap: 1.5rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
+	.checkbox-field { display: flex; align-items: center; gap: 0.6rem; }
+	.checkbox-field input { width: auto; }
 	label, .field-label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
 	input, select, textarea {

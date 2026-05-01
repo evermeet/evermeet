@@ -16,6 +16,7 @@ import { api, type Calendar } from '$lib/api.js';
 	let locationName = $state('');
 	let visibility = $state<'public' | 'unlisted' | 'private'>('public');
 	let rsvpLimit = $state(0);
+	let rsvpVisible = $state(true);
 let calendars = $state<Calendar[]>([]);
 let calendarId = $state('');
 let owners = $state<string[]>([]);
@@ -47,6 +48,7 @@ let deleting = $state(false);
 			locationName = e.location?.name || '';
 			visibility = e.visibility;
 			rsvpLimit = e.rsvp?.limit || 0;
+			rsvpVisible = e.rsvp?.visible ?? true;
 			calendarId = e.calendar ?? '';
 			owners = (e.governance?.owners ?? []).map((o: any) => o.did).filter(Boolean);
 			if (owners.length === 0 && auth.user?.did) {
@@ -89,6 +91,7 @@ let deleting = $state(false);
 				owners: cleanedOwners,
 				visibility,
 				rsvp_limit: rsvpLimit > 0 ? rsvpLimit : undefined,
+				rsvp_visible: rsvpVisible,
 			});
 			goto(`/events/${id}`);
 		} catch (e: any) {
@@ -207,6 +210,11 @@ let deleting = $state(false);
 				</div>
 			</div>
 
+			<label class="checkbox-field">
+				<input type="checkbox" bind:checked={rsvpVisible} />
+				<span>Show RSVP on event page</span>
+			</label>
+
 			<div class="actions">
 				<button type="submit" disabled={saving}>
 					{saving ? 'Saving…' : 'Save Changes'}
@@ -236,6 +244,8 @@ let deleting = $state(false);
 
 	form { display: flex; flex-direction: column; gap: 1.5rem; }
 	.field { display: flex; flex-direction: column; gap: 0.4rem; }
+	.checkbox-field { display: flex; align-items: center; gap: 0.6rem; }
+	.checkbox-field input { width: auto; }
 	label, .field-label { font-size: 0.9rem; font-weight: 600; color: var(--text-label); }
 
 	input, select, textarea {

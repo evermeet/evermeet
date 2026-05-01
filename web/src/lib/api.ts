@@ -149,8 +149,10 @@ export const api = {
 				method: 'DELETE',
 			}),
 		listRSVPs: (id: string) => request<any[]>(`/api/events/${id}/rsvps`),
-		rsvp: (id: string, data: { name: string; email: string; note?: string }) =>
-			request<{ status: string }>(`/api/events/${id}/rsvp`, {
+		myRSVPStatus: (id: string) =>
+			request<MyRSVPStatus>(`/api/events/${id}/rsvp/status`),
+		rsvp: (id: string, data: { name?: string; email?: string; note?: string }) =>
+			request<{ status: string; received_at?: string }>(`/api/events/${id}/rsvp`, {
 				method: 'POST',
 				body: JSON.stringify(data),
 			}),
@@ -196,7 +198,7 @@ export interface Event {
 	ends_at?: string;
 	location?: { name: string; address?: string; lat?: number; lon?: number };
 	visibility: 'public' | 'unlisted' | 'private';
-	rsvp: { limit: number; count: number; deadline?: string; approval: string };
+	rsvp: { limit: number; count: number; deadline?: string; approval: string; visible?: boolean };
 	tags?: string[];
 	updated_at: string;
 }
@@ -207,6 +209,12 @@ export interface EventRevision {
 	is_current: boolean;
 	created_at: string;
 	state: Event;
+}
+
+export interface MyRSVPStatus {
+	has_rsvp: boolean;
+	status?: 'pending' | 'confirmed' | 'rejected' | 'waitlisted' | 'cancelled' | string;
+	received_at?: string;
 }
 
 export type CalendarLinkType = 'website' | 'twitter' | 'instagram' | 'youtube' | 'tiktok' | 'linkedin' | 'bluesky' | 'nostr' | 'facebook';
@@ -269,6 +277,7 @@ export interface CreateEventInput {
 	location?: { name: string; address?: string };
 	visibility?: string;
 	rsvp_limit?: number;
+	rsvp_visible?: boolean;
 	tags?: string[];
 }
 

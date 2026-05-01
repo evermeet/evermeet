@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { api, type CalendarDetail, type Event } from '$lib/api.js';
+	import { api, type CalendarDetail, type Event as EvermeetEvent, type MyRSVPStatus } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { marked } from 'marked';
 
-	let event = $state<any>(null);
+	let event = $state<EvermeetEvent | null>(null);
 	let founding = $state<any>(null);
 let calendar = $state<CalendarDetail | null>(null);
 let currentHash = $state('');
@@ -17,9 +17,11 @@ let currentHash = $state('');
 
 	let rsvps = $state<any[]>([]);
 	let rsvpSent = $state(false);
+	let myRsvpStatus = $state<MyRSVPStatus | null>(null);
 	let rsvpName = $state('');
 	let rsvpEmail = $state('');
 	let rsvpNote = $state('');
+	let showRsvpDetails = $state(false);
 	let rsvpSubmitting = $state(false);
 
 	const id = $derived($page.params.id);
@@ -66,6 +68,10 @@ let currentHash = $state('');
 			);
 			hosts = hostProfiles;
 
+			await waitForAuth();
+			if (auth.user) {
+				myRsvpStatus = await api.events.myRSVPStatus(id);
+			}
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
 			}
@@ -91,12 +97,48 @@ let currentHash = $state('');
 		return auth.user?.did === event?.organizer;
 	}
 
-	async function submitRSVP(e: Event) {
-		e.preventDefault();
+	function canShowRSVP() {
+		return isOrganizer() || event?.rsvp?.visible !== false;
+	}
+
+	async function waitForAuth() {
+		if (!auth.loading) return;
+		await new Promise<void>((resolve) => {
+			const timer = setInterval(() => {
+				if (!auth.loading) {
+					clearInterval(timer);
+					resolve();
+				}
+			}, 20);
+		});
+	}
+
+	function rsvpStatusText(status?: string) {
+		if (status === 'confirmed') return intl.t('events.rsvpAccepted');
+		if (status === 'rejected') return intl.t('events.rsvpRejected');
+		if (status === 'waitlisted') return intl.t('events.rsvpWaitlisted');
+		if (status === 'cancelled') return intl.t('events.rsvpCancelled');
+		return intl.t('events.rsvpPending');
+	}
+
+	async function submitRSVP(e?: SubmitEvent) {
+		e?.preventDefault();
 		rsvpSubmitting = true;
 		error = '';
 		try {
-			await api.events.rsvp(id, { name: rsvpName, email: rsvpEmail, note: rsvpNote });
+			const hadRsvp = myRsvpStatus?.has_rsvp === true;
+			const res = await api.events.rsvp(id, {
+				name: rsvpName || auth.user?.display_name || '',
+				email: rsvpEmail,
+				note: rsvpNote
+			});
+			myRsvpStatus = { has_rsvp: true, status: res.status, received_at: res.received_at };
+			if (!hadRsvp && res.status === 'confirmed' && event?.rsvp) {
+				event = { ...event, rsvp: { ...event.rsvp, count: event.rsvp.count + 1 } };
+			}
+			if (isOrganizer()) {
+				rsvps = await api.events.listRSVPs(id);
+			}
 			rsvpSent = true;
 		} catch (e: any) {
 			error = e.message;
@@ -202,7 +244,7 @@ let currentHash = $state('');
 				</div>
 
 				<!-- Going -->
-				{#if event.rsvp?.count !== undefined}
+				{#if canShowRSVP() && event.rsvp?.count !== undefined}
 					<div class="side-section">
 						<p class="side-label">{intl.t('events.going', { count: event.rsvp.count, limit: event.rsvp.limit ? `/${event.rsvp.limit}` : '' })}</p>
 					</div>
@@ -265,52 +307,89 @@ let currentHash = $state('');
 				{/if}
 
 				<!-- RSVP panel -->
-				<div class="rsvp-panel">
-					{#if isOrganizer()}
-						<p class="panel-label">{intl.t('events.rsvps', { count: rsvps.length })}</p>
-						{#if rsvps.length === 0}
-							<p class="muted">{intl.t('events.noRsvps')}</p>
-						{:else}
-							<div class="rsvp-list">
-								{#each rsvps as env}
-									<div class="rsvp-item">
-										<div class="rsvp-head">
-											<strong>{env.rsvp.name}</strong>
-											<span class="muted">{env.rsvp.email}</span>
+				{#if canShowRSVP() || myRsvpStatus?.has_rsvp}
+					<div class="rsvp-panel">
+						{#if isOrganizer()}
+							<p class="panel-label">{intl.t('events.register')}</p>
+							{#if auth.user && (myRsvpStatus?.has_rsvp || rsvpSent)}
+								<div class="success-box">
+									<strong>{rsvpStatusText(myRsvpStatus?.status)}</strong>
+									<p>{intl.t('events.rsvpPrivateStatus')}</p>
+								</div>
+							{:else if auth.user}
+								<button type="button" class="rsvp-btn" onclick={() => submitRSVP()} disabled={rsvpSubmitting}>
+									{rsvpSubmitting ? intl.t('auth.sending') : intl.t('events.confirmRsvp')}
+								</button>
+								<button type="button" class="details-toggle" onclick={() => showRsvpDetails = !showRsvpDetails}>
+									{showRsvpDetails ? intl.t('events.hideRsvpDetails') : intl.t('events.addRsvpDetails')}
+								</button>
+								{#if showRsvpDetails}
+									<form class="rsvp-form" onsubmit={submitRSVP}>
+										<div class="form-row">
+											<input type="text" bind:value={rsvpName} placeholder={intl.t('events.yourName')} />
+											<input type="email" bind:value={rsvpEmail} placeholder={intl.t('common.email')} />
 										</div>
-										{#if env.rsvp.note}
-											<p class="rsvp-note">{env.rsvp.note}</p>
-										{/if}
-										<div class="rsvp-meta">
-											<code>{env.sender_did.slice(0, 16)}…</code>
-											<span>{new Date(env.received_at).toLocaleDateString(intl.dateLocale())}</span>
+										<textarea bind:value={rsvpNote} placeholder={intl.t('events.noteToOrganizer')}></textarea>
+										<button type="submit" class="rsvp-btn secondary" disabled={rsvpSubmitting}>
+											{rsvpSubmitting ? intl.t('auth.sending') : intl.t('events.confirmRsvpWithDetails')}
+										</button>
+									</form>
+								{/if}
+							{/if}
+							<div class="rsvp-section-divider"></div>
+							<p class="panel-label">{intl.t('events.rsvps', { count: rsvps.length })}</p>
+							{#if rsvps.length === 0}
+								<p class="muted">{intl.t('events.noRsvps')}</p>
+							{:else}
+								<div class="rsvp-list">
+									{#each rsvps as env}
+										<div class="rsvp-item">
+											<div class="rsvp-head">
+												<strong>{env.rsvp.name}</strong>
+												<span class="muted">{env.rsvp.email}</span>
+											</div>
+											{#if env.rsvp.note}
+												<p class="rsvp-note">{env.rsvp.note}</p>
+											{/if}
+											<div class="rsvp-meta">
+												<code>{env.sender_did.slice(0, 16)}…</code>
+												<span>{new Date(env.received_at).toLocaleDateString(intl.dateLocale())}</span>
+											</div>
 										</div>
-									</div>
-								{/each}
+									{/each}
+								</div>
+							{/if}
+						{:else if auth.user && (myRsvpStatus?.has_rsvp || rsvpSent)}
+							<div class="success-box">
+								<strong>{rsvpStatusText(myRsvpStatus?.status)}</strong>
+								<p>{intl.t('events.rsvpPrivateStatus')}</p>
 							</div>
-						{/if}
-					{:else if rsvpSent}
-						<div class="success-box">
-							<strong>{intl.t('events.rsvpSent')}</strong>
-							<p>{intl.t('events.rsvpDelivered')}</p>
-						</div>
-					{:else if auth.user}
-						<p class="panel-label">{intl.t('events.register')}</p>
-						<form class="rsvp-form" onsubmit={submitRSVP}>
-							<div class="form-row">
-								<input type="text" bind:value={rsvpName} placeholder={intl.t('events.yourName')} required />
-								<input type="email" bind:value={rsvpEmail} placeholder={intl.t('common.email')} required />
-							</div>
-							<textarea bind:value={rsvpNote} placeholder={intl.t('events.noteToOrganizer')}></textarea>
-							<button type="submit" class="rsvp-btn" disabled={rsvpSubmitting}>
+						{:else if auth.user}
+							<p class="panel-label">{intl.t('events.register')}</p>
+							<button type="button" class="rsvp-btn" onclick={() => submitRSVP()} disabled={rsvpSubmitting}>
 								{rsvpSubmitting ? intl.t('auth.sending') : intl.t('events.confirmRsvp')}
 							</button>
-						</form>
-					{:else}
-						<p class="panel-label">{intl.t('events.register')}</p>
-						<a href="/auth/login" class="rsvp-btn">{intl.t('events.signInToRsvp')}</a>
-					{/if}
-				</div>
+							<button type="button" class="details-toggle" onclick={() => showRsvpDetails = !showRsvpDetails}>
+								{showRsvpDetails ? intl.t('events.hideRsvpDetails') : intl.t('events.addRsvpDetails')}
+							</button>
+							{#if showRsvpDetails}
+								<form class="rsvp-form" onsubmit={submitRSVP}>
+									<div class="form-row">
+										<input type="text" bind:value={rsvpName} placeholder={intl.t('events.yourName')} />
+										<input type="email" bind:value={rsvpEmail} placeholder={intl.t('common.email')} />
+									</div>
+									<textarea bind:value={rsvpNote} placeholder={intl.t('events.noteToOrganizer')}></textarea>
+									<button type="submit" class="rsvp-btn secondary" disabled={rsvpSubmitting}>
+										{rsvpSubmitting ? intl.t('auth.sending') : intl.t('events.confirmRsvpWithDetails')}
+									</button>
+								</form>
+							{/if}
+						{:else}
+							<p class="panel-label">{intl.t('events.register')}</p>
+							<a href="/auth/login" class="rsvp-btn">{intl.t('events.signInToRsvp')}</a>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- About -->
 				{#if event.description}
@@ -596,6 +675,22 @@ let currentHash = $state('');
 		display: block;
 	}
 	.rsvp-btn:disabled { opacity: 0.5; }
+	.rsvp-btn.secondary {
+		background: var(--bg-btn-secondary);
+		color: var(--text-btn-secondary);
+		border: 1px solid var(--border-input);
+	}
+	.details-toggle {
+		border: none;
+		background: transparent;
+		color: var(--text-link);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+		padding: 0;
+		text-align: left;
+	}
 
 	.rsvp-form { display: flex; flex-direction: column; gap: 0.6rem; }
 	.form-row { display: flex; gap: 0.6rem; }
@@ -614,6 +709,10 @@ let currentHash = $state('');
 	textarea { min-height: 70px; resize: vertical; }
 
 	.rsvp-list { display: flex; flex-direction: column; gap: 0.75rem; }
+	.rsvp-section-divider {
+		border-top: 1px solid var(--border-subtle);
+		margin: 0.25rem 0;
+	}
 	.rsvp-item {
 		padding: 0.9rem 1rem;
 		border: 1px solid var(--border-card);

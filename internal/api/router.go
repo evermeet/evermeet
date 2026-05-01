@@ -127,6 +127,7 @@ func (s *Server) Router() http.Handler {
 	r.Put("/api/events/{id}", s.requireAuth(s.handleUpdateEvent))
 	r.Delete("/api/events/{id}", s.requireAuth(s.handleDeleteEvent))
 	r.Post("/api/events/{id}/rsvp", s.requireAuth(s.handleRSVP))
+	r.Get("/api/events/{id}/rsvp/status", s.requireAuth(s.handleMyRSVPStatus))
 	r.Get("/api/events/{id}/rsvps", s.requireAuth(s.handleListRSVPs))
 
 	// Users

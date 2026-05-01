@@ -13,12 +13,12 @@ import (
 // FoundingDoc is hashed to produce the permanent event ID.
 // It is immutable — stored once, never modified.
 type FoundingDoc struct {
-	Type      string  `json:"type"`       // always "event"
-	Organizer string  `json:"organizer"`  // did:em: of creator
-	Calendar  *string `json:"calendar"`   // optional calendar ID
-	CreatedAt string  `json:"created_at"`
-	Nonce     string  `json:"nonce"` // random hex, ensures uniqueness
-	InstanceID string `json:"instance_id,omitempty"`
+	Type       string  `json:"type"`      // always "event"
+	Organizer  string  `json:"organizer"` // did:em: of creator
+	Calendar   *string `json:"calendar"`  // optional calendar ID
+	CreatedAt  string  `json:"created_at"`
+	Nonce      string  `json:"nonce"` // random hex, ensures uniqueness
+	InstanceID string  `json:"instance_id,omitempty"`
 }
 
 // Location is the physical or virtual location of an event.
@@ -36,6 +36,7 @@ type RSVPPolicy struct {
 	Count    int    `json:"count"`
 	Deadline string `json:"deadline,omitempty"`
 	Approval string `json:"approval"` // auto | manual
+	Visible  *bool  `json:"visible,omitempty"`
 }
 
 // GovernanceOwner is one entry in the governance block.
@@ -58,22 +59,22 @@ type Sig struct {
 
 // MutableState is the signed, updateable part of an event record.
 type MutableState struct {
-	ID          string      `json:"id"`
-	Prev        string      `json:"prev,omitempty"`
-	Organizer   string      `json:"organizer"`
-	Calendar    *string     `json:"calendar,omitempty"`
-	Title       string      `json:"title"`
-	Description string      `json:"description,omitempty"`
-	CoverURL    string      `json:"cover_url,omitempty"`
-	StartsAt    string      `json:"starts_at"`
-	EndsAt      string      `json:"ends_at,omitempty"`
-	Location    *Location   `json:"location,omitempty"`
-	Governance  Governance  `json:"governance"`
-	RSVP        RSVPPolicy  `json:"rsvp"`
-	Visibility  string      `json:"visibility"` // public | unlisted | private
-	Tags        []string    `json:"tags,omitempty"`
-	UpdatedAt   string      `json:"updated_at"`
-	Sigs        []Sig       `json:"sigs"`
+	ID          string     `json:"id"`
+	Prev        string     `json:"prev,omitempty"`
+	Organizer   string     `json:"organizer"`
+	Calendar    *string    `json:"calendar,omitempty"`
+	Title       string     `json:"title"`
+	Description string     `json:"description,omitempty"`
+	CoverURL    string     `json:"cover_url,omitempty"`
+	StartsAt    string     `json:"starts_at"`
+	EndsAt      string     `json:"ends_at,omitempty"`
+	Location    *Location  `json:"location,omitempty"`
+	Governance  Governance `json:"governance"`
+	RSVP        RSVPPolicy `json:"rsvp"`
+	Visibility  string     `json:"visibility"` // public | unlisted | private
+	Tags        []string   `json:"tags,omitempty"`
+	UpdatedAt   string     `json:"updated_at"`
+	Sigs        []Sig      `json:"sigs"`
 }
 
 // Fields is the user-supplied input when creating or updating an event.
@@ -89,6 +90,7 @@ type Fields struct {
 	Visibility   string
 	RSVPLimit    int
 	RSVPApproval string
+	RSVPVisible  *bool
 	RSVPDeadline *time.Time
 	Tags         []string
 }
@@ -103,11 +105,11 @@ func New(organizerDID string, priv ed25519.PrivateKey, homeHost string, f Fields
 
 	now := time.Now().UTC()
 	founding := &FoundingDoc{
-		Type:      "event",
-		Organizer: organizerDID,
-		Calendar:  f.CalendarID,
-		CreatedAt: now.Format(time.RFC3339),
-		Nonce:     hex.EncodeToString(nonce),
+		Type:       "event",
+		Organizer:  organizerDID,
+		Calendar:   f.CalendarID,
+		CreatedAt:  now.Format(time.RFC3339),
+		Nonce:      hex.EncodeToString(nonce),
 		InstanceID: homeHost,
 	}
 
@@ -192,10 +194,15 @@ func buildState(id, prev, signerDID string, priv ed25519.PrivateKey, f Fields, n
 	if approval == "" {
 		approval = "auto"
 	}
+	visible := true
+	if f.RSVPVisible != nil {
+		visible = *f.RSVPVisible
+	}
 
 	rsvp := RSVPPolicy{
 		Limit:    f.RSVPLimit,
 		Approval: approval,
+		Visible:  &visible,
 	}
 	if f.RSVPDeadline != nil {
 		rsvp.Deadline = f.RSVPDeadline.UTC().Format(time.RFC3339)

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { api, type CalendarDetail, type Event as EvermeetEvent, type MyRSVPStatus } from '$lib/api.js';
+	import { api, type CalendarDetail, type Event as EvermeetEvent, type EventAttendee, type MyRSVPStatus } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import { intl } from '$lib/i18n.svelte.js';
 	import Avatar from '$lib/components/Avatar.svelte';
@@ -12,6 +12,8 @@
 let calendar = $state<CalendarDetail | null>(null);
 let currentHash = $state('');
 	let hosts = $state<{ did: string; displayName: string; avatar: string }[]>([]);
+	let attendees = $state<EventAttendee[]>([]);
+	let showAttendees = $state(false);
 	let loading = $state(true);
 	let error = $state('');
 
@@ -67,6 +69,10 @@ let currentHash = $state('');
 				})
 			);
 			hosts = hostProfiles;
+			if (event.rsvp?.visible !== false) {
+				const attendeeRes = await api.events.attendees(id);
+				attendees = attendeeRes.attendees ?? [];
+			}
 
 			await waitForAuth();
 			if (auth.user) {
@@ -139,12 +145,30 @@ let currentHash = $state('');
 			if (isOrganizer()) {
 				rsvps = await api.events.listRSVPs(id);
 			}
+			if (event?.rsvp?.visible !== false) {
+				const attendeeRes = await api.events.attendees(id);
+				attendees = attendeeRes.attendees ?? [];
+				if (event?.rsvp) {
+					event = { ...event, rsvp: { ...event.rsvp, count: attendeeRes.count } };
+				}
+			}
 			rsvpSent = true;
 		} catch (e: any) {
 			error = e.message;
 		} finally {
 			rsvpSubmitting = false;
 		}
+	}
+
+	function attendeeSummary() {
+		const names = attendees.map((attendee) => attendee.display_name || attendee.did);
+		if (names.length === 0) return '';
+		if (names.length === 1) return intl.t('events.attendeeSummaryOne', { name: names[0] });
+		if (names.length === 2) return intl.t('events.attendeeSummaryTwo', { first: names[0], second: names[1] });
+		return intl.t('events.attendeeSummaryMany', {
+			names: `${names[0]}, ${names[1]}`,
+			count: names.length - 2
+		});
 	}
 </script>
 
@@ -247,6 +271,16 @@ let currentHash = $state('');
 				{#if canShowRSVP() && event.rsvp?.count !== undefined}
 					<div class="side-section">
 						<p class="side-label">{intl.t('events.going', { count: event.rsvp.count, limit: event.rsvp.limit ? `/${event.rsvp.limit}` : '' })}</p>
+						{#if attendees.length > 0}
+							<button type="button" class="attendee-summary" onclick={() => (showAttendees = true)}>
+								<div class="avatar-stack" aria-hidden="true">
+									{#each attendees.slice(0, 6) as attendee}
+										<Avatar src={attendee.avatar || ''} did={attendee.did} size={32} />
+									{/each}
+								</div>
+								<span>{attendeeSummary()}</span>
+							</button>
+						{/if}
 					</div>
 				{/if}
 
@@ -404,6 +438,27 @@ let currentHash = $state('');
 				{/if}
 			</div>
 		</div>
+
+		{#if showAttendees}
+			<div class="modal-backdrop" role="presentation" onclick={(e) => {
+				if (e.target === e.currentTarget) showAttendees = false;
+			}}>
+				<div class="attendee-modal" role="dialog" aria-modal="true" aria-labelledby="attendees-title" tabindex="-1">
+					<div class="modal-header">
+						<h2 id="attendees-title">{intl.t('events.attendeesTitle', { count: attendees.length })}</h2>
+						<button type="button" class="modal-close" aria-label={intl.t('common.close')} onclick={() => (showAttendees = false)}>×</button>
+					</div>
+					<div class="attendee-list">
+						{#each attendees as attendee}
+							<a href="/u/{attendee.did}" class="attendee-row">
+								<Avatar src={attendee.avatar || ''} did={attendee.did} size={40} />
+								<span>{attendee.display_name || attendee.did}</span>
+							</a>
+						{/each}
+					</div>
+				</div>
+			</div>
+		{/if}
 	{/if}
 </main>
 
@@ -488,6 +543,31 @@ let currentHash = $state('');
 		text-decoration: none;
 	}
 	.host-name:hover { text-decoration: underline; }
+	.attendee-summary {
+		border: none;
+		background: transparent;
+		color: var(--text);
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		align-items: flex-start;
+		text-align: left;
+		cursor: pointer;
+		font: inherit;
+	}
+	.attendee-summary:hover span {
+		text-decoration: underline;
+	}
+	.avatar-stack {
+		display: flex;
+		align-items: center;
+		padding-left: 0.35rem;
+	}
+	.avatar-stack :global(.avatar-box) {
+		margin-left: -0.35rem;
+		border: 2px solid var(--bg);
+	}
 	.presenter-section { border-top: none; padding-top: 0; }
 	.presenter-row {
 		display: flex;
@@ -730,6 +810,66 @@ let currentHash = $state('');
 		border-radius: var(--radius-md);
 	}
 	.success-box p { margin: 0.25rem 0 0; font-size: 0.9rem; }
+
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		background: rgba(0, 0, 0, 0.55);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1.5rem;
+	}
+	.attendee-modal {
+		width: min(440px, 100%);
+		max-height: min(640px, 85vh);
+		overflow: hidden;
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--border-card);
+		background: var(--bg-card);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+		display: flex;
+		flex-direction: column;
+	}
+	.modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1rem 1.25rem;
+		border-bottom: 1px solid var(--border-subtle);
+	}
+	.modal-header h2 {
+		margin: 0;
+		font-size: 1.1rem;
+		color: var(--text);
+	}
+	.modal-close {
+		border: none;
+		background: transparent;
+		color: var(--text-muted);
+		font-size: 1.6rem;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.attendee-list {
+		overflow: auto;
+		padding: 0.5rem;
+	}
+	.attendee-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.7rem 0.75rem;
+		border-radius: var(--radius-md);
+		color: var(--text);
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.attendee-row:hover {
+		background: var(--bg-hover);
+	}
 
 	/* About section */
 	.about-section {

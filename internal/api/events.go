@@ -141,6 +141,44 @@ func (s *Server) handleEventHistory(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	ctx := r.Context()
+
+	state, err := s.db.GetCurrentEventState(ctx, id)
+	if err != nil || state == nil {
+		jsonErr(w, http.StatusNotFound, "event not found")
+		return
+	}
+	var ms events.MutableState
+	if err := json.Unmarshal([]byte(state.Payload), &ms); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "parse event state")
+		return
+	}
+	if ms.Visibility == "private" {
+		did := authDID(r)
+		if did != ms.Organizer {
+			jsonErr(w, http.StatusForbidden, "event is private")
+			return
+		}
+	}
+	if ms.RSVP.Visible != nil && !*ms.RSVP.Visible {
+		jsonErr(w, http.StatusForbidden, "attendees are private for this event")
+		return
+	}
+
+	attendees, err := s.publicRSVPAttendees(ctx, id, ms.RSVP.Approval)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "load attendees failed")
+		return
+	}
+
+	jsonOK(w, map[string]any{
+		"attendees": attendees,
+		"count":     len(attendees),
+	})
+}
+
 func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	did := authDID(r)
 	priv := authPrivKey(r)
@@ -648,16 +686,58 @@ func rsvpEffectiveStatus(status, approval string) string {
 }
 
 func (s *Server) applyPublicRSVPCount(ctx context.Context, eventID string, ms *events.MutableState) error {
-	envelopes, err := s.db.ListRSVPsForEvent(ctx, eventID)
+	attendees, err := s.publicRSVPAttendees(ctx, eventID, ms.RSVP.Approval)
 	if err != nil {
 		return err
 	}
-	count := 0
-	for _, env := range envelopes {
-		if rsvpEffectiveStatus(env.Status, ms.RSVP.Approval) == "confirmed" {
-			count++
-		}
-	}
-	ms.RSVP.Count = count
+	ms.RSVP.Count = len(attendees)
 	return nil
+}
+
+type publicRSVPAttendee struct {
+	DID         string `json:"did"`
+	DisplayName string `json:"display_name"`
+	Avatar      string `json:"avatar"`
+}
+
+func (s *Server) publicRSVPAttendees(ctx context.Context, eventID, approval string) ([]publicRSVPAttendee, error) {
+	envelopes, err := s.db.ListRSVPsForEvent(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+	seen := map[string]struct{}{}
+	attendees := make([]publicRSVPAttendee, 0, len(envelopes))
+	for _, env := range envelopes {
+		if rsvpEffectiveStatus(env.Status, approval) != "confirmed" {
+			continue
+		}
+		if _, ok := seen[env.SenderDID]; ok {
+			continue
+		}
+		seen[env.SenderDID] = struct{}{}
+		attendee := publicRSVPAttendee{
+			DID:         env.SenderDID,
+			DisplayName: shortDID(env.SenderDID),
+		}
+		user, err := s.db.GetUser(ctx, env.SenderDID)
+		if err != nil {
+			return nil, err
+		}
+		if user != nil {
+			attendee.DisplayName = strings.TrimSpace(user.DisplayName)
+			if attendee.DisplayName == "" {
+				attendee.DisplayName = shortDID(env.SenderDID)
+			}
+			attendee.Avatar = user.Avatar
+		}
+		attendees = append(attendees, attendee)
+	}
+	return attendees, nil
+}
+
+func shortDID(did string) string {
+	if len(did) <= 16 {
+		return did
+	}
+	return did[:16] + "..."
 }

@@ -123,6 +123,7 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/events", s.requireAuth(s.handleCreateEvent))
 	r.Post("/api/events/import/preview", s.requireAuth(s.handleImportEventPreview))
 	r.Get("/api/events/{id}", s.handleGetEvent)
+	r.Get("/api/events/{id}/attendees", s.handleEventAttendees)
 	r.Get("/api/events/{id}/history", s.handleEventHistory)
 	r.Put("/api/events/{id}", s.requireAuth(s.handleUpdateEvent))
 	r.Delete("/api/events/{id}", s.requireAuth(s.handleDeleteEvent))

@@ -148,6 +148,8 @@ export const api = {
 			request<{ status: string }>(`/api/events/${id}`, {
 				method: 'DELETE',
 			}),
+		attendees: (id: string) =>
+			request<{ attendees: EventAttendee[]; count: number }>(`/api/events/${id}/attendees`),
 		listRSVPs: (id: string) => request<any[]>(`/api/events/${id}/rsvps`),
 		myRSVPStatus: (id: string) =>
 			request<MyRSVPStatus>(`/api/events/${id}/rsvp/status`),
@@ -215,6 +217,12 @@ export interface MyRSVPStatus {
 	has_rsvp: boolean;
 	status?: 'pending' | 'confirmed' | 'rejected' | 'waitlisted' | 'cancelled' | string;
 	received_at?: string;
+}
+
+export interface EventAttendee {
+	did: string;
+	display_name: string;
+	avatar?: string;
 }
 
 export type CalendarLinkType = 'website' | 'twitter' | 'instagram' | 'youtube' | 'tiktok' | 'linkedin' | 'bluesky' | 'nostr' | 'facebook';

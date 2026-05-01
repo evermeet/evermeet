@@ -173,6 +173,11 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		homeInstanceURL = s.baseURL
 	}
 	isLocal := strings.TrimRight(homeInstanceURL, "/") == strings.TrimRight(s.baseURL, "/")
+	isAdmin, err := s.db.IsAdmin(ctx, did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "admin lookup failed")
+		return
+	}
 
 	jsonOK(w, map[string]any{
 		"did":               user.DID,
@@ -182,6 +187,7 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		"is_local":          isLocal,
 		"auth_kind":         map[bool]string{true: "local", false: "remote"}[isLocal],
 		"home_instance_url": homeInstanceURL,
+		"is_admin":          isAdmin,
 	})
 }
 

@@ -409,6 +409,13 @@ func (d *DB) SetUserSIWE(ctx context.Context, did, chainID, address string) erro
 	})
 }
 
+func (d *DB) SetUserEmailVerified(ctx context.Context, did string, verified bool) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE user_private SET email_verified = ? WHERE did = ?`, boolInt(verified), did)
+		return err
+	})
+}
+
 func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPrivate, error) {
 	row := d.db.QueryRowContext(ctx,
 		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
@@ -425,6 +432,41 @@ func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPr
 	}
 	p.EmailVerified = ev != 0
 	return p, nil
+}
+
+// ---- Admin accounts ----
+
+type AdminAccount struct {
+	DID       string
+	CreatedAt time.Time
+}
+
+func (d *DB) InsertAdminAccount(ctx context.Context, admin *AdminAccount) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO admin_accounts (did, created_at) VALUES (?, ?)`,
+			admin.DID, admin.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) HasAdminAccounts(ctx context.Context) (bool, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM admin_accounts LIMIT 1)`)
+	var exists int
+	if err := row.Scan(&exists); err != nil {
+		return false, err
+	}
+	return exists != 0, nil
+}
+
+func (d *DB) IsAdmin(ctx context.Context, did string) (bool, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM admin_accounts WHERE did = ?)`, did)
+	var exists int
+	if err := row.Scan(&exists); err != nil {
+		return false, err
+	}
+	return exists != 0, nil
 }
 
 // ---- Event records ----

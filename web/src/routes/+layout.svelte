@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { api } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import { intl, localeNames, locales, type Locale } from '$lib/i18n.svelte.js';
 	import { theme } from '$lib/theme.svelte.js';
@@ -15,12 +16,27 @@
 
 	onMount(() => {
 		intl.load();
+		checkSetup();
 		auth.load();
 		theme.load();
 		updateClock();
 		const t = setInterval(updateClock, 1000);
 		return () => clearInterval(t);
 	});
+
+	async function checkSetup() {
+		try {
+			const status = await api.setup.status();
+			const path = window.location.pathname;
+			if (status.required && path !== '/setup') {
+				goto('/setup');
+			} else if (!status.required && path === '/setup') {
+				goto('/');
+			}
+		} catch {
+			// If status cannot be read, let the current route surface the API error.
+		}
+	}
 
 	function updateClock() {
 		const now = new Date();

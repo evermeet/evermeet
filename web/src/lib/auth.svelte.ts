@@ -6,6 +6,7 @@ function createAuthStore() {
 	let loading = $state(true);
 
 	async function load() {
+		loading = true;
 		try {
 			user = await api.auth.me();
 		} catch {

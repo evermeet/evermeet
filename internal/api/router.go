@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/blob"
@@ -36,6 +37,8 @@ type Server struct {
 	cfg          *config.Config
 	startTime    time.Time
 	dhtPublisher *routing.Publisher
+	setupMu      sync.Mutex
+	setupToken   string
 }
 
 // NewServer creates a Server with the given dependencies.
@@ -61,6 +64,20 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 	if p2pNode != nil {
 		pub = routing.NewPublisher(p2pNode.DHTPublish, instancePriv, baseURL)
 	}
+	setupToken := ""
+	hasAdmins, err := db.HasAdminAccounts(context.Background())
+	if err != nil {
+		logger.Fatalf("admin setup check: %v", err)
+	}
+	if !hasAdmins {
+		setupToken = randomHex(32)
+		logger.Println("============================================================")
+		logger.Println("Evermeet first-time setup required")
+		logger.Printf("Admin setup token: %s", setupToken)
+		logger.Println("Open this instance in a browser and paste this token to create the first admin account.")
+		logger.Println("This token is one-time and only kept in memory for this server process.")
+		logger.Println("============================================================")
+	}
 
 	return &Server{
 		db:           db,
@@ -76,6 +93,7 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 		cfg:          cfg,
 		startTime:    time.Now(),
 		dhtPublisher: pub,
+		setupToken:   setupToken,
 	}
 }
 
@@ -84,12 +102,17 @@ func (s *Server) Router() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	if s.cfg != nil && s.cfg.Node.Verbose {
+		r.Use(middleware.Logger)
+	}
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
 	r.Use(s.sessionMiddleware)
+	r.Use(s.setupGate)
 
 	// Auth
+	r.Get("/api/setup/status", s.handleSetupStatus)
+	r.Post("/api/setup/complete", s.handleSetupComplete)
 	r.Post("/api/auth/magic-link", s.handleMagicLinkRequest)
 	r.Post("/api/auth/magic-link/status", s.handleMagicLinkStatus)
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)

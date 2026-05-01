@@ -15,11 +15,29 @@
 	onMount(() => {
 		const unwatch = $effect.root(() => {
 			$effect(() => {
-				if (!auth.loading && !auth.user) goto('/discover');
+				if (!auth.loading && !auth.user) redirectUnauthenticated();
 			});
 		});
 
+		async function redirectUnauthenticated() {
+			try {
+				const status = await api.setup.status();
+				goto(status.required ? '/setup' : '/discover');
+			} catch {
+				goto('/discover');
+			}
+		}
+
 		async function load() {
+			try {
+				const status = await api.setup.status();
+				if (status.required) {
+					goto('/setup');
+					return;
+				}
+			} catch {
+				// Continue to auth handling below.
+			}
 			// wait until auth is resolved
 			await new Promise<void>(resolve => {
 				if (!auth.loading) { resolve(); return; }

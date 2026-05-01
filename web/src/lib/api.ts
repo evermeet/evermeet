@@ -34,6 +34,14 @@ async function requestWithSession<T>(path: string, sessionToken?: string | null,
 }
 
 export const api = {
+	setup: {
+		status: () => request<{ required: boolean }>('/api/setup/status'),
+		complete: (data: { token: string; email: string; display_name?: string }) =>
+			request<{ status: string }>('/api/setup/complete', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
+	},
 	blobs: {
 		upload: async (file: File): Promise<{ hash: string; url: string }> => {
 			const form = new FormData();
@@ -393,6 +401,7 @@ export interface AuthUser {
 	is_local: boolean;
 	auth_kind: 'local' | 'remote';
 	home_instance_url: string;
+	is_admin?: boolean;
 }
 
 export interface AuthMethods {

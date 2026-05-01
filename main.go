@@ -32,6 +32,7 @@ func main() {
 	httpPort := flag.Int("port", 0, "HTTP port (overrides config)")
 	p2pPort := flag.Int("p2p-port", 0, "P2P port (overrides config)")
 	dataDir := flag.String("data", "", "Data directory (overrides config)")
+	verbose := flag.Bool("verbose", false, "Enable verbose backend logging, including HTTP request logs")
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
@@ -49,6 +50,9 @@ func main() {
 	}
 	if *dataDir != "" {
 		cfg.Node.DataDir = *dataDir
+	}
+	if *verbose {
+		cfg.Node.Verbose = true
 	}
 
 	if err := os.MkdirAll(cfg.Node.DataDir, 0755); err != nil {

@@ -19,6 +19,7 @@ type NodeConfig struct {
 	BaseURL string `toml:"base_url"`
 	Public  bool   `toml:"public"`
 	Dev     bool   `toml:"dev"`
+	Verbose bool   `toml:"verbose"`
 }
 
 type EmailConfig struct {
@@ -55,7 +56,7 @@ func defaults() *Config {
 			DataDir: "./data",
 			Public:  true,
 		},
-P2P: P2PConfig{
+		P2P: P2PConfig{
 			ListenPort: 4001,
 		},
 	}

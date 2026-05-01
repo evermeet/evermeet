@@ -69,10 +69,12 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	founding, err := s.db.GetEventFounding(ctx, id)
-	if (err != nil || founding == nil) && s.node != nil {
-		// Try fetching from P2P
-		if err := s.node.FetchEvent(id); err == nil {
-			founding, err = s.db.GetEventFounding(ctx, id)
+	if err != nil || founding == nil {
+		if n := s.libp2pNode(); n != nil {
+			// Try fetching from P2P
+			if err := n.FetchEvent(id); err == nil {
+				founding, err = s.db.GetEventFounding(ctx, id)
+			}
 		}
 	}
 	if err != nil || founding == nil {
@@ -336,13 +338,13 @@ func (s *Server) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Broadcast via P2P if node is available
-	if s.node != nil {
+	if n := s.libp2pNode(); n != nil {
 		gossip := node.GossipEvent{
 			Founding: founding,
 			State:    state,
 		}
 		data, _ := json.Marshal(gossip)
-		if err := s.node.BroadcastEvent(data); err != nil {
+		if err := n.BroadcastEvent(data); err != nil {
 			s.log.Printf("p2p broadcast failed: %v", err)
 		}
 	}
@@ -490,7 +492,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Broadcast update via P2P
-	if s.node != nil {
+	if n := s.libp2pNode(); n != nil {
 		// For updates, we might only need the state, but GossipEvent expects founding.
 		// We can get founding from DB if needed, or update GossipEvent to make it optional.
 		// For now, let's fetch founding.
@@ -505,7 +507,7 @@ func (s *Server) handleUpdateEvent(w http.ResponseWriter, r *http.Request) {
 			State:    newState,
 		}
 		data, _ := json.Marshal(gossip)
-		s.node.BroadcastEvent(data)
+		n.BroadcastEvent(data)
 	}
 
 	jsonOK(w, map[string]any{

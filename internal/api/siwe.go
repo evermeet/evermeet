@@ -114,11 +114,11 @@ func (s *Server) handleSIWEFinish(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "user storage failed")
 		return
 	}
-	if s.dhtPublisher != nil {
+	if pub := s.publisher(); pub != nil {
 		go func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			if err := s.dhtPublisher.PublishEthereum(ctx, msg.ChainID, recoveredLower); err != nil {
+			if err := pub.PublishEthereum(ctx, msg.ChainID, recoveredLower); err != nil {
 				s.log.Printf("dht publish siwe %s:%s: %v", msg.ChainID, recoveredLower, err)
 			}
 		}()

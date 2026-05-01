@@ -14,10 +14,12 @@ func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	user, err := s.db.GetUser(ctx, did)
-	if (err != nil || user == nil) && s.node != nil {
-		// Try fetching from P2P
-		if err := s.node.FetchUser(did); err == nil {
-			user, err = s.db.GetUser(ctx, did)
+	if err != nil || user == nil {
+		if n := s.libp2pNode(); n != nil {
+			// Try fetching from P2P
+			if err := n.FetchUser(did); err == nil {
+				user, err = s.db.GetUser(ctx, did)
+			}
 		}
 	}
 

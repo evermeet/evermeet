@@ -45,8 +45,8 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 
 	uptime := time.Since(s.startTime)
 	var p2pStatus any = map[string]any{}
-	if s.node != nil {
-		p2pStatus = s.node.Status()
+	if n := s.libp2pNode(); n != nil {
+		p2pStatus = n.Status()
 	}
 
 	jsonOK(w, map[string]any{

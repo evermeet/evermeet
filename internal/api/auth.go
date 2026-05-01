@@ -304,9 +304,11 @@ func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if priv := authPrivKey(r); s.node != nil && len(priv) > 0 {
-		if err := s.node.BroadcastUserProfile(user, priv); err != nil {
-			s.log.Printf("broadcast profile: %v", err)
+	if priv := authPrivKey(r); len(priv) > 0 {
+		if n := s.libp2pNode(); n != nil {
+			if err := n.BroadcastUserProfile(user, priv); err != nil {
+				s.log.Printf("broadcast profile: %v", err)
+			}
 		}
 	}
 
@@ -383,11 +385,11 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 	// Publish email → home instance mapping to the DHT so foreign instances
 	// can discover where this user's home is. Fire-and-forget: a failure here
 	// does not block registration; the heartbeat will retry within 12h.
-	if s.dhtPublisher != nil {
+	if pub := s.publisher(); pub != nil {
 		go func() {
 			pubCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			if err := s.dhtPublisher.Publish(pubCtx, email); err != nil {
+			if err := pub.Publish(pubCtx, email); err != nil {
 				s.log.Printf("dht publish for new user %s: %v", did, err)
 			}
 		}()

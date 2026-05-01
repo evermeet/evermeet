@@ -6,7 +6,8 @@ import (
 )
 
 func (s *Server) handleInstanceStatus(w http.ResponseWriter, r *http.Request) {
-	if s.node == nil {
+	n := s.libp2pNode()
+	if n == nil {
 		jsonErr(w, http.StatusNotFound, "node not initialized")
 		return
 	}
@@ -25,7 +26,7 @@ func (s *Server) handleInstanceStatus(w http.ResponseWriter, r *http.Request) {
 		"uptime_s":    int(uptime.Seconds()),
 		"uptime":      formatUptime(uptime),
 		"config":      safeConfig,
-		"p2p":         s.node.Status(),
+		"p2p":         n.Status(),
 	})
 }
 

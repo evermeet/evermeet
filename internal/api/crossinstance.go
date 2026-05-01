@@ -101,11 +101,12 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		if s.node == nil {
+		n := s.libp2pNode()
+		if n == nil {
 			jsonErr(w, http.StatusServiceUnavailable, "p2p not available")
 			return
 		}
-		data, err := s.node.DHTPeerLookup(ctx, identityHash)
+		data, err := n.DHTPeerLookup(ctx, identityHash)
 		if err != nil {
 			// Not found in DHT — could be a new user or a peer-less network.
 			jsonErr(w, http.StatusNotFound, "home instance not found for this identity")

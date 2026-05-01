@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -37,6 +38,11 @@ type Server struct {
 	cfg          *config.Config
 	startTime    time.Time
 	dhtPublisher *routing.Publisher
+	p2pMu        sync.RWMutex
+	bgCtx        context.Context
+	bgCtxMu      sync.RWMutex
+	heartbeatMu  sync.Mutex
+	dhtHBRunning bool
 	setupMu      sync.Mutex
 	setupToken   string
 }
@@ -95,6 +101,78 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 		dhtPublisher: pub,
 		setupToken:   setupToken,
 	}
+}
+
+// SetBackgroundContext sets the context used for DHT heartbeats after first-time
+// setup (and should be the same root context used for process shutdown). Call once from main.
+func (s *Server) SetBackgroundContext(ctx context.Context) {
+	s.bgCtxMu.Lock()
+	defer s.bgCtxMu.Unlock()
+	s.bgCtx = ctx
+}
+
+func (s *Server) backgroundCtx() context.Context {
+	s.bgCtxMu.RLock()
+	defer s.bgCtxMu.RUnlock()
+	if s.bgCtx != nil {
+		return s.bgCtx
+	}
+	return context.Background()
+}
+
+// libp2pNode returns the running libp2p host, or nil if P2P has not been started yet.
+func (s *Server) libp2pNode() *node.Node {
+	s.p2pMu.RLock()
+	defer s.p2pMu.RUnlock()
+	return s.node
+}
+
+func (s *Server) publisher() *routing.Publisher {
+	s.p2pMu.RLock()
+	defer s.p2pMu.RUnlock()
+	return s.dhtPublisher
+}
+
+// PeerCount returns the current libp2p peer count, or 0 if P2P is not running.
+func (s *Server) PeerCount() int {
+	n := s.libp2pNode()
+	if n == nil {
+		return 0
+	}
+	return n.PeerCount()
+}
+
+// HandleHealth writes JSON health including live P2P peer count.
+func (s *Server) HandleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, s.instanceID, s.PeerCount())
+}
+
+// ensureP2P starts the libp2p node and DHT publisher if they are not already running.
+func (s *Server) ensureP2P() error {
+	s.p2pMu.Lock()
+	defer s.p2pMu.Unlock()
+	if s.node != nil {
+		return nil
+	}
+	n, err := node.New(s.db, s.log, s.cfg.P2P.ListenPort, s.cfg.Node.DataDir)
+	if err != nil {
+		return err
+	}
+	s.node = n
+	s.dhtPublisher = routing.NewPublisher(n.DHTPublish, s.instancePriv, s.baseURL)
+	return nil
+}
+
+// CloseP2P shuts down the libp2p host if one was started. Safe to call multiple times.
+func (s *Server) CloseP2P() {
+	s.p2pMu.Lock()
+	defer s.p2pMu.Unlock()
+	if s.node != nil {
+		_ = s.node.Close()
+	}
+	s.node = nil
+	s.dhtPublisher = nil
 }
 
 // Router builds and returns the chi router with all routes registered.
@@ -261,12 +339,25 @@ func (s *Server) requireOwner(next http.HandlerFunc) http.HandlerFunc {
 
 // StartDHTHeartbeat starts the background goroutine that re-publishes all
 // local user email→homeInstance mappings to the DHT every 12 hours.
-// Call this once after the server is fully initialised.
+// Idempotent: safe to call from main at boot (no-op until a publisher exists) and again after lazy P2P start.
 func (s *Server) StartDHTHeartbeat(ctx context.Context) {
-	if s.dhtPublisher == nil {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	s.heartbeatMu.Lock()
+	if s.dhtHBRunning {
+		s.heartbeatMu.Unlock()
 		return
 	}
-	s.dhtPublisher.StartHeartbeat(ctx, 12*time.Hour, func(ctx context.Context) ([]string, error) {
+	pub := s.publisher()
+	if pub == nil {
+		s.heartbeatMu.Unlock()
+		return
+	}
+	s.dhtHBRunning = true
+	s.heartbeatMu.Unlock()
+
+	pub.StartHeartbeat(ctx, 12*time.Hour, func(ctx context.Context) ([]string, error) {
 		return s.db.GetAllUserEmails(ctx)
 	})
 	go s.startSIWEDHTHeartbeat(ctx, 12*time.Hour)
@@ -298,11 +389,15 @@ func (s *Server) publishSIWERouting(ctx context.Context) {
 		s.log.Printf("dht siwe identities: %v", err)
 		return
 	}
+	pub := s.publisher()
+	if pub == nil {
+		return
+	}
 	for _, identity := range identities {
 		if ctx.Err() != nil {
 			return
 		}
-		if err := s.dhtPublisher.PublishEthereum(ctx, identity.ChainID, identity.Address); err != nil {
+		if err := pub.PublishEthereum(ctx, identity.ChainID, identity.Address); err != nil {
 			s.log.Printf("dht publish siwe %s:%s: %v", identity.ChainID, identity.Address, err)
 		}
 	}

@@ -93,12 +93,21 @@ func main() {
 		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
 	}
 
-	// P2P Node
-	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir)
+	ctxBoot := context.Background()
+	hasAdmins, err := db.HasAdminAccounts(ctxBoot)
 	if err != nil {
-		logger.Fatalf("start p2p node: %v", err)
+		logger.Fatalf("admin check: %v", err)
 	}
-	defer p2pNode.Close()
+
+	var p2pNode *node.Node
+	if hasAdmins {
+		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir)
+		if err != nil {
+			logger.Fatalf("start p2p node: %v", err)
+		}
+	} else {
+		logger.Println("P2P: not started yet (first-time setup). P2P will start automatically when setup completes.")
+	}
 
 	blobStore, err := blob.New(filepath.Join(cfg.Node.DataDir, "blobs"))
 	if err != nil {
@@ -109,10 +118,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, instanceID, p2pNode.PeerCount())
-	})
+	r.Get("/health", apiServer.HandleHealth)
 
 	r.Mount("/", apiServer.Router())
 
@@ -130,6 +136,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	apiServer.SetBackgroundContext(ctx)
 	apiServer.StartDHTHeartbeat(ctx)
 
 	go func() {
@@ -146,6 +153,7 @@ func main() {
 	if err := srv.Shutdown(shutCtx); err != nil {
 		logger.Printf("shutdown error: %v", err)
 	}
+	apiServer.CloseP2P()
 }
 
 // deriveInstanceID returns a 16-character hex string from blake3(pubkey)[:8].

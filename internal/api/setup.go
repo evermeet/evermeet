@@ -87,6 +87,18 @@ func (s *Server) handleSetupComplete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := s.ensureP2P(); err != nil {
+		s.log.Printf("setup p2p: %v", err)
+		jsonErr(w, http.StatusInternalServerError, "start p2p failed")
+		return
+	}
+	setupCommitted := false
+	defer func() {
+		if !setupCommitted {
+			s.CloseP2P()
+		}
+	}()
+
 	_, did, err := s.lookupOrCreateUser(r.Context(), req.Email)
 	if err != nil {
 		s.log.Printf("setup user create: %v", err)
@@ -112,8 +124,10 @@ func (s *Server) handleSetupComplete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	setupCommitted = true
 	s.setupToken = ""
 	s.createSession(w, r.Context(), did)
+	s.StartDHTHeartbeat(s.backgroundCtx())
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 

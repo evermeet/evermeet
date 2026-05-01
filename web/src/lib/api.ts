@@ -47,6 +47,17 @@ export const api = {
 		objects: () => request<AdminObjectsOverview>('/api/admin/objects'),
 		objectsByType: (type: AdminObjectType, limit = 50, offset = 0) =>
 			request<AdminObjectList>(`/api/admin/objects/${type}?limit=${limit}&offset=${offset}`),
+		admins: () => request<AdminAdminsOverview>('/api/admin/admins'),
+		createAdmin: (data: { did?: string; email?: string; role: AdminRole }) =>
+			request<{ status: string }>('/api/admin/admins', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
+		setAdminRole: (did: string, role: AdminRole) =>
+			request<{ status: string }>(`/api/admin/admins/${encodeURIComponent(did)}/role`, {
+				method: 'PUT',
+				body: JSON.stringify({ role }),
+			}),
 	},
 	blobs: {
 		upload: async (file: File): Promise<{ hash: string; url: string }> => {
@@ -405,6 +416,23 @@ export interface AuthUser {
 	auth_kind: 'local' | 'remote';
 	home_instance_url: string;
 	is_admin?: boolean;
+	admin_role?: AdminRole | '';
+	is_owner?: boolean;
+}
+
+export type AdminRole = 'owner' | 'admin';
+
+export interface AdminAccount {
+	did: string;
+	display_name: string;
+	endpoint?: string;
+	role: AdminRole;
+	created_at: string;
+}
+
+export interface AdminAdminsOverview {
+	my_role: AdminRole | '';
+	admins: AdminAccount[];
 }
 
 export interface AdminOverview {

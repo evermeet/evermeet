@@ -481,17 +481,48 @@ func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPr
 
 type AdminAccount struct {
 	DID       string
+	Role      string
+	Name      string
+	Endpoint  string
 	CreatedAt time.Time
 }
 
 func (d *DB) InsertAdminAccount(ctx context.Context, admin *AdminAccount) error {
+	role := admin.Role
+	if role == "" {
+		role = "owner"
+	}
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
-			`INSERT OR IGNORE INTO admin_accounts (did, created_at) VALUES (?, ?)`,
-			admin.DID, admin.CreatedAt.UTC().Format(time.RFC3339),
+			`INSERT OR IGNORE INTO admin_accounts (did, role, created_at) VALUES (?, ?, ?)`,
+			admin.DID, role, admin.CreatedAt.UTC().Format(time.RFC3339),
 		)
 		return err
 	})
+}
+
+func (d *DB) ListAdminAccounts(ctx context.Context) ([]*AdminAccount, error) {
+	rows, err := d.db.QueryContext(ctx, `
+		SELECT a.did, COALESCE(a.role, 'owner'), a.created_at, COALESCE(u.display_name, ''), COALESCE(u.endpoint, '')
+		FROM admin_accounts a
+		LEFT JOIN users u ON u.did = a.did
+		ORDER BY a.created_at ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var admins []*AdminAccount
+	for rows.Next() {
+		var admin AdminAccount
+		var createdAt string
+		if err := rows.Scan(&admin.DID, &admin.Role, &createdAt, &admin.Name, &admin.Endpoint); err != nil {
+			return nil, err
+		}
+		admin.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+		admins = append(admins, &admin)
+	}
+	return admins, rows.Err()
 }
 
 func (d *DB) HasAdminAccounts(ctx context.Context) (bool, error) {
@@ -512,8 +543,35 @@ func (d *DB) IsAdmin(ctx context.Context, did string) (bool, error) {
 	return exists != 0, nil
 }
 
+func (d *DB) GetAdminRole(ctx context.Context, did string) (string, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT COALESCE(role, 'owner') FROM admin_accounts WHERE did = ?`, did)
+	var role string
+	if err := row.Scan(&role); err == sql.ErrNoRows {
+		return "", nil
+	} else if err != nil {
+		return "", err
+	}
+	return role, nil
+}
+
+func (d *DB) SetAdminRole(ctx context.Context, did, role string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE admin_accounts SET role = ? WHERE did = ?`, role, did)
+		return err
+	})
+}
+
 func (d *DB) CountAdminAccounts(ctx context.Context) (int, error) {
 	return d.count(ctx, `SELECT COUNT(*) FROM admin_accounts`)
+}
+
+func (d *DB) CountAdminsByRole(ctx context.Context, role string) (int, error) {
+	row := d.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM admin_accounts WHERE COALESCE(role, 'owner') = ?`, role)
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (d *DB) CountUsers(ctx context.Context) (int, error) {

@@ -116,6 +116,9 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/admin/overview", s.requireAdmin(s.handleAdminOverview))
 	r.Get("/api/admin/objects", s.requireAdmin(s.handleAdminObjectsOverview))
 	r.Get("/api/admin/objects/{type}", s.requireAdmin(s.handleAdminObjectsByType))
+	r.Get("/api/admin/admins", s.requireAdmin(s.handleAdminAdminsList))
+	r.Post("/api/admin/admins", s.requireOwner(s.handleAdminAdminsCreate))
+	r.Put("/api/admin/admins/{did}/role", s.requireOwner(s.handleAdminAdminsSetRole))
 	r.Post("/api/auth/magic-link", s.handleMagicLinkRequest)
 	r.Post("/api/auth/magic-link/status", s.handleMagicLinkStatus)
 	r.Get("/api/auth/magic-link/verify", s.handleMagicLinkVerify)
@@ -235,6 +238,21 @@ func (s *Server) requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 		}
 		if !ok {
 			jsonErr(w, http.StatusForbidden, "admin access required")
+			return
+		}
+		next(w, r)
+	})
+}
+
+func (s *Server) requireOwner(next http.HandlerFunc) http.HandlerFunc {
+	return s.requireAdmin(func(w http.ResponseWriter, r *http.Request) {
+		role, err := s.db.GetAdminRole(r.Context(), authDID(r))
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "admin role lookup failed")
+			return
+		}
+		if role != "owner" {
+			jsonErr(w, http.StatusForbidden, "owner access required")
 			return
 		}
 		next(w, r)

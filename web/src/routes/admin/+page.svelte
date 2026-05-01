@@ -31,24 +31,26 @@
 	const countCards = $derived(
 		overview
 			? [
-					['Admins', overview.counts.admins, '/admin/objects/users'],
+					['Admins', overview.counts.admins, '/admin/admins'],
 					['Users', overview.counts.users, '/admin/objects/users'],
 					['Events', overview.counts.events, '/admin/objects/events'],
 					['Calendars', overview.counts.calendars, '/admin/objects/calendars'],
 					['Blobs', overview.counts.blobs, '/admin/objects/blobs'],
+					[
+						'P2P peers',
+						Array.isArray(overview.p2p?.peers) ? overview.p2p.peers.length : 0,
+						'/admin/p2p',
+					],
 				]
 			: []
 	);
-
-	const p2pPeers = $derived(Array.isArray(overview?.p2p?.peers) ? overview.p2p.peers : []);
-	const p2pAddresses = $derived(Array.isArray(overview?.p2p?.addresses) ? overview.p2p.addresses : []);
 </script>
 
 <main>
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Instance Admin</h1>
+			<h1>Admin Overview</h1>
 			<p class="muted">Basic status and operational overview for this Evermeet instance.</p>
 		</div>
 	</div>
@@ -91,14 +93,6 @@
 					<span class="label">Started At</span>
 					<span class="value mono">{new Date(overview.started_at).toLocaleString()}</span>
 				</div>
-				<div class="info-row">
-					<span class="label">P2P Peer ID</span>
-					<span class="value mono">{overview.p2p?.id ?? 'not initialized'}</span>
-				</div>
-				<div class="info-row">
-					<span class="label">Connected Peers</span>
-					<span class="value">{p2pPeers.length}</span>
-				</div>
 			</div>
 		</section>
 
@@ -115,64 +109,6 @@
 					{/each}
 				</div>
 			</div>
-			<div class="config-group">
-				<h3>P2P</h3>
-				<div class="info-grid">
-					<div class="info-row">
-						<span class="label">listen_port</span>
-						<span class="value mono">{overview.config.p2p.listen_port}</span>
-					</div>
-					<div class="info-row">
-						<span class="label">bootstrap_peers</span>
-						<span class="value mono">
-							{#if overview.config.p2p.bootstrap_peers?.length}
-								{overview.config.p2p.bootstrap_peers.join(', ')}
-							{:else}
-								<em class="muted">none (mDNS only)</em>
-							{/if}
-						</span>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<section class="panel">
-			<h2>P2P Network Node</h2>
-			<p><span class="label">Listening Addresses</span></p>
-			{#if p2pAddresses.length}
-				<ul class="addr-list">
-					{#each p2pAddresses as addr}
-						<li class="mono">{addr}</li>
-					{/each}
-				</ul>
-			{:else}
-				<p class="muted">No listening addresses reported.</p>
-			{/if}
-		</section>
-
-		<section class="panel">
-			<h2>Connected Peers ({p2pPeers.length})</h2>
-			{#if p2pPeers.length === 0}
-				<p class="muted">No peers connected yet. mDNS is active - try starting another node on the same network.</p>
-			{:else}
-				<div class="peers-list">
-					{#each p2pPeers as peer}
-						<div class="peer-card">
-							<p class="mono peer-id">{peer.id}</p>
-							{#if peer.addresses?.length}
-								<details>
-									<summary>Show Addresses ({peer.addresses.length})</summary>
-									<ul class="addr-list">
-										{#each peer.addresses as addr}
-											<li class="mono">{addr}</li>
-										{/each}
-									</ul>
-								</details>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			{/if}
 		</section>
 	{/if}
 </main>
@@ -189,7 +125,7 @@
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
-		margin-bottom: 1.5rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.eyebrow {
@@ -329,38 +265,4 @@
 		margin-top: 0;
 	}
 
-	.addr-list {
-		list-style: none;
-		padding: 0;
-		margin: 0.5rem 0 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.peer-card {
-		border: 1px solid var(--border-subtle);
-		border-left: 3px solid var(--border-peer);
-		border-radius: var(--radius-md);
-		padding: 1rem;
-		background: var(--bg);
-	}
-
-	.peer-id {
-		word-break: break-all;
-		margin: 0 0 0.5rem;
-	}
-
-	.peers-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	details summary {
-		cursor: pointer;
-		color: var(--text-accent);
-		font-size: 0.8rem;
-		margin-top: 0.25rem;
-	}
 </style>

@@ -178,6 +178,16 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "admin lookup failed")
 		return
 	}
+	adminRole := ""
+	isOwner := false
+	if isAdmin {
+		adminRole, err = s.db.GetAdminRole(ctx, did)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "admin role lookup failed")
+			return
+		}
+		isOwner = adminRole == "owner"
+	}
 
 	jsonOK(w, map[string]any{
 		"did":               user.DID,
@@ -188,6 +198,8 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		"auth_kind":         map[bool]string{true: "local", false: "remote"}[isLocal],
 		"home_instance_url": homeInstanceURL,
 		"is_admin":          isAdmin,
+		"admin_role":        adminRole,
+		"is_owner":          isOwner,
 	})
 }
 

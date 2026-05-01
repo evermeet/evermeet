@@ -105,6 +105,7 @@ func (s *Server) handleSetupComplete(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := s.db.InsertAdminAccount(r.Context(), &store.AdminAccount{
 		DID:       did,
+		Role:      "owner",
 		CreatedAt: time.Now(),
 	}); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "create admin failed")

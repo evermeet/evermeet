@@ -121,6 +121,13 @@
 		font-family: system-ui, sans-serif;
 	}
 
+	.page-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: 0.75rem;
+	}
+
 	.eyebrow {
 		margin: 0 0 0.35rem;
 		color: var(--text-muted);

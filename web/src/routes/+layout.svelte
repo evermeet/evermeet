@@ -96,7 +96,12 @@
 			</a>
 			{#if auth.user.is_admin}
 				<a href="/admin" class="nav-item">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v5c0 5-3 9-7 11-4-2-7-6-7-11V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+						<rect x="3" y="3" width="7" height="9" rx="1" />
+						<rect x="14" y="3" width="7" height="5" rx="1" />
+						<rect x="14" y="12" width="7" height="9" rx="1" />
+						<rect x="3" y="16" width="7" height="5" rx="1" />
+					</svg>
 					Admin
 				</a>
 			{/if}

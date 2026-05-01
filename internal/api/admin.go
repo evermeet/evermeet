@@ -11,6 +11,7 @@ import (
 
 	"github.com/evermeet/evermeet/internal/calendar"
 	"github.com/evermeet/evermeet/internal/events"
+	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -93,6 +94,14 @@ type adminObjectSummary struct {
 	Bytes      int64  `json:"bytes"`
 }
 
+type adminAccountResponse struct {
+	DID         string `json:"did"`
+	DisplayName string `json:"display_name"`
+	Endpoint    string `json:"endpoint,omitempty"`
+	Role        string `json:"role"`
+	CreatedAt   string `json:"created_at"`
+}
+
 func (s *Server) handleAdminObjectsOverview(w http.ResponseWriter, r *http.Request) {
 	summaries := make([]adminObjectSummary, 0, 4)
 	for _, objectType := range []string{"users", "events", "calendars", "blobs"} {
@@ -104,6 +113,132 @@ func (s *Server) handleAdminObjectsOverview(w http.ResponseWriter, r *http.Reque
 		summaries = append(summaries, summary)
 	}
 	jsonOK(w, map[string]any{"objects": summaries})
+}
+
+func (s *Server) handleAdminAdminsList(w http.ResponseWriter, r *http.Request) {
+	admins, err := s.db.ListAdminAccounts(r.Context())
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "load admins failed")
+		return
+	}
+	myRole, err := s.db.GetAdminRole(r.Context(), authDID(r))
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "admin role lookup failed")
+		return
+	}
+	myRole = normalizeAdminRole(myRole)
+	out := make([]adminAccountResponse, 0, len(admins))
+	for _, admin := range admins {
+		displayName := strings.TrimSpace(admin.Name)
+		if displayName == "" {
+			displayName = shortDID(admin.DID)
+		}
+		out = append(out, adminAccountResponse{
+			DID:         admin.DID,
+			DisplayName: displayName,
+			Endpoint:    admin.Endpoint,
+			Role:        normalizeAdminRole(admin.Role),
+			CreatedAt:   admin.CreatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+	jsonOK(w, map[string]any{
+		"my_role": myRole,
+		"admins":  out,
+	})
+}
+
+func (s *Server) handleAdminAdminsCreate(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		DID   string `json:"did"`
+		Email string `json:"email"`
+		Role  string `json:"role"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	role := normalizeAdminRole(req.Role)
+	if role == "" {
+		role = "admin"
+	}
+	var did string
+	if strings.TrimSpace(req.Email) != "" {
+		_, resolvedDID, err := s.lookupOrCreateUser(r.Context(), strings.TrimSpace(req.Email))
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "resolve user failed")
+			return
+		}
+		did = resolvedDID
+	} else {
+		did = strings.TrimSpace(req.DID)
+	}
+	if did == "" {
+		jsonErr(w, http.StatusBadRequest, "email or did required")
+		return
+	}
+	exists, err := s.db.IsAdmin(r.Context(), did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "admin lookup failed")
+		return
+	}
+	if exists {
+		jsonErr(w, http.StatusConflict, "admin already exists")
+		return
+	}
+	if err := s.db.InsertAdminAccount(r.Context(), &store.AdminAccount{
+		DID:       did,
+		Role:      role,
+		CreatedAt: time.Now(),
+	}); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "create admin failed")
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleAdminAdminsSetRole(w http.ResponseWriter, r *http.Request) {
+	did := strings.TrimSpace(chi.URLParam(r, "did"))
+	if did == "" {
+		jsonErr(w, http.StatusBadRequest, "did required")
+		return
+	}
+	var req struct {
+		Role string `json:"role"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	role := normalizeAdminRole(req.Role)
+	if role == "" {
+		jsonErr(w, http.StatusBadRequest, "invalid role")
+		return
+	}
+	currentRole, err := s.db.GetAdminRole(r.Context(), did)
+	if err != nil {
+		jsonErr(w, http.StatusInternalServerError, "admin role lookup failed")
+		return
+	}
+	if currentRole == "" {
+		jsonErr(w, http.StatusNotFound, "admin not found")
+		return
+	}
+	if currentRole == "owner" && role != "owner" {
+		owners, err := s.db.CountAdminsByRole(r.Context(), "owner")
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "owner count failed")
+			return
+		}
+		if owners <= 1 {
+			jsonErr(w, http.StatusBadRequest, "at least one owner is required")
+			return
+		}
+	}
+	if err := s.db.SetAdminRole(r.Context(), did, role); err != nil {
+		jsonErr(w, http.StatusInternalServerError, "update role failed")
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleAdminObjectsByType(w http.ResponseWriter, r *http.Request) {
@@ -409,6 +544,17 @@ func normalizeAdminObjectType(objectType string) string {
 		return "calendars"
 	case "blob", "blobs":
 		return "blobs"
+	default:
+		return ""
+	}
+}
+
+func normalizeAdminRole(role string) string {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "owner":
+		return "owner"
+	case "admin":
+		return "admin"
 	default:
 		return ""
 	}

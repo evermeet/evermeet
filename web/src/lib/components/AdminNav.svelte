@@ -1,17 +1,19 @@
 <script lang="ts">
-	let { active = 'overview' }: { active?: 'overview' | 'objects' } = $props();
+	let { active = 'overview' }: { active?: 'overview' | 'objects' | 'admins' | 'p2p' } = $props();
 </script>
 
 <nav class="admin-nav" aria-label="Admin sections">
 	<a href="/admin" class:active={active === 'overview'}>Overview</a>
+	<a href="/admin/p2p" class:active={active === 'p2p'}>P2P</a>
 	<a href="/admin/objects" class:active={active === 'objects'}>Objects</a>
+	<a href="/admin/admins" class:active={active === 'admins'}>Admins</a>
 </nav>
 
 <style>
 	.admin-nav {
 		display: flex;
 		gap: 0.5rem;
-		margin: 1.5rem 0;
+		margin: 0 0 1.25rem;
 		border-bottom: 1px solid var(--border-subtle);
 	}
 

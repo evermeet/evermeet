@@ -87,7 +87,10 @@
 	}
 
 	.page-header {
-		margin-bottom: 0;
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: 0.75rem;
 	}
 
 	.eyebrow {

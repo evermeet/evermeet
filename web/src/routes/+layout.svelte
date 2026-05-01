@@ -79,32 +79,34 @@
 		</svg>
 	</a>
 
-	<!-- Center: main nav (only when logged in) -->
+	<!-- Center: main nav (only when logged in); flex middle so links never sit under avatar/dropdown -->
 	{#if !auth.loading && auth.user}
-		<div class="nav-center">
-			<a href="/" class="nav-item">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-				{intl.t('nav.events')}
-			</a>
-			<a href="/calendars" class="nav-item">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg>
-				{intl.t('nav.calendars')}
-			</a>
-			<a href="/discover" class="nav-item">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-				{intl.t('nav.discover')}
-			</a>
-			{#if auth.user.is_admin}
-				<a href="/admin" class="nav-item">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-						<rect x="3" y="3" width="7" height="9" rx="1" />
-						<rect x="14" y="3" width="7" height="5" rx="1" />
-						<rect x="14" y="12" width="7" height="9" rx="1" />
-						<rect x="3" y="16" width="7" height="5" rx="1" />
-					</svg>
-					Admin
+		<div class="nav-mid">
+			<div class="nav-center">
+				<a href="/" class="nav-item">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+					{intl.t('nav.events')}
 				</a>
-			{/if}
+				<a href="/calendars" class="nav-item">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg>
+					{intl.t('nav.calendars')}
+				</a>
+				<a href="/discover" class="nav-item">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+					{intl.t('nav.discover')}
+				</a>
+				{#if auth.user.is_admin}
+					<a href="/admin" class="nav-item">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+							<rect x="3" y="3" width="7" height="9" rx="1" />
+							<rect x="14" y="3" width="7" height="5" rx="1" />
+							<rect x="14" y="12" width="7" height="9" rx="1" />
+							<rect x="3" y="16" width="7" height="5" rx="1" />
+						</svg>
+						Admin
+					</a>
+				{/if}
+			</div>
 		</div>
 	{/if}
 
@@ -269,6 +271,8 @@
 	nav {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
+		position: relative;
 		height: 56px;
 		font-family: system-ui, sans-serif;
 		background: var(--bg);
@@ -283,17 +287,24 @@
 		color: var(--text);
 		text-decoration: none;
 		flex-shrink: 0;
-		/* push nav-center to align with page content left edge */
-		margin-right: max(0px, calc((100vw - 900px) / 2 - 20px));
 	}
 	.logo:hover { opacity: 0.7; }
 
-	/* Center nav */
+	/* Flex middle: grows between logo and right rail so center links are never covered by avatar/dropdown */
+	.nav-mid {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		/* First link lines up with medium `main` text (same centering as margin: auto main + 1.5rem pad) */
+		padding-left: max(0px, calc((100vw - var(--layout-page-medium)) / 2 - 20px));
+		/* Nudge left: must be translate, not less padding — max(0,…) would erase small shifts */
+		transform: translateX(-1rem);
+	}
 	.nav-center {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
-		flex: 1;
 		min-width: 0;
 	}
 	.nav-item {
@@ -321,7 +332,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		flex-shrink: 0;
-		margin-left: auto;
+		position: relative;
 	}
 
 	.clock {
@@ -342,7 +353,9 @@
 
 	@media (max-width: 640px) {
 		.clock { display: none; }
-		.nav-center { display: none; }
+		.nav-mid {
+			display: none;
+		}
 		nav { padding: 0 1rem; }
 	}
 
@@ -378,6 +391,11 @@
 	/* Avatar + dropdown */
 	.avatar-menu {
 		position: relative;
+		flex-shrink: 0;
+		/* 32px avatar + 1px border each side */
+		width: 34px;
+		height: 34px;
+		overflow: visible;
 	}
 	.avatar-btn {
 		display: flex;

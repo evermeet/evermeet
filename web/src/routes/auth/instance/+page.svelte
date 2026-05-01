@@ -310,12 +310,16 @@
 				</div>
 				<p class="muted">{intl.t('auth.approveSignInDescription')}</p>
 				<div class="actions" class:two-up={method === 'email' && passkeyAvailable}>
-					<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
-						{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
-					</button>
 					{#if method === 'email' && passkeyAvailable}
-						<button type="button" class="secondary" onclick={signInWithPasskeyHere} disabled={submitting}>
+						<button type="button" onclick={signInWithPasskeyHere} disabled={submitting}>
 							{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+						</button>
+						<button type="button" class="secondary" onclick={continueOnThisInstance} disabled={submitting}>
+							{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
+						</button>
+					{:else}
+						<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
+							{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
 						</button>
 					{/if}
 				</div>
@@ -355,12 +359,16 @@
 				{/if}
 				{#if homeIsCurrentInstance}
 					<div class="actions" class:two-up={method === 'email' && passkeyAvailable}>
-						<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
-							{submitting ? intl.t('auth.sending') : (method === 'email' && passkeyAvailable ? intl.t('auth.continueEmailLink') : intl.t('auth.continueLocal'))}
-						</button>
 						{#if method === 'email' && passkeyAvailable}
-							<button type="button" class="secondary" onclick={signInWithPasskeyHere} disabled={submitting}>
+							<button type="button" onclick={signInWithPasskeyHere} disabled={submitting}>
 								{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+							</button>
+							<button type="button" class="secondary" onclick={continueOnThisInstance} disabled={submitting}>
+								{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
+							</button>
+						{:else}
+							<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
+								{submitting ? intl.t('auth.sending') : intl.t('auth.continueLocal')}
 							</button>
 						{/if}
 					</div>

@@ -32,6 +32,14 @@ func TestEthereumHashNormalizesIdentity(t *testing.T) {
 	}
 }
 
+func TestDIDHashNormalizesCase(t *testing.T) {
+	a := DIDHash("did:em:ABCDEFabcdef123456789012")
+	b := DIDHash("  did:em:abcdefabcdef123456789012  ")
+	if string(a) != string(b) {
+		t.Errorf("DIDHash not case-stable: %s vs %s", a, b)
+	}
+}
+
 func TestEthereumHashDomainSeparatedFromEmail(t *testing.T) {
 	email := EmailHash("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd")
 	wallet := EthereumHash("1", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd")

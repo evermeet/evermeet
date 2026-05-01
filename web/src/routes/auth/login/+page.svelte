@@ -10,7 +10,7 @@
 		}
 	}
 
-	let email = $state('');
+	let identifier = $state('');
 	let error = $state('');
 	let submitting = $state(false);
 	let ethereumSupported = $state(false);
@@ -26,14 +26,32 @@
 		return value.startsWith('/') && !value.startsWith('//') ? value : '';
 	}
 
+	function isEvermeetDid(value: string) {
+		const t = value.trim().toLowerCase();
+		return t.startsWith('did:em:') && t.length >= 16;
+	}
+
+	function isValidEmail(value: string) {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+	}
+
 	async function submit(e: Event) {
 		e.preventDefault();
-		if (!email) return;
+		const raw = identifier.trim();
+		if (!raw) return;
 		submitting = true;
 		error = '';
 		try {
 			const eventId = new URLSearchParams(window.location.search).get('event_id') ?? '';
-			const params = new URLSearchParams({ method: 'email', email });
+			let params: URLSearchParams;
+			if (isEvermeetDid(raw)) {
+				params = new URLSearchParams({ method: 'did', did: raw });
+			} else if (isValidEmail(raw)) {
+				params = new URLSearchParams({ method: 'email', email: raw });
+			} else {
+				error = intl.t('auth.invalidEmailOrDid');
+				return;
+			}
 			if (eventId) params.set('event_id', eventId);
 			if (next) params.set('next', next);
 			goto(`/auth/instance?${params.toString()}`);
@@ -55,16 +73,16 @@
 
 <main>
 	<h1>{intl.t('auth.signIn')}</h1>
-	<p class="muted">{intl.t('auth.emailLinkHelp')}</p>
+	<p class="muted">{intl.t('auth.emailOrDidHelp')}</p>
 
 	<form onsubmit={submit}>
-		<label for="email">{intl.t('common.email')}</label>
+		<label for="identifier">{intl.t('auth.emailOrDid')}</label>
 		<input
-			id="email"
-			type="email"
-			bind:value={email}
-			placeholder="you@example.com"
-			autocomplete="email"
+			id="identifier"
+			type="text"
+			bind:value={identifier}
+			placeholder={intl.t('auth.emailOrDidPlaceholder')}
+			autocomplete="username"
 			required
 		/>
 		{#if error}<p class="error">{error}</p>{/if}

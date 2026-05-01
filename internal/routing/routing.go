@@ -25,6 +25,7 @@ import (
 const (
 	emailDomain    = "evermeet-home-routing-v1"
 	ethereumDomain = "evermeet-home-routing-ethereum-v1"
+	didDomain      = "evermeet-home-routing-did-v1"
 )
 
 const (
@@ -56,6 +57,14 @@ func EmailHash(email string) []byte {
 func EthereumHash(chainID, address string) []byte {
 	normalized := normalizeEthereumIdentity(chainID, address)
 	return routingHash(normalized, ethereumDomain)
+}
+
+// DIDHash returns the DHT key for an Evermeet DID (did:em:…). The DID is
+// normalized with strings.ToLower(strings.TrimSpace(d)) so lookups match
+// regardless of user-entered casing.
+func DIDHash(did string) []byte {
+	normalized := strings.ToLower(strings.TrimSpace(did))
+	return routingHash(normalized, didDomain)
 }
 
 func routingHash(normalized, domain string) []byte {
@@ -160,6 +169,11 @@ func (p *Publisher) Publish(ctx context.Context, email string) error {
 // PublishEthereum publishes the Ethereum wallet → homeURL mapping.
 func (p *Publisher) PublishEthereum(ctx context.Context, chainID, address string) error {
 	return p.publishRecord(ctx, EthereumHash(chainID, address))
+}
+
+// PublishDID publishes the DID → homeURL mapping.
+func (p *Publisher) PublishDID(ctx context.Context, did string) error {
+	return p.publishRecord(ctx, DIDHash(did))
 }
 
 // StartHeartbeat launches a goroutine that re-publishes all emails every

@@ -362,6 +362,7 @@ func (s *Server) StartDHTHeartbeat(ctx context.Context) {
 		return s.db.GetAllUserEmails(ctx)
 	})
 	go s.startSIWEDHTHeartbeat(ctx, 12*time.Hour)
+	go s.startDIDDHTHeartbeat(ctx, 12*time.Hour)
 }
 
 func (s *Server) startSIWEDHTHeartbeat(ctx context.Context, interval time.Duration) {
@@ -400,6 +401,46 @@ func (s *Server) publishSIWERouting(ctx context.Context) {
 		}
 		if err := pub.PublishEthereum(ctx, identity.ChainID, identity.Address); err != nil {
 			s.log.Printf("dht publish siwe %s:%s: %v", identity.ChainID, identity.Address, err)
+		}
+	}
+}
+
+func (s *Server) startDIDDHTHeartbeat(ctx context.Context, interval time.Duration) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(30 * time.Second):
+	}
+	s.publishDIDRouting(ctx)
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.publishDIDRouting(ctx)
+		}
+	}
+}
+
+func (s *Server) publishDIDRouting(ctx context.Context) {
+	dids, err := s.db.GetAllUserDIDs(ctx)
+	if err != nil {
+		s.log.Printf("dht did list: %v", err)
+		return
+	}
+	pub := s.publisher()
+	if pub == nil {
+		return
+	}
+	for _, did := range dids {
+		if ctx.Err() != nil {
+			return
+		}
+		if err := pub.PublishDID(ctx, did); err != nil {
+			s.log.Printf("dht publish did %s: %v", did, err)
 		}
 	}
 }

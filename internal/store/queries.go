@@ -427,6 +427,43 @@ func (d *DB) GetAllUserEmails(ctx context.Context) ([]string, error) {
 	return emails, rows.Err()
 }
 
+// GetAllUserDIDs returns every DID on this instance for DHT home-routing.
+func (d *DB) GetAllUserDIDs(ctx context.Context) ([]string, error) {
+	rows, err := d.db.QueryContext(ctx, `SELECT did FROM users`)
+	if err != nil {
+		return nil, fmt.Errorf("get all user DIDs: %w", err)
+	}
+	defer rows.Close()
+	var dids []string
+	for rows.Next() {
+		var did string
+		if err := rows.Scan(&did); err != nil {
+			return nil, err
+		}
+		dids = append(dids, did)
+	}
+	return dids, rows.Err()
+}
+
+// GetUserPrivateByDIDFold looks up user_private by DID case-insensitively.
+func (d *DB) GetUserPrivateByDIDFold(ctx context.Context, did string) (*UserPrivate, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),
+		        COALESCE(passkey_ids,''), COALESCE(enc_signing_key,'')
+		 FROM user_private WHERE lower(trim(did)) = lower(trim(?))`, did)
+	p := &UserPrivate{}
+	var ev int
+	err := row.Scan(&p.DID, &p.Email, &ev, &p.GoogleSub, &p.SIWEChainID, &p.SIWEAddress, &p.PasskeyIDs, &p.EncSigningKey)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	p.EmailVerified = ev != 0
+	return p, nil
+}
+
 func (d *DB) GetUserPrivateBySIWE(ctx context.Context, chainID, address string) (*UserPrivate, error) {
 	row := d.db.QueryRowContext(ctx,
 		`SELECT did, COALESCE(email,''), email_verified, COALESCE(google_sub,''), COALESCE(siwe_chain_id,''), COALESCE(siwe_address,''),

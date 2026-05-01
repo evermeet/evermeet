@@ -4,7 +4,7 @@
 
 <nav class="admin-nav" aria-label="Admin sections">
 	<a href="/admin" class:active={active === 'overview'}>Overview</a>
-	<a href="/admin/p2p" class:active={active === 'p2p'}>P2P</a>
+	<a href="/admin/p2p" class:active={active === 'p2p'}>Network</a>
 	<a href="/admin/objects" class:active={active === 'objects'}>Objects</a>
 	<a href="/admin/admins" class:active={active === 'admins'}>Admins</a>
 </nav>

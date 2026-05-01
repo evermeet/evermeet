@@ -136,6 +136,15 @@ export const messages = {
 	'auth.signInCancelled': 'Sign in cancelled.',
 	'auth.signupCancelled': 'Signup cancelled.',
 	'auth.findHomeServer': 'Find home server',
+	'auth.emailOrDid': 'Email or DID',
+	'auth.emailOrDidHelp':
+		"We'll email a sign-in link for email, or look up your home server from an Evermeet DID (did:em:…).",
+	'auth.emailOrDidPlaceholder': 'you@example.com or did:em:…',
+	'auth.invalidEmailOrDid': 'Enter a valid email or an Evermeet DID (did:em:…).',
+	'auth.didRequired': 'DID is required.',
+	'auth.lookingUpDid': 'Looking up your DID…',
+	'auth.didSignInNeedsPasskey':
+		'Signing in with a DID here requires a passkey on this account. Use email sign-in, or add a passkey while signed in.',
 	'auth.lookingUp': 'Looking up...',
 	'auth.chooseHomeTitle': 'Choose home instance',
 	'auth.chooseHomeHelp': 'We use your home instance to sign you in across Evermeet.',

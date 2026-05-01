@@ -136,6 +136,15 @@ export const messages = {
 	'auth.signInCancelled': 'Přihlášení zrušeno.',
 	'auth.signupCancelled': 'Registrace zrušena.',
 	'auth.findHomeServer': 'Najít domovský server',
+	'auth.emailOrDid': 'E-mail nebo DID',
+	'auth.emailOrDidHelp':
+		'Pro e-mail pošleme přihlašovací odkaz, z Evermeet DID (did:em:…) najdeme domovský server.',
+	'auth.emailOrDidPlaceholder': 'vas@email.cz nebo did:em:…',
+	'auth.invalidEmailOrDid': 'Zadejte platný e-mail nebo Evermeet DID (did:em:…).',
+	'auth.didRequired': 'DID je povinné.',
+	'auth.lookingUpDid': 'Vyhledávám DID…',
+	'auth.didSignInNeedsPasskey':
+		'Přihlášení pomocí DID na této instanci vyžaduje uložený passkey. Použijte přihlášení e-mailem nebo si passkey přidejte po přihlášení.',
 	'auth.lookingUp': 'Vyhledávám...',
 	'auth.chooseHomeTitle': 'Vyberte domovskou instanci',
 	'auth.chooseHomeHelp': 'Domovskou instanci používáme pro přihlášení napříč Evermeetem.',

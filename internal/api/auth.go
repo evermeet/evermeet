@@ -392,6 +392,9 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 			if err := pub.Publish(pubCtx, email); err != nil {
 				s.log.Printf("dht publish for new user %s: %v", did, err)
 			}
+			if err := pub.PublishDID(pubCtx, did); err != nil {
+				s.log.Printf("dht publish did for new user %s: %v", did, err)
+			}
 		}()
 	}
 

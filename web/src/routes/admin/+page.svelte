@@ -54,7 +54,7 @@
 					['Calendars', overview.counts.calendars, '/admin/objects/calendars'],
 					['Blobs', overview.counts.blobs, '/admin/objects/blobs'],
 					[
-						'P2P peers',
+						'Network peers',
 						Array.isArray(overview.p2p?.peers) ? overview.p2p.peers.length : 0,
 						'/admin/p2p',
 					],

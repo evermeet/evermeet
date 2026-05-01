@@ -22,7 +22,7 @@
 		try {
 			overview = await api.admin.overview();
 		} catch (err: any) {
-			error = err.message ?? 'Failed to load P2P status';
+			error = err.message ?? 'Failed to load network status';
 		} finally {
 			loading = false;
 		}
@@ -41,14 +41,14 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>P2P</h1>
+			<h1>Network</h1>
 			<p class="muted">Libp2p node identity, listen addresses, and connected peers.</p>
 		</div>
 	</div>
 	<AdminNav active="p2p" />
 
 	{#if loading}
-		<p class="muted">Loading P2P status...</p>
+		<p class="muted">Loading network status...</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if overview}

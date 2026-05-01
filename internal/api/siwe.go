@@ -121,6 +121,9 @@ func (s *Server) handleSIWEFinish(w http.ResponseWriter, r *http.Request) {
 			if err := pub.PublishEthereum(ctx, msg.ChainID, recoveredLower); err != nil {
 				s.log.Printf("dht publish siwe %s:%s: %v", msg.ChainID, recoveredLower, err)
 			}
+			if err := pub.PublishDID(ctx, did); err != nil {
+				s.log.Printf("dht publish did for siwe user %s: %v", did, err)
+			}
 		}()
 	}
 

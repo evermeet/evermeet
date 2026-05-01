@@ -12,6 +12,7 @@
 	let eventId = '';
 	let method = '';
 	let email = '';
+	let did = '';
 	let foreignSig: ForeignInstanceSig | null = null;
 	let currentUser = $state<{ did: string; display_name: string; avatar: string; bio: string } | null>(null);
 
@@ -22,6 +23,7 @@
 		eventId = params.get('event_id') ?? '';
 		method = params.get('method') ?? '';
 		email = params.get('email') ?? '';
+		did = params.get('did') ?? '';
 		const rawForeignSig = params.get('foreign_sig') ?? '';
 
 		if (!returnTo || !nonce || !rawForeignSig) {
@@ -52,6 +54,13 @@
 		if (method === 'email' && email) {
 			target.set('method', 'email');
 			target.set('email', email);
+			if (eventId) target.set('event_id', eventId);
+			goto(`/auth/instance?${target.toString()}`, { replaceState: true });
+			return;
+		}
+		if (method === 'did' && did) {
+			target.set('method', 'did');
+			target.set('did', did);
 			if (eventId) target.set('event_id', eventId);
 			goto(`/auth/instance?${target.toString()}`, { replaceState: true });
 			return;

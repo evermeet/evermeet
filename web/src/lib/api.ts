@@ -367,7 +367,8 @@ export interface ResolveHomeResponse {
 
 export type ResolveHomeRequest =
 	| { type: 'email'; email: string; event_id?: string }
-	| { type: 'ethereum'; chain_id: string; address: string; event_id?: string };
+	| { type: 'ethereum'; chain_id: string; address: string; event_id?: string }
+	| { type: 'did'; did: string; event_id?: string };
 
 export interface ResolvedInstanceInfo {
 	id: string;

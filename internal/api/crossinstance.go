@@ -27,12 +27,13 @@ import (
 //  4. Issues a short-lived nonce for this cross-instance session
 //
 // POST /api/auth/resolve-home
-// Body: {"email": "user@example.com", "event_id": "optional"}
+// Body: {"type":"email","email":"..."} | {"type":"ethereum",...} | {"type":"did","did":"did:em:..."}
 // Response: {"home_instance_url": "https://...", "nonce": "..."}
 func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Type    string `json:"type"`
 		Email   string `json:"email"`
+		DID     string `json:"did"`
 		ChainID string `json:"chain_id"`
 		Address string `json:"address"`
 		EventID string `json:"event_id"`
@@ -46,6 +47,7 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 	var identityHash []byte
 	var localHome bool
 	var localPasskeyAvailable bool
+	var delegateDID string // canonical did for /auth/delegate when type is did
 	switch req.Type {
 	case "", "email":
 		if req.Email == "" {
@@ -84,6 +86,29 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		localHome = existing != nil
+	case "did":
+		normalized, err := identity.NormalizeEvermeetDID(req.DID)
+		if err != nil {
+			jsonErr(w, http.StatusBadRequest, "invalid did")
+			return
+		}
+		identityHash = routing.DIDHash(normalized)
+		existing, err := s.db.GetUserPrivateByDIDFold(r.Context(), normalized)
+		if err != nil {
+			jsonErr(w, http.StatusInternalServerError, "local identity lookup failed")
+			return
+		}
+		localHome = existing != nil
+		delegateDID = normalized
+		if existing != nil {
+			delegateDID = existing.DID
+			passkeys, err := s.db.GetPasskeysByDID(r.Context(), existing.DID)
+			if err != nil {
+				jsonErr(w, http.StatusInternalServerError, "local passkey lookup failed")
+				return
+			}
+			localPasskeyAvailable = len(passkeys) > 0
+		}
 	default:
 		jsonErr(w, http.StatusBadRequest, "unsupported identity type")
 		return
@@ -163,7 +188,7 @@ func (s *Server) handleResolveHome(w http.ResponseWriter, r *http.Request) {
 		jsonErr(w, http.StatusInternalServerError, "redirect signing failed")
 		return
 	}
-	delegateURL, err := buildDelegateURL(rec.HomeInstanceURL, foreignSig, req.Type, req.Email, req.ChainID, req.Address)
+	delegateURL, err := buildDelegateURL(rec.HomeInstanceURL, foreignSig, req.Type, req.Email, req.ChainID, req.Address, delegateDID)
 	if err != nil {
 		jsonErr(w, http.StatusInternalServerError, "delegate URL failed")
 		return
@@ -519,7 +544,7 @@ func foreignSigPayload(fs *ForeignInstanceSig) ([]byte, error) {
 	}{fs.ReturnTo, fs.Nonce, fs.EventID, fs.IssuedAt})
 }
 
-func buildDelegateURL(homeURL string, fs *ForeignInstanceSig, authType, email, chainID, address string) (string, error) {
+func buildDelegateURL(homeURL string, fs *ForeignInstanceSig, authType, email, chainID, address, did string) (string, error) {
 	u, err := url.Parse(strings.TrimRight(homeURL, "/") + "/auth/delegate")
 	if err != nil {
 		return "", err
@@ -544,6 +569,11 @@ func buildDelegateURL(homeURL string, fs *ForeignInstanceSig, authType, email, c
 			q.Set("method", "ethereum")
 			q.Set("chain_id", chainID)
 			q.Set("address", address)
+		}
+	case "did":
+		if did != "" {
+			q.Set("method", "did")
+			q.Set("did", did)
 		}
 	}
 	u.RawQuery = q.Encode()

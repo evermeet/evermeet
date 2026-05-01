@@ -16,10 +16,11 @@
 		}
 	}
 
-	type Method = 'email' | 'ethereum';
+	type Method = 'email' | 'ethereum' | 'did';
 
 	let method = $state<Method>('email');
 	let email = $state('');
+	let did = $state('');
 	let eventId = $state('');
 	let next = $state('');
 	let autoEmail = $state(false);
@@ -42,8 +43,10 @@
 
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search);
-		method = params.get('method') === 'ethereum' ? 'ethereum' : 'email';
+		const m = params.get('method');
+		method = m === 'ethereum' ? 'ethereum' : m === 'did' ? 'did' : 'email';
 		email = params.get('email') ?? '';
+		did = params.get('did') ?? '';
 		eventId = params.get('event_id') ?? '';
 		next = sanitizeNext(params.get('next') ?? '');
 		autoEmail = params.get('auto') === '1';
@@ -56,6 +59,16 @@
 				return;
 			}
 			resolveEmail();
+			return;
+		}
+		if (method === 'did') {
+			identity = did;
+			if (!did) {
+				error = intl.t('auth.didRequired');
+				loading = false;
+				return;
+			}
+			resolveDid();
 			return;
 		}
 		connectAndResolveEthereum();
@@ -90,6 +103,10 @@
 
 	async function resolveEmail() {
 		await resolveHome({ type: 'email', email, event_id: eventId });
+	}
+
+	async function resolveDid() {
+		await resolveHome({ type: 'did', did, event_id: eventId });
 	}
 
 	async function connectAndResolveEthereum() {
@@ -128,7 +145,14 @@
 			delegateURL = resolved.delegate_url;
 			homeIsCurrentInstance = resolved.home_instance_url.replace(/\/$/, '') === window.location.origin.replace(/\/$/, '');
 			passkeyAvailable = !!resolved.auth_methods?.passkey;
-			if (autoEmail && !isDelegationRequest() && method === 'email' && homeIsCurrentInstance && !passkeyAvailable && !autoEmailRequested) {
+			if (
+				autoEmail &&
+				!isDelegationRequest() &&
+				method === 'email' &&
+				homeIsCurrentInstance &&
+				!passkeyAvailable &&
+				!autoEmailRequested
+			) {
 				autoEmailRequested = true;
 				await requestLocalMagicLink();
 			}
@@ -148,7 +172,24 @@
 			await requestLocalMagicLink();
 			return;
 		}
+		if (method === 'did') {
+			if (passkeyAvailable) {
+				await signInWithPasskeyHere();
+				return;
+			}
+			error = intl.t('auth.didSignInNeedsPasskey');
+			return;
+		}
 		await signInWithEthereumHere();
+	}
+
+	/** Email / wallet can create an account here; DID lookup cannot — send user to sign-in. */
+	function registerOnThisInstanceInstead() {
+		if (method === 'did') {
+			goto('/auth/login');
+			return;
+		}
+		void continueOnThisInstance();
 	}
 
 	async function requestLocalMagicLink() {
@@ -223,7 +264,9 @@
 		submitting = true;
 		error = '';
 		try {
-			const { data: options, session } = await api.auth.passkey.loginStart(email || undefined);
+			const { data: options, session } = await api.auth.passkey.loginStart(
+				method === 'email' ? email || undefined : undefined
+			);
 			const credential: any = await navigator.credentials.get({
 				publicKey: recursiveBase64ToBuffer(options.publicKey)
 			});
@@ -282,7 +325,13 @@
 		</p>
 
 		{#if loading}
-			<p class="muted">{method === 'ethereum' ? intl.t('auth.connectingWallet') : intl.t('auth.lookingUp')}</p>
+			<p class="muted">
+				{method === 'ethereum'
+					? intl.t('auth.connectingWallet')
+					: method === 'did'
+						? intl.t('auth.lookingUpDid')
+						: intl.t('auth.lookingUp')}
+			</p>
 		{/if}
 
 		{#if error}
@@ -317,6 +366,12 @@
 						<button type="button" class="secondary" onclick={continueOnThisInstance} disabled={submitting}>
 							{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
 						</button>
+					{:else if method === 'did' && passkeyAvailable}
+						<button type="button" onclick={signInWithPasskeyHere} disabled={submitting}>
+							{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+						</button>
+					{:else if method === 'did'}
+						<p class="muted">{intl.t('auth.didSignInNeedsPasskey')}</p>
 					{:else}
 						<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
 							{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
@@ -366,6 +421,12 @@
 							<button type="button" class="secondary" onclick={continueOnThisInstance} disabled={submitting}>
 								{submitting ? intl.t('auth.sending') : intl.t('auth.continueEmailLink')}
 							</button>
+						{:else if method === 'did' && passkeyAvailable}
+							<button type="button" onclick={signInWithPasskeyHere} disabled={submitting}>
+								{submitting ? intl.t('auth.sending') : intl.t('auth.continuePasskey')}
+							</button>
+						{:else if method === 'did'}
+							<p class="muted">{intl.t('auth.didSignInNeedsPasskey')}</p>
 						{:else}
 							<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
 								{submitting ? intl.t('auth.sending') : intl.t('auth.continueLocal')}
@@ -375,7 +436,7 @@
 				{:else}
 					<div class="actions two-up">
 						<a class="button" href={delegateURL}>{intl.t('auth.continueRemote')}</a>
-						<button type="button" class="secondary" onclick={continueOnThisInstance} disabled={submitting}>
+						<button type="button" class="secondary" onclick={registerOnThisInstanceInstead} disabled={submitting}>
 							{submitting ? intl.t('auth.sending') : intl.t('auth.registerLocal')}
 						</button>
 					</div>
@@ -386,7 +447,7 @@
 		{#if noHomeFound}
 			<div class="instance-card">
 				<p>{intl.t('auth.noHomeFound', { identity })}</p>
-				<button type="button" onclick={continueOnThisInstance} disabled={submitting}>
+				<button type="button" onclick={registerOnThisInstanceInstead} disabled={submitting}>
 					{submitting ? intl.t('auth.sending') : intl.t('auth.registerLocal')}
 				</button>
 			</div>

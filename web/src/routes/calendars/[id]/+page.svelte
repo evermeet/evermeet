@@ -153,12 +153,14 @@
 {:else if error}
 	<p class="status-msg error">{error}</p>
 {:else if cal}
-	<!-- Backdrop -->
-	<div class="backdrop" style={cal.backdrop_url ? `background-image: url('${cal.backdrop_url}')` : ''}>
-		{#if !cal.backdrop_url}<div class="backdrop-gradient"></div>{/if}
-	</div>
+	{#if cal.backdrop_url}
+		<div
+			class="backdrop"
+			style={`background-image: url(${JSON.stringify(cal.backdrop_url)})`}
+		></div>
+	{/if}
 
-	<div class="header-wrap">
+	<div class="header-wrap" class:no-backdrop={!cal.backdrop_url}>
 		<!-- Avatar overlapping backdrop -->
 		<div class="avatar-row">
 			<div class="cal-avatar">
@@ -412,15 +414,10 @@
 	.backdrop {
 		width: 100%;
 		height: 240px;
-		background: var(--bg-raised);
+		background-color: var(--bg-raised);
 		background-size: cover;
 		background-position: center;
 		position: relative;
-	}
-	.backdrop-gradient {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(135deg, var(--bg-raised) 0%, var(--bg-subtle) 100%);
 	}
 
 	/* Full-width header section */
@@ -429,6 +426,9 @@
 		margin: 0 auto;
 		padding: 0 1.5rem;
 		font-family: system-ui, sans-serif;
+	}
+	.header-wrap.no-backdrop {
+		padding-top: 2.5rem;
 	}
 
 	/* Two-column layout below the divider */
@@ -454,6 +454,9 @@
 		justify-content: space-between;
 		margin-top: -43px;
 		margin-bottom: 1rem;
+	}
+	.header-wrap.no-backdrop .avatar-row {
+		margin-top: 0;
 	}
 	.cal-avatar {
 		border: 4px solid var(--bg);

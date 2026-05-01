@@ -6,7 +6,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,6 +25,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/crypto"
 	cryptopb "github.com/libp2p/go-libp2p/core/crypto/pb"
 	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
@@ -30,10 +33,12 @@ import (
 )
 
 const (
-	EventsTopicName    = "em/events"
-	UsersTopicName     = "em/users"
-	EventFetchProtocol = "/evermeet/event-fetch/1.0.0"
-	UserFetchProtocol  = "/evermeet/user-fetch/1.0.0"
+	EventsTopicName         = "em/events"
+	UsersTopicName          = "em/users"
+	EventFetchProtocol      = "/evermeet/event-fetch/1.0.0"
+	UserFetchProtocol       = "/evermeet/user-fetch/1.0.0"
+	InstanceInfoProtocol    = "/evermeet/instance-info/1.0.0"
+	instanceInfoMaxBodySize = 8192
 
 	dhtProtocolPrefix = "/evermeet"
 	dhtNamespace      = "evermeet"
@@ -56,9 +61,13 @@ type Node struct {
 
 	peersMu sync.Mutex
 	peers   map[peer.ID]peer.AddrInfo
+
+	evermeetHomeID   string
+	peerEvermeet     map[peer.ID]string
+	peerEvermeetLock sync.RWMutex
 }
 
-func New(db *store.DB, l *log.Logger, listenPort int, dataDir string) (*Node, error) {
+func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID string) (*Node, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Load or generate a persistent Ed25519 identity for this node.
@@ -113,15 +122,18 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir string) (*Node, er
 	}
 
 	n := &Node{
-		host:   h,
-		ps:     ps,
-		dht:    kad,
-		rd:     drouting.NewRoutingDiscovery(kad),
-		db:     db,
-		log:    l,
-		ctx:    ctx,
-		cancel: cancel,
-		peers:  make(map[peer.ID]peer.AddrInfo),
+		host:             h,
+		ps:               ps,
+		dht:              kad,
+		rd:               drouting.NewRoutingDiscovery(kad),
+		db:               db,
+		log:              l,
+		ctx:              ctx,
+		cancel:           cancel,
+		peers:            make(map[peer.ID]peer.AddrInfo),
+		evermeetHomeID:   evermeetHomeID,
+		peerEvermeet:     make(map[peer.ID]string),
+		peerEvermeetLock: sync.RWMutex{},
 	}
 
 	// mDNS discovery — peers found here also populate the DHT routing table
@@ -140,6 +152,26 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir string) (*Node, er
 
 	n.host.SetStreamHandler(EventFetchProtocol, n.handleEventFetchStream)
 	n.host.SetStreamHandler(UserFetchProtocol, n.handleUserFetchStream)
+	n.host.SetStreamHandler(InstanceInfoProtocol, n.handleInstanceInfoStream)
+
+	n.host.Network().Notify(&network.NotifyBundle{
+		ConnectedF: func(_ network.Network, c network.Conn) {
+			remote := c.RemotePeer()
+			if remote == n.host.ID() {
+				return
+			}
+			go func() {
+				ctx, cancel := context.WithTimeout(n.ctx, 5*time.Second)
+				defer cancel()
+				n.exchangeInstanceInfo(ctx, remote)
+			}()
+		},
+		DisconnectedF: func(_ network.Network, c network.Conn) {
+			n.peerEvermeetLock.Lock()
+			delete(n.peerEvermeet, c.RemotePeer())
+			n.peerEvermeetLock.Unlock()
+		},
+	})
 
 	l.Printf("P2P node started: %s", h.ID())
 	for _, addr := range h.Addrs() {
@@ -242,6 +274,57 @@ func (n *Node) BroadcastEvent(data []byte) error {
 	return n.eventsTopic.Publish(n.ctx, data)
 }
 
+func (n *Node) handleInstanceInfoStream(s network.Stream) {
+	defer s.Close()
+	remote := s.Conn().RemotePeer()
+	dec := json.NewDecoder(io.LimitReader(s, instanceInfoMaxBodySize))
+	var req struct {
+		EvermeetInstanceID string `json:"evermeet_instance_id"`
+	}
+	if err := dec.Decode(&req); err != nil {
+		return
+	}
+	if req.EvermeetInstanceID != "" {
+		n.peerEvermeetLock.Lock()
+		n.peerEvermeet[remote] = req.EvermeetInstanceID
+		n.peerEvermeetLock.Unlock()
+	}
+	if n.evermeetHomeID == "" {
+		return
+	}
+	_ = json.NewEncoder(s).Encode(map[string]string{"evermeet_instance_id": n.evermeetHomeID})
+}
+
+func (n *Node) exchangeInstanceInfo(ctx context.Context, remote peer.ID) {
+	if n.evermeetHomeID == "" {
+		return
+	}
+	s, err := n.host.NewStream(ctx, remote, InstanceInfoProtocol)
+	if err != nil {
+		return
+	}
+	defer s.Close()
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		deadline = time.Now().Add(5 * time.Second)
+	}
+	_ = s.SetDeadline(deadline)
+	if err := json.NewEncoder(s).Encode(map[string]string{"evermeet_instance_id": n.evermeetHomeID}); err != nil {
+		return
+	}
+	var resp struct {
+		EvermeetInstanceID string `json:"evermeet_instance_id"`
+	}
+	if err := json.NewDecoder(io.LimitReader(s, instanceInfoMaxBodySize)).Decode(&resp); err != nil {
+		return
+	}
+	if resp.EvermeetInstanceID != "" {
+		n.peerEvermeetLock.Lock()
+		n.peerEvermeet[remote] = resp.EvermeetInstanceID
+		n.peerEvermeetLock.Unlock()
+	}
+}
+
 func (n *Node) HandlePeerFound(pi peer.AddrInfo) {
 	n.peersMu.Lock()
 	defer n.peersMu.Unlock()
@@ -273,13 +356,15 @@ func (n *Node) PeerCount() int {
 }
 
 type NodeStatus struct {
-	ID        string       `json:"id"`
-	Addresses []string     `json:"addresses"`
-	Peers     []PeerStatus `json:"peers"`
+	EvermeetInstanceID string       `json:"evermeet_instance_id"`
+	Libp2pPeerID       string       `json:"libp2p_peer_id"`
+	Addresses          []string     `json:"addresses"`
+	Peers              []PeerStatus `json:"peers"`
 }
 
 type PeerStatus struct {
-	ID                 string   `json:"id"`
+	EvermeetInstanceID string   `json:"evermeet_instance_id,omitempty"`
+	Libp2pPeerID       string   `json:"libp2p_peer_id"`
 	Libp2pFingerprint  string   `json:"libp2p_fingerprint,omitempty"`
 	Addresses          []string `json:"addresses"`
 }
@@ -312,13 +397,22 @@ func (n *Node) Status() NodeStatus {
 		if pk := n.host.Peerstore().PubKey(p); pk != nil {
 			fp = fingerprintFromLibp2pPubKey(pk)
 		}
+		n.peerEvermeetLock.RLock()
+		home := n.peerEvermeet[p]
+		n.peerEvermeetLock.RUnlock()
 		peerStats = append(peerStats, PeerStatus{
-			ID:                p.String(),
-			Libp2pFingerprint: fp,
-			Addresses:         pAddrs,
+			EvermeetInstanceID: home,
+			Libp2pPeerID:       p.String(),
+			Libp2pFingerprint:  fp,
+			Addresses:          pAddrs,
 		})
 	}
-	return NodeStatus{ID: n.host.ID().String(), Addresses: addrs, Peers: peerStats}
+	return NodeStatus{
+		EvermeetInstanceID: n.evermeetHomeID,
+		Libp2pPeerID:       n.host.ID().String(),
+		Addresses:          addrs,
+		Peers:              peerStats,
+	}
 }
 
 // InstancePubKey returns the raw Ed25519 public key bytes of this node's

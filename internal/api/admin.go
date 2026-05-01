@@ -47,16 +47,13 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 	homeID := s.homeHost()
 	var p2pStatus any
 	if n := s.libp2pNode(); n != nil {
-		st := n.Status()
-		p2pStatus = map[string]any{
-			"id":                   st.ID,
-			"addresses":            st.Addresses,
-			"peers":                st.Peers,
-			"evermeet_instance_id": homeID,
-		}
+		p2pStatus = n.Status()
 	} else {
 		p2pStatus = map[string]any{
 			"evermeet_instance_id": homeID,
+			"libp2p_peer_id":       "",
+			"addresses":            []string{},
+			"peers":                []any{},
 		}
 	}
 

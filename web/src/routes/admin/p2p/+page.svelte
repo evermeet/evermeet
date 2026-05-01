@@ -61,7 +61,7 @@
 				</div>
 				<div class="info-row">
 					<span class="label">Libp2p Peer ID</span>
-					<span class="value mono">{overview.p2p?.id ?? 'not initialized'}</span>
+					<span class="value mono">{overview.p2p?.libp2p_peer_id ?? 'not initialized'}</span>
 				</div>
 				<div class="info-row">
 					<span class="label">Connected peers</span>
@@ -111,7 +111,16 @@
 				<div class="peers-list">
 					{#each p2pPeers as peer}
 						<div class="peer-card">
-							<p class="mono peer-id">{peer.id}</p>
+							<div class="peer-info-grid">
+								<div class="info-row">
+									<span class="label">Evermeet instance</span>
+									<span class="value mono">{peer.evermeet_instance_id || '—'}</span>
+								</div>
+								<div class="info-row">
+									<span class="label">Libp2p Peer ID</span>
+									<span class="value mono">{peer.libp2p_peer_id}</span>
+								</div>
+							</div>
 							{#if peer.libp2p_fingerprint}
 								<p class="peer-meta">
 									<span class="meta-label">Libp2p key fingerprint</span>
@@ -236,9 +245,11 @@
 		background: var(--bg);
 	}
 
-	.peer-id {
-		word-break: break-all;
-		margin: 0 0 0.35rem;
+	.peer-info-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 0.35rem;
 	}
 
 	.peer-meta {

@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -99,9 +100,14 @@ func main() {
 		logger.Fatalf("admin check: %v", err)
 	}
 
+	homeHostStr := instanceID
+	if u, err := url.Parse(baseURL); err == nil && u.Host != "" {
+		homeHostStr = instanceID + "@" + u.Host
+	}
+
 	var p2pNode *node.Node
 	if hasAdmins {
-		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir)
+		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir, homeHostStr)
 		if err != nil {
 			logger.Fatalf("start p2p node: %v", err)
 		}

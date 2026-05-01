@@ -145,7 +145,7 @@ func (s *Server) PeerCount() int {
 // HandleHealth writes JSON health including live P2P peer count.
 func (s *Server) HandleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, s.instanceID, s.PeerCount())
+	fmt.Fprintf(w, `{"status":"ok","instance_id":%q,"p2p_peers":%d}`, s.homeHost(), s.PeerCount())
 }
 
 // ensureP2P starts the libp2p node and DHT publisher if they are not already running.
@@ -155,7 +155,7 @@ func (s *Server) ensureP2P() error {
 	if s.node != nil {
 		return nil
 	}
-	n, err := node.New(s.db, s.log, s.cfg.P2P.ListenPort, s.cfg.Node.DataDir)
+	n, err := node.New(s.db, s.log, s.cfg.P2P.ListenPort, s.cfg.Node.DataDir, s.homeHost())
 	if err != nil {
 		return err
 	}
@@ -413,7 +413,7 @@ func (s *Server) homeHost() string {
 
 func (s *Server) handleNodeKey(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]any{
-		"instance_id": s.instanceID,
+		"instance_id": s.homeHost(),
 		"public_key":  s.instancePriv.Public().(ed25519.PublicKey), // raw Ed25519 public key bytes, base64 by JSON encoder
 	})
 }

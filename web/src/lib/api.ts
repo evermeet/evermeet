@@ -442,6 +442,33 @@ export interface AdminP2PPeer {
 	addresses?: string[];
 }
 
+export interface AdminRuntimeMemory {
+	heap_alloc_bytes: number;
+	heap_inuse_bytes: number;
+	heap_sys_bytes: number;
+	stack_inuse_bytes: number;
+	sys_bytes: number;
+	gc_count: number;
+	gc_cpu_fraction: number;
+}
+
+export interface AdminRuntimeCPU {
+	num_cpu: number;
+	gomaxprocs: number;
+	goroutines: number;
+	loadavg_1?: number;
+	loadavg_5?: number;
+	loadavg_15?: number;
+}
+
+export interface AdminRuntime {
+	os: string;
+	arch: string;
+	go_version: string;
+	memory: AdminRuntimeMemory;
+	cpu: AdminRuntimeCPU;
+}
+
 export interface AdminOverview {
 	instance_id: string;
 	base_url: string;
@@ -462,6 +489,7 @@ export interface AdminOverview {
 		peers?: AdminP2PPeer[];
 		[key: string]: any;
 	};
+	runtime?: AdminRuntime;
 	config: {
 		node: Record<string, any>;
 		p2p: Record<string, any>;

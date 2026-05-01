@@ -71,7 +71,8 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 			"calendars": calendarCount,
 			"blobs":     blobCount,
 		},
-		"p2p": p2pStatus,
+		"p2p":     p2pStatus,
+		"runtime": adminRuntimeSnapshot(),
 		"config": map[string]any{
 			"node": s.cfg.Node,
 			"p2p":  s.cfg.P2P,

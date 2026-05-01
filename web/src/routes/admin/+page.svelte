@@ -5,6 +5,23 @@
 	import AdminNav from '$lib/components/AdminNav.svelte';
 	import { onMount } from 'svelte';
 
+	/** Binary IEC units; index matches power-of-1024 tier (was mis-indexed before, e.g. MiB shown as GiB). */
+	function formatBytes(n: number): string {
+		if (!Number.isFinite(n) || n < 0) return '—';
+		const k = 1024;
+		if (n < k) return `${Math.round(n)} B`;
+		const sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+		const tier = Math.min(Math.floor(Math.log(n) / Math.log(k)), sizes.length - 1);
+		const v = n / Math.pow(k, tier);
+		const decimals = tier <= 1 ? 1 : 2;
+		return `${parseFloat(v.toFixed(decimals))} ${sizes[tier]}`;
+	}
+
+	function pct(n: number): string {
+		if (!Number.isFinite(n)) return '—';
+		return `${(n * 100).toFixed(2)}%`;
+	}
+
 	let overview = $state<AdminOverview | null>(null);
 	let loading = $state(true);
 	let error = $state('');
@@ -96,6 +113,79 @@
 			</div>
 		</section>
 
+		{#if overview.runtime}
+			<section class="panel">
+				<h2>System</h2>
+				<p class="muted small-print">
+					OS and architecture from the Go build target; memory and scheduler stats from this process. Load averages
+					appear on Linux when <code class="mono">/proc/loadavg</code> is available.
+				</p>
+				<div class="info-grid">
+					<div class="info-row">
+						<span class="label">Operating system</span>
+						<span class="value mono">{overview.runtime.os}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Architecture</span>
+						<span class="value mono">{overview.runtime.arch}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Go runtime</span>
+						<span class="value mono">{overview.runtime.go_version}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Heap in use</span>
+						<span class="value mono">{formatBytes(overview.runtime.memory.heap_inuse_bytes)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Heap allocated</span>
+						<span class="value mono">{formatBytes(overview.runtime.memory.heap_alloc_bytes)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Heap reserved</span>
+						<span class="value mono">{formatBytes(overview.runtime.memory.heap_sys_bytes)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Stack in use</span>
+						<span class="value mono">{formatBytes(overview.runtime.memory.stack_inuse_bytes)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Total from OS</span>
+						<span class="value mono">{formatBytes(overview.runtime.memory.sys_bytes)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">GC runs</span>
+						<span class="value mono">{overview.runtime.memory.gc_count}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">GC CPU (cumulative)</span>
+						<span class="value mono">{pct(overview.runtime.memory.gc_cpu_fraction)}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Logical CPUs</span>
+						<span class="value mono">{overview.runtime.cpu.num_cpu}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">GOMAXPROCS</span>
+						<span class="value mono">{overview.runtime.cpu.gomaxprocs}</span>
+					</div>
+					<div class="info-row">
+						<span class="label">Goroutines</span>
+						<span class="value mono">{overview.runtime.cpu.goroutines}</span>
+					</div>
+					{#if overview.runtime.cpu.loadavg_1 != null && overview.runtime.cpu.loadavg_5 != null && overview.runtime.cpu.loadavg_15 != null}
+						<div class="info-row">
+							<span class="label">Load avg (1 / 5 / 15 m)</span>
+							<span class="value mono">
+								{overview.runtime.cpu.loadavg_1?.toFixed(2)} / {overview.runtime.cpu.loadavg_5?.toFixed(2)} /
+								{overview.runtime.cpu.loadavg_15?.toFixed(2)}
+							</span>
+						</div>
+					{/if}
+				</div>
+			</section>
+		{/if}
+
 		<section class="panel">
 			<h2>Active Configuration</h2>
 			<div class="config-group">
@@ -160,6 +250,16 @@
 
 	.muted {
 		color: var(--text-secondary);
+	}
+
+	.small-print {
+		font-size: 0.8rem;
+		line-height: 1.45;
+		margin: -0.35rem 0 0.85rem;
+	}
+
+	.small-print code {
+		font-size: 0.78em;
 	}
 
 	.error {

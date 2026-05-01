@@ -437,7 +437,7 @@ export interface AdminAdminsOverview {
 
 export interface AdminP2PPeer {
 	id: string;
-	instance_id?: string;
+	libp2p_fingerprint?: string;
 	addresses?: string[];
 }
 
@@ -458,6 +458,7 @@ export interface AdminOverview {
 		id?: string;
 		addresses?: string[];
 		peers?: AdminP2PPeer[];
+		evermeet_instance_id?: string;
 		[key: string]: any;
 	};
 	config: {

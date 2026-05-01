@@ -32,6 +32,9 @@
 		Array.isArray(overview?.p2p?.peers) ? (overview.p2p.peers as AdminP2PPeer[]) : []
 	);
 	const p2pAddresses = $derived(Array.isArray(overview?.p2p?.addresses) ? overview.p2p.addresses : []);
+	const evermeetInstanceId = $derived(
+		overview?.p2p?.evermeet_instance_id ?? overview?.instance_id ?? ''
+	);
 </script>
 
 <main>
@@ -53,7 +56,11 @@
 			<h2>Status</h2>
 			<div class="info-grid">
 				<div class="info-row">
-					<span class="label">Peer ID</span>
+					<span class="label">Evermeet instance</span>
+					<span class="value mono">{evermeetInstanceId || '—'}</span>
+				</div>
+				<div class="info-row">
+					<span class="label">Libp2p Peer ID</span>
 					<span class="value mono">{overview.p2p?.id ?? 'not initialized'}</span>
 				</div>
 				<div class="info-row">
@@ -105,10 +112,10 @@
 					{#each p2pPeers as peer}
 						<div class="peer-card">
 							<p class="mono peer-id">{peer.id}</p>
-							{#if peer.instance_id}
+							{#if peer.libp2p_fingerprint}
 								<p class="peer-meta">
-									<span class="meta-label">Instance id</span>
-									<code class="mono instance-id">{peer.instance_id}</code>
+									<span class="meta-label">Libp2p key fingerprint</span>
+									<code class="mono instance-id">{peer.libp2p_fingerprint}</code>
 								</p>
 							{/if}
 							{#if peer.addresses?.length}

@@ -279,14 +279,12 @@ type NodeStatus struct {
 }
 
 type PeerStatus struct {
-	ID         string   `json:"id"`
-	InstanceID string   `json:"instance_id,omitempty"`
-	Addresses  []string `json:"addresses"`
+	ID                 string   `json:"id"`
+	Libp2pFingerprint  string   `json:"libp2p_fingerprint,omitempty"`
+	Addresses          []string `json:"addresses"`
 }
 
-// instanceIDFromLibp2pPubKey returns the same 16-hex fingerprint Evermeet uses
-// for application instance_id, but derived from the peer's libp2p public key.
-func instanceIDFromLibp2pPubKey(pub crypto.PubKey) string {
+func fingerprintFromLibp2pPubKey(pub crypto.PubKey) string {
 	if pub == nil || pub.Type() != cryptopb.KeyType_Ed25519 {
 		return ""
 	}
@@ -310,14 +308,14 @@ func (n *Node) Status() NodeStatus {
 		for _, a := range n.host.Peerstore().Addrs(p) {
 			pAddrs = append(pAddrs, a.String())
 		}
-		instID := ""
+		fp := ""
 		if pk := n.host.Peerstore().PubKey(p); pk != nil {
-			instID = instanceIDFromLibp2pPubKey(pk)
+			fp = fingerprintFromLibp2pPubKey(pk)
 		}
 		peerStats = append(peerStats, PeerStatus{
-			ID:         p.String(),
-			InstanceID: instID,
-			Addresses:  pAddrs,
+			ID:                p.String(),
+			Libp2pFingerprint: fp,
+			Addresses:         pAddrs,
 		})
 	}
 	return NodeStatus{ID: n.host.ID().String(), Addresses: addrs, Peers: peerStats}

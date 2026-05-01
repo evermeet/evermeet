@@ -7,28 +7,40 @@
 
 	let registering = $state(false);
 	let savingProfile = $state(false);
-	let error = $state('');
-	let success = $state('');
+	let profileError = $state('');
+	let profileSuccess = $state('');
+	let passkeyError = $state('');
+	let passkeySuccess = $state('');
 
-	let displayName = $state(auth.user?.display_name || '');
-	let bio = $state(auth.user?.bio || '');
-	let avatar = $state(auth.user?.avatar || '');
+	let displayName = $state('');
+	let bio = $state('');
+	let avatar = $state('');
+	let populated = $state(false);
+
+	$effect(() => {
+		if (!populated && auth.user) {
+			displayName = auth.user.display_name || '';
+			bio = auth.user.bio || '';
+			avatar = auth.user.avatar || '';
+			populated = true;
+		}
+	});
 
 	async function updateProfile(e: Event) {
 		e.preventDefault();
 		savingProfile = true;
-		error = '';
-		success = '';
+		profileError = '';
+		profileSuccess = '';
 		try {
 			await api.auth.updateProfile({
 				display_name: displayName,
 				bio: bio,
 				avatar: avatar
 			});
-			success = 'Profile updated successfully!';
+			profileSuccess = 'Profile updated successfully!';
 			await auth.load();
 		} catch (err: any) {
-			error = err.message;
+			profileError = err.message;
 		} finally {
 			savingProfile = false;
 		}
@@ -36,8 +48,8 @@
 
 	async function registerPasskey() {
 		registering = true;
-		error = '';
-		success = '';
+		passkeyError = '';
+		passkeySuccess = '';
 		try {
 			const { data: options, session } = await api.auth.passkey.registerStart();
 
@@ -56,10 +68,10 @@
 			};
 
 			await api.auth.passkey.registerFinish(finishData, session);
-			success = 'Passkey registered successfully!';
+			passkeySuccess = 'Passkey registered successfully!';
 		} catch (err: any) {
 			console.error(err);
-			error = err.message;
+			passkeyError = err.message;
 		} finally {
 			registering = false;
 		}
@@ -84,6 +96,12 @@
 				<span class="field-label">Avatar</span>
 				<ImageUpload bind:value={avatar} rounded={true} previewSize={120} />
 			</div>
+			{#if profileSuccess}
+				<p class="success">{profileSuccess}</p>
+			{/if}
+			{#if profileError}
+				<p class="error">{profileError}</p>
+			{/if}
 			<button type="submit" disabled={savingProfile}>
 				{savingProfile ? 'Saving…' : 'Save Profile'}
 			</button>
@@ -112,11 +130,11 @@
 		<h2>Passkeys</h2>
 		<p class="muted">Add a passkey to sign in without waiting for email links.</p>
 
-		{#if success}
-			<p class="success">{success}</p>
+		{#if passkeySuccess}
+			<p class="success">{passkeySuccess}</p>
 		{/if}
-		{#if error}
-			<p class="error">{error}</p>
+		{#if passkeyError}
+			<p class="error">{passkeyError}</p>
 		{/if}
 
 		<button onclick={registerPasskey} disabled={registering}>
@@ -153,7 +171,7 @@
 	form { display: flex; flex-direction: column; gap: 1rem; }
 	.field { display: flex; flex-direction: column; gap: 0.3rem; }
 	label, .field-label { font-size: 0.85rem; font-weight: 600; color: var(--text-label); }
-	input, textarea {
+input, textarea {
 		padding: 0.6rem;
 		border: 1px solid var(--border-input);
 		border-radius: var(--radius-md);

@@ -110,8 +110,6 @@
 	}
 	.preview-rounded {
 		border-radius: 50%;
-		overflow: hidden;
-		border: 1px solid var(--border-input);
 	}
 	.preview img {
 		display: block;
@@ -123,7 +121,6 @@
 	}
 	.preview-rounded img {
 		border-radius: 50%;
-		border: none;
 	}
 	.clear-btn {
 		position: absolute;

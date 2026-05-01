@@ -1,15 +1,19 @@
 package api
 
 import (
+	"context"
+	"crypto/ed25519"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/blob"
 	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/email"
 	"github.com/evermeet/evermeet/internal/node"
+	"github.com/evermeet/evermeet/internal/routing"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,11 +29,13 @@ type Server struct {
 	log          *log.Logger
 	baseURL      string
 	serverSecret []byte // used to derive per-user key encryption passwords
+	instancePriv ed25519.PrivateKey
 	instanceID   string
 	webauthn     *webauthn.WebAuthn
 	node         *node.Node
 	cfg          *config.Config
 	startTime    time.Time
+	dhtPublisher *routing.Publisher
 }
 
 // NewServer creates a Server with the given dependencies.
@@ -48,6 +54,14 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 		logger.Fatalf("webauthn: %v", err)
 	}
 
+	// Reconstruct the instance Ed25519 private key from its seed (serverSecret).
+	instancePriv := ed25519.NewKeyFromSeed(serverSecret)
+
+	var pub *routing.Publisher
+	if p2pNode != nil {
+		pub = routing.NewPublisher(p2pNode.DHTPublish, instancePriv, baseURL)
+	}
+
 	return &Server{
 		db:           db,
 		blobs:        blobStore,
@@ -55,11 +69,13 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 		log:          logger,
 		baseURL:      baseURL,
 		serverSecret: serverSecret,
+		instancePriv: instancePriv,
 		instanceID:   instanceID,
 		webauthn:     w,
 		node:         p2pNode,
 		cfg:          cfg,
 		startTime:    time.Now(),
+		dhtPublisher: pub,
 	}
 }
 
@@ -112,6 +128,11 @@ func (s *Server) Router() http.Handler {
 	// Users
 	r.Get("/api/users/{did}", s.handleGetUser)
 
+	// Cross-instance auth
+	r.Post("/api/auth/resolve-home", s.handleResolveHome)
+	r.Post("/api/auth/delegate", s.requireAuth(s.handleCreateDelegation))
+	r.Post("/api/auth/delegate-verify", s.handleVerifyDelegation)
+
 	// Blobs
 	r.Post("/api/blobs", s.requireAuth(s.handleUploadBlob))
 	r.Get("/api/blobs/{hash}", s.handleGetBlob)
@@ -144,9 +165,12 @@ func (s *Server) sessionMiddleware(next http.Handler) http.Handler {
 
 		priv, err := s.decryptUserKey(r.Context(), sess.DID)
 		if err != nil {
-			s.log.Printf("session key decrypt for %s: %v", sess.DID, err)
-			next.ServeHTTP(w, r)
-			return
+			user, userErr := s.db.GetUser(r.Context(), sess.DID)
+			if userErr != nil || user == nil || user.Endpoint == "" || strings.TrimRight(user.Endpoint, "/") == strings.TrimRight(s.baseURL, "/") {
+				s.log.Printf("session key decrypt for %s: %v", sess.DID, err)
+				next.ServeHTTP(w, r)
+				return
+			}
 		}
 
 		next.ServeHTTP(w, withAuth(r, sess.DID, priv))
@@ -164,6 +188,18 @@ func (s *Server) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// StartDHTHeartbeat starts the background goroutine that re-publishes all
+// local user email→homeInstance mappings to the DHT every 12 hours.
+// Call this once after the server is fully initialised.
+func (s *Server) StartDHTHeartbeat(ctx context.Context) {
+	if s.dhtPublisher == nil {
+		return
+	}
+	s.dhtPublisher.StartHeartbeat(ctx, 12*time.Hour, func(ctx context.Context) ([]string, error) {
+		return s.db.GetAllUserEmails(ctx)
+	})
+}
+
 // homeHost returns the canonical instance address: "instanceID@hostname".
 func (s *Server) homeHost() string {
 	if u, err := url.Parse(s.baseURL); err == nil && u.Hostname() != "" {
@@ -173,6 +209,8 @@ func (s *Server) homeHost() string {
 }
 
 func (s *Server) handleNodeKey(w http.ResponseWriter, r *http.Request) {
-	// Placeholder — populated in Phase 6 when the libp2p node key is available.
-	jsonErr(w, http.StatusNotImplemented, "node key not yet configured")
+	jsonOK(w, map[string]any{
+		"instance_id": s.instanceID,
+		"public_key":  s.instancePriv.Public().(ed25519.PublicKey), // raw Ed25519 public key bytes, base64 by JSON encoder
+	})
 }

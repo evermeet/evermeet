@@ -7,6 +7,55 @@ import (
 	"time"
 )
 
+// ---- Cross-instance nonces ----
+
+type CrossInstanceNonce struct {
+	Nonce      string
+	ForeignURL string
+	EventID    string
+	CreatedAt  time.Time
+	ExpiresAt  time.Time
+	Used       bool
+}
+
+func (d *DB) InsertNonce(ctx context.Context, n *CrossInstanceNonce) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT INTO cross_instance_nonces (nonce, foreign_url, event_id, created_at, expires_at, used)
+			 VALUES (?, ?, ?, ?, ?, 0)`,
+			n.Nonce, n.ForeignURL, n.EventID,
+			n.CreatedAt.UTC().Format(time.RFC3339),
+			n.ExpiresAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) GetNonce(ctx context.Context, nonce string) (*CrossInstanceNonce, error) {
+	row := d.db.QueryRowContext(ctx,
+		`SELECT nonce, foreign_url, event_id, created_at, expires_at, used
+		 FROM cross_instance_nonces WHERE nonce = ?`, nonce)
+	var n CrossInstanceNonce
+	var ca, ea string
+	var used int
+	if err := row.Scan(&n.Nonce, &n.ForeignURL, &n.EventID, &ca, &ea, &used); err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("get nonce: %w", err)
+	}
+	n.CreatedAt, _ = time.Parse(time.RFC3339, ca)
+	n.ExpiresAt, _ = time.Parse(time.RFC3339, ea)
+	n.Used = used != 0
+	return &n, nil
+}
+
+func (d *DB) MarkNonceUsed(ctx context.Context, nonce string) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`UPDATE cross_instance_nonces SET used = 1 WHERE nonce = ?`, nonce)
+		return err
+	})
+}
+
 // ---- Blobs ----
 
 type BlobRecord struct {
@@ -201,6 +250,25 @@ func (d *DB) GetUserPrivateByEmail(ctx context.Context, email string) (*UserPriv
 	}
 	p.EmailVerified = ev != 0
 	return p, nil
+}
+
+// GetAllUserEmails returns all non-empty email addresses stored on this instance.
+// Used by the DHT heartbeat to re-publish home-routing records.
+func (d *DB) GetAllUserEmails(ctx context.Context) ([]string, error) {
+	rows, err := d.db.QueryContext(ctx, `SELECT email FROM user_private WHERE email != ''`)
+	if err != nil {
+		return nil, fmt.Errorf("get all emails: %w", err)
+	}
+	defer rows.Close()
+	var emails []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+	return emails, rows.Err()
 }
 
 func (d *DB) GetUserPrivateByGoogleSub(ctx context.Context, sub string) (*UserPrivate, error) {

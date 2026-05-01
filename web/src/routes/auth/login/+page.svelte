@@ -9,6 +9,8 @@
 	let error = $state('');
 	let submitting = $state(false);
 	let passkeySupported = $state(false);
+	let discoveredHome = $state('');
+	let delegateURL = $state('');
 
 	import { onMount } from 'svelte';
 	onMount(() => {
@@ -20,7 +22,22 @@
 		if (!email) return;
 		submitting = true;
 		error = '';
+		discoveredHome = '';
+		delegateURL = '';
 		try {
+			const eventId = new URLSearchParams(window.location.search).get('event_id') ?? '';
+			try {
+				const resolved = await api.auth.resolveHome(email, eventId);
+				if (resolved.home_instance_url.replace(/\/$/, '') !== window.location.origin.replace(/\/$/, '')) {
+					discoveredHome = resolved.home_instance_url;
+					delegateURL = resolved.delegate_url;
+					return;
+				}
+			} catch (resolveErr: any) {
+				if (!String(resolveErr.message).includes('not found')) {
+					throw resolveErr;
+				}
+			}
 			await api.auth.requestMagicLink(email);
 			sent = true;
 		} catch (err: any) {
@@ -111,6 +128,12 @@
 				required
 			/>
 			{#if error}<p class="error">{error}</p>{/if}
+			{#if discoveredHome}
+				<div class="discovered">
+					<p>Your home instance is <strong>{discoveredHome}</strong>.</p>
+					<a class="button" href={delegateURL}>Continue there to sign in</a>
+				</div>
+			{/if}
 			<button type="submit" disabled={submitting}>
 				{submitting ? intl.t('auth.sending') : intl.t('auth.sendLink')}
 			</button>
@@ -170,6 +193,23 @@
 		border: 1px solid var(--border-input);
 	}
 	button.secondary:hover { background: var(--bg-hover); }
+	a.button {
+		display: block;
+		margin-top: 0.5rem;
+		padding: 0.7rem;
+		background: var(--bg-btn-primary);
+		color: var(--text-btn-primary);
+		border-radius: var(--radius-md);
+		text-align: center;
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.discovered {
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--radius-md);
+		padding: 0.75rem;
+	}
+	.discovered p { margin-bottom: 0.5rem; }
 	.separator {
 		text-align: center;
 		font-size: 0.8rem;

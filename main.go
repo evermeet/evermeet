@@ -90,7 +90,7 @@ func main() {
 	}
 
 	// P2P Node
-	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort)
+	p2pNode, err := node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir)
 	if err != nil {
 		logger.Fatalf("start p2p node: %v", err)
 	}
@@ -125,6 +125,8 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	apiServer.StartDHTHeartbeat(ctx)
 
 	go func() {
 		logger.Printf("evermeet running on http://localhost:%d", cfg.Node.Port)

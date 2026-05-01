@@ -247,6 +247,19 @@ func (s *Server) lookupOrCreateUser(ctx context.Context, email string) (ed25519.
 		return nil, "", err
 	}
 
+	// Publish email → home instance mapping to the DHT so foreign instances
+	// can discover where this user's home is. Fire-and-forget: a failure here
+	// does not block registration; the heartbeat will retry within 12h.
+	if s.dhtPublisher != nil {
+		go func() {
+			pubCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			if err := s.dhtPublisher.Publish(pubCtx, email); err != nil {
+				s.log.Printf("dht publish for new user %s: %v", did, err)
+			}
+		}()
+	}
+
 	return kp.SigningPriv, did, nil
 }
 
@@ -562,12 +575,16 @@ func (s *Server) handlePasskeyLoginFinish(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) createSession(w http.ResponseWriter, ctx context.Context, did string) {
+	s.createSessionWithDuration(w, ctx, did, 30*24*time.Hour)
+}
+
+func (s *Server) createSessionWithDuration(w http.ResponseWriter, ctx context.Context, did string, duration time.Duration) {
 	sessionToken := randomHex(32)
 	sess := &store.Session{
 		Token:     sessionToken,
 		DID:       did,
 		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
+		ExpiresAt: time.Now().Add(duration),
 	}
 	if err := s.db.InsertSession(ctx, sess); err != nil {
 		s.log.Printf("failed to insert session: %v", err)

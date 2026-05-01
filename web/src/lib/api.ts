@@ -14,8 +14,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 async function requestWithSession<T>(path: string, sessionToken?: string | null, init?: RequestInit): Promise<{ data: T; session: string }> {
-	const headers: Record<string, string> = { 'Content-Type': 'application/json', ...init?.headers };
-	if (sessionToken) headers['X-WebAuthn-Session'] = sessionToken;
+	const headers = new Headers(init?.headers);
+	headers.set('Content-Type', 'application/json');
+	if (sessionToken) headers.set('X-WebAuthn-Session', sessionToken);
 
 	const res = await fetch(base + path, {
 		credentials: 'include',
@@ -59,6 +60,16 @@ export const api = {
 		updateProfile: (data: { display_name: string; avatar: string; bio: string }) =>
 			request<{ status: string }>('/api/auth/profile', {
 				method: 'PUT',
+				body: JSON.stringify(data),
+			}),
+		resolveHome: (email: string, eventId = '') =>
+			request<ResolveHomeResponse>('/api/auth/resolve-home', {
+				method: 'POST',
+				body: JSON.stringify({ email, event_id: eventId }),
+			}),
+		delegate: (data: DelegateRequest) =>
+			request<SignedDelegationToken>('/api/auth/delegate', {
+				method: 'POST',
 				body: JSON.stringify(data),
 			}),
 		logout: () => request<{ status: string }>('/api/auth/logout', { method: 'POST' }),
@@ -249,4 +260,43 @@ export interface ImportEventPreview {
 	ends_at?: string;
 	location_name?: string;
 	location_address?: string;
+}
+
+export interface ForeignInstanceSig {
+	return_to: string;
+	nonce: string;
+	event_id: string;
+	issued_at: number;
+	sig: string;
+}
+
+export interface ResolveHomeResponse {
+	home_instance_url: string;
+	nonce: string;
+	return_to: string;
+	foreign_sig: ForeignInstanceSig;
+	delegate_url: string;
+}
+
+export interface DelegateRequest {
+	return_to: string;
+	nonce: string;
+	event_id: string;
+	foreign_sig: ForeignInstanceSig;
+}
+
+export interface DelegationToken {
+	sub: string;
+	aud: string;
+	iat: number;
+	exp: number;
+	nonce: string;
+	event_id: string;
+}
+
+export interface SignedDelegationToken {
+	token: DelegationToken;
+	sig: string;
+	public_key: string;
+	home_instance_url: string;
 }

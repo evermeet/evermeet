@@ -2,17 +2,25 @@ package node
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/libp2p/go-libp2p"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
+	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 )
 
 const (
@@ -20,15 +28,19 @@ const (
 	UsersTopicName     = "em/users"
 	EventFetchProtocol = "/evermeet/event-fetch/1.0.0"
 	UserFetchProtocol  = "/evermeet/user-fetch/1.0.0"
+
+	dhtNamespace = "evermeet"
 )
 
 type Node struct {
-	host    host.Host
-	ps      *pubsub.PubSub
-	db      *store.DB
-	log     *log.Logger
-	ctx     context.Context
-	cancel  context.CancelFunc
+	host   host.Host
+	ps     *pubsub.PubSub
+	dht    *dht.IpfsDHT
+	rd     *drouting.RoutingDiscovery
+	db     *store.DB
+	log    *log.Logger
+	ctx    context.Context
+	cancel context.CancelFunc
 
 	eventsTopic *pubsub.Topic
 	eventsSub   *pubsub.Subscription
@@ -39,25 +51,49 @@ type Node struct {
 	peers   map[peer.ID]peer.AddrInfo
 }
 
-func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
+func New(db *store.DB, l *log.Logger, listenPort int, dataDir string) (*Node, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// libp2p host with default security/muxing for maximum compatibility
+	// Load or generate a persistent Ed25519 identity for this node.
+	// A stable identity means a stable DHT node ID across restarts.
+	privKey, err := loadOrGenerateP2PKey(filepath.Join(dataDir, "p2p.key"))
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("p2p identity: %w", err)
+	}
+
 	h, err := libp2p.New(
+		libp2p.Identity(privKey),
 		libp2p.ListenAddrStrings(
 			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
 			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
 		),
-		// In a real app, we'd use a persistent identity here
 	)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("libp2p host: %w", err)
 	}
 
+	// Kademlia DHT in server mode so this node stores and serves records.
+	// mDNS-only bootstrap for now — no hardcoded bootstrap peers.
+	kad, err := dht.New(ctx, h,
+		dht.Mode(dht.ModeServer),
+		dht.BootstrapPeers(), // empty — mDNS will populate routing table
+	)
+	if err != nil {
+		h.Close()
+		cancel()
+		return nil, fmt.Errorf("kademlia dht: %w", err)
+	}
+
+	if err := kad.Bootstrap(ctx); err != nil {
+		l.Printf("dht bootstrap: %v", err)
+	}
+
 	// GossipSub
 	ps, err := pubsub.NewGossipSub(ctx, h)
 	if err != nil {
+		kad.Close()
 		h.Close()
 		cancel()
 		return nil, fmt.Errorf("gossipsub: %w", err)
@@ -66,6 +102,8 @@ func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
 	n := &Node{
 		host:   h,
 		ps:     ps,
+		dht:    kad,
+		rd:     drouting.NewRoutingDiscovery(kad),
 		db:     db,
 		log:    l,
 		ctx:    ctx,
@@ -73,13 +111,13 @@ func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
 		peers:  make(map[peer.ID]peer.AddrInfo),
 	}
 
-	// Setup mDNS discovery
+	// mDNS discovery — peers found here also populate the DHT routing table
+	// via the Connect call in HandlePeerFound.
 	ser := mdns.NewMdnsService(h, "evermeet", n)
 	if err := ser.Start(); err != nil {
 		l.Printf("mdns error: %v", err)
 	}
 
-	// Join topics
 	if err := n.joinEvents(); err != nil {
 		return nil, err
 	}
@@ -87,7 +125,6 @@ func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
 		return nil, err
 	}
 
-	// Register P2P RPC handlers
 	n.host.SetStreamHandler(EventFetchProtocol, n.handleEventFetchStream)
 	n.host.SetStreamHandler(UserFetchProtocol, n.handleUserFetchStream)
 
@@ -99,6 +136,20 @@ func New(db *store.DB, l *log.Logger, listenPort int) (*Node, error) {
 	return n, nil
 }
 
+// DHTPublish stores value under key in the Kademlia DHT.
+// key should be an email hash; value is a signed JSON record.
+func (n *Node) DHTPublish(ctx context.Context, key []byte, value []byte) error {
+	hexKey := hex.EncodeToString(key)
+	return n.dht.PutValue(ctx, "/evermeet/"+hexKey, value)
+}
+
+// DHTPeerLookup retrieves the value stored under key from the DHT.
+// Returns the raw signed record bytes, or an error if not found.
+func (n *Node) DHTPeerLookup(ctx context.Context, key []byte) ([]byte, error) {
+	hexKey := hex.EncodeToString(key)
+	return n.dht.GetValue(ctx, "/evermeet/"+hexKey)
+}
+
 func (n *Node) joinEvents() error {
 	topic, err := n.ps.Join(EventsTopicName)
 	if err != nil {
@@ -108,10 +159,8 @@ func (n *Node) joinEvents() error {
 	if err != nil {
 		return fmt.Errorf("subscribe: %w", err)
 	}
-
 	n.eventsTopic = topic
 	n.eventsSub = sub
-
 	go n.readEventsLoop()
 	return nil
 }
@@ -125,10 +174,8 @@ func (n *Node) joinUsers() error {
 	if err != nil {
 		return fmt.Errorf("subscribe: %w", err)
 	}
-
 	n.usersTopic = topic
 	n.usersSub = sub
-
 	go n.readUsersLoop()
 	return nil
 }
@@ -154,7 +201,6 @@ func (n *Node) HandlePeerFound(pi peer.AddrInfo) {
 	if pi.ID == n.host.ID() {
 		return
 	}
-
 	if _, ok := n.peers[pi.ID]; ok {
 		return
 	}
@@ -163,12 +209,9 @@ func (n *Node) HandlePeerFound(pi peer.AddrInfo) {
 	n.peers[pi.ID] = pi
 
 	go func() {
-		// Small delay to avoid simultaneous open race on localhost
-		time.Sleep(time.Duration(100+ (pi.ID[0] % 10)) * time.Millisecond)
-
+		time.Sleep(time.Duration(100+(pi.ID[0]%10)) * time.Millisecond)
 		ctx, cancel := context.WithTimeout(n.ctx, 5*time.Second)
 		defer cancel()
-
 		if err := n.host.Connect(ctx, pi); err != nil {
 			n.log.Printf("failed to connect to %s: %v", pi.ID, err)
 		} else {
@@ -182,8 +225,8 @@ func (n *Node) PeerCount() int {
 }
 
 type NodeStatus struct {
-	ID        string   `json:"id"`
-	Addresses []string `json:"addresses"`
+	ID        string       `json:"id"`
+	Addresses []string     `json:"addresses"`
 	Peers     []PeerStatus `json:"peers"`
 }
 
@@ -197,7 +240,6 @@ func (n *Node) Status() NodeStatus {
 	for _, a := range n.host.Addrs() {
 		addrs = append(addrs, a.String())
 	}
-
 	peers := n.host.Network().Peers()
 	peerStats := make([]PeerStatus, 0, len(peers))
 	for _, p := range peers {
@@ -205,20 +247,58 @@ func (n *Node) Status() NodeStatus {
 		for _, a := range n.host.Peerstore().Addrs(p) {
 			pAddrs = append(pAddrs, a.String())
 		}
-		peerStats = append(peerStats, PeerStatus{
-			ID:        p.String(),
-			Addresses: pAddrs,
-		})
+		peerStats = append(peerStats, PeerStatus{ID: p.String(), Addresses: pAddrs})
 	}
+	return NodeStatus{ID: n.host.ID().String(), Addresses: addrs, Peers: peerStats}
+}
 
-	return NodeStatus{
-		ID:        n.host.ID().String(),
-		Addresses: addrs,
-		Peers:     peerStats,
+// InstancePubKey returns the raw Ed25519 public key bytes of this node's
+// persistent identity. Used by /.well-known/evermeet-node-key.
+func (n *Node) InstancePubKey() ([]byte, error) {
+	pub := n.host.Peerstore().PubKey(n.host.ID())
+	if pub == nil {
+		return nil, fmt.Errorf("no public key in peerstore")
 	}
+	return crypto.MarshalPublicKey(pub)
+}
+
+func (n *Node) SignInstancePayload(payload []byte) (string, error) {
+	priv := n.host.Peerstore().PrivKey(n.host.ID())
+	if priv == nil {
+		return "", fmt.Errorf("no private key in peerstore")
+	}
+	sig, err := priv.Sign(payload)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(sig), nil
 }
 
 func (n *Node) Close() error {
 	n.cancel()
 	return n.host.Close()
+}
+
+// loadOrGenerateP2PKey loads a libp2p Ed25519 private key from path,
+// generating and persisting a new one if the file does not exist.
+func loadOrGenerateP2PKey(path string) (crypto.PrivKey, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		priv, _, err := crypto.GenerateEd25519Key(rand.Reader)
+		if err != nil {
+			return nil, fmt.Errorf("generate key: %w", err)
+		}
+		b, err := crypto.MarshalPrivateKey(priv)
+		if err != nil {
+			return nil, fmt.Errorf("marshal key: %w", err)
+		}
+		if err := os.WriteFile(path, b, 0600); err != nil {
+			return nil, fmt.Errorf("save key: %w", err)
+		}
+		return priv, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read key: %w", err)
+	}
+	return crypto.UnmarshalPrivateKey(data)
 }

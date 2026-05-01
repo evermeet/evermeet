@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { api, type AdminOverview } from '$lib/api.js';
+	import { api, type AdminOverview, type AdminP2PPeer } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
 	import AdminNav from '$lib/components/AdminNav.svelte';
 	import { onMount } from 'svelte';
@@ -28,7 +28,9 @@
 		}
 	});
 
-	const p2pPeers = $derived(Array.isArray(overview?.p2p?.peers) ? overview.p2p.peers : []);
+	const p2pPeers = $derived(
+		Array.isArray(overview?.p2p?.peers) ? (overview.p2p.peers as AdminP2PPeer[]) : []
+	);
 	const p2pAddresses = $derived(Array.isArray(overview?.p2p?.addresses) ? overview.p2p.addresses : []);
 </script>
 
@@ -103,6 +105,12 @@
 					{#each p2pPeers as peer}
 						<div class="peer-card">
 							<p class="mono peer-id">{peer.id}</p>
+							{#if peer.instance_id}
+								<p class="peer-meta">
+									<span class="meta-label">Instance id</span>
+									<code class="mono instance-id">{peer.instance_id}</code>
+								</p>
+							{/if}
 							{#if peer.addresses?.length}
 								<details>
 									<summary>Show addresses ({peer.addresses.length})</summary>
@@ -223,7 +231,26 @@
 
 	.peer-id {
 		word-break: break-all;
+		margin: 0 0 0.35rem;
+	}
+
+	.peer-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem 0.6rem;
 		margin: 0 0 0.5rem;
+		font-size: 0.85rem;
+	}
+
+	.meta-label {
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	.instance-id {
+		color: var(--text);
+		font-size: 0.85rem;
 	}
 
 	.peers-list {

@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
@@ -20,10 +21,12 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	record "github.com/libp2p/go-libp2p-record"
 	"github.com/libp2p/go-libp2p/core/crypto"
+	cryptopb "github.com/libp2p/go-libp2p/core/crypto/pb"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
+	lukeblake3 "lukechampine.com/blake3"
 )
 
 const (
@@ -276,8 +279,23 @@ type NodeStatus struct {
 }
 
 type PeerStatus struct {
-	ID        string   `json:"id"`
-	Addresses []string `json:"addresses"`
+	ID         string   `json:"id"`
+	InstanceID string   `json:"instance_id,omitempty"`
+	Addresses  []string `json:"addresses"`
+}
+
+// instanceIDFromLibp2pPubKey returns the same 16-hex fingerprint Evermeet uses
+// for application instance_id, but derived from the peer's libp2p public key.
+func instanceIDFromLibp2pPubKey(pub crypto.PubKey) string {
+	if pub == nil || pub.Type() != cryptopb.KeyType_Ed25519 {
+		return ""
+	}
+	raw, err := pub.Raw()
+	if err != nil || len(raw) != ed25519.PublicKeySize {
+		return ""
+	}
+	h := lukeblake3.Sum256(raw)
+	return hex.EncodeToString(h[:8])
 }
 
 func (n *Node) Status() NodeStatus {
@@ -292,7 +310,15 @@ func (n *Node) Status() NodeStatus {
 		for _, a := range n.host.Peerstore().Addrs(p) {
 			pAddrs = append(pAddrs, a.String())
 		}
-		peerStats = append(peerStats, PeerStatus{ID: p.String(), Addresses: pAddrs})
+		instID := ""
+		if pk := n.host.Peerstore().PubKey(p); pk != nil {
+			instID = instanceIDFromLibp2pPubKey(pk)
+		}
+		peerStats = append(peerStats, PeerStatus{
+			ID:         p.String(),
+			InstanceID: instID,
+			Addresses:  pAddrs,
+		})
 	}
 	return NodeStatus{ID: n.host.ID().String(), Addresses: addrs, Peers: peerStats}
 }

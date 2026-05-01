@@ -435,6 +435,12 @@ export interface AdminAdminsOverview {
 	admins: AdminAccount[];
 }
 
+export interface AdminP2PPeer {
+	id: string;
+	instance_id?: string;
+	addresses?: string[];
+}
+
 export interface AdminOverview {
 	instance_id: string;
 	base_url: string;
@@ -451,7 +457,7 @@ export interface AdminOverview {
 	p2p: {
 		id?: string;
 		addresses?: string[];
-		peers?: Array<{ id: string; addresses?: string[] }>;
+		peers?: AdminP2PPeer[];
 		[key: string]: any;
 	};
 	config: {

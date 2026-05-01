@@ -138,6 +138,12 @@ type BlobRecord struct {
 	CreatedAt   time.Time
 }
 
+type BlobSource struct {
+	Hash        string
+	InstanceURL string
+	CreatedAt   time.Time
+}
+
 func (d *DB) InsertBlob(ctx context.Context, b *BlobRecord) error {
 	return d.Write(ctx, func(tx *sql.Tx) error {
 		_, err := tx.Exec(
@@ -160,6 +166,37 @@ func (d *DB) GetBlob(ctx context.Context, hash string) (*BlobRecord, error) {
 	}
 	b.CreatedAt, _ = time.Parse(time.RFC3339, ca)
 	return &b, nil
+}
+
+func (d *DB) InsertBlobSource(ctx context.Context, src *BlobSource) error {
+	return d.Write(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(
+			`INSERT OR IGNORE INTO blob_sources (hash, instance_url, created_at) VALUES (?, ?, ?)`,
+			src.Hash, src.InstanceURL, src.CreatedAt.UTC().Format(time.RFC3339),
+		)
+		return err
+	})
+}
+
+func (d *DB) ListBlobSources(ctx context.Context, hash string) ([]*BlobSource, error) {
+	rows, err := d.db.QueryContext(ctx,
+		`SELECT hash, instance_url, created_at FROM blob_sources WHERE hash = ? ORDER BY created_at ASC`, hash)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []*BlobSource
+	for rows.Next() {
+		src := &BlobSource{}
+		var createdAt string
+		if err := rows.Scan(&src.Hash, &src.InstanceURL, &createdAt); err != nil {
+			return nil, err
+		}
+		src.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+		out = append(out, src)
+	}
+	return out, rows.Err()
 }
 
 // ---- Key event log ----

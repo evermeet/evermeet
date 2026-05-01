@@ -50,6 +50,14 @@ func (s *Server) handleListEvents(w http.ResponseWriter, r *http.Request) {
 		if ms.Visibility == "private" {
 			continue
 		}
+		if founding, err := s.db.GetEventFounding(r.Context(), ms.ID); err == nil && founding != nil {
+			var fd events.FoundingDoc
+			if err := json.Unmarshal([]byte(founding.Payload), &fd); err == nil {
+				if hostURL := s.eventHostURL(r.Context(), &fd, ms); hostURL != "" {
+					s.recordEventBlobSources(r.Context(), hostURL, ms)
+				}
+			}
+		}
 		out = append(out, json.RawMessage(st.Payload))
 	}
 
@@ -86,6 +94,7 @@ func (s *Server) handleGetEvent(w http.ResponseWriter, r *http.Request) {
 	var fd events.FoundingDoc
 	if err := json.Unmarshal([]byte(founding.Payload), &fd); err == nil {
 		if hostURL := s.eventHostURL(ctx, &fd, ms); hostURL != "" {
+			s.recordEventBlobSources(ctx, hostURL, ms)
 			if err := proxyPublicEventAPI(w, r, hostURL, "/api/events/"+url.PathEscape(id)); err != nil {
 				s.log.Printf("proxy remote event %s via %s failed, using cached replica: %v", id, hostURL, err)
 			} else {
@@ -179,6 +188,7 @@ func (s *Server) handleEventAttendees(w http.ResponseWriter, r *http.Request) {
 	var fd events.FoundingDoc
 	if err := json.Unmarshal([]byte(founding.Payload), &fd); err == nil {
 		if hostURL := s.eventHostURL(ctx, &fd, ms); hostURL != "" {
+			s.recordEventBlobSources(ctx, hostURL, ms)
 			if err := proxyPublicEventAPI(w, r, hostURL, "/api/events/"+url.PathEscape(id)+"/attendees"); err != nil {
 				s.log.Printf("proxy remote attendees %s via %s failed, using local cache: %v", id, hostURL, err)
 			} else {

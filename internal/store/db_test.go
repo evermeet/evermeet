@@ -189,6 +189,34 @@ func TestDB_RSVPReceiptUpsert(t *testing.T) {
 	}
 }
 
+func TestDB_BlobSourcesRoundTrip(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	src := &BlobSource{
+		Hash:        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+		InstanceURL: "http://localhost:8080",
+		CreatedAt:   time.Now(),
+	}
+	if err := db.InsertBlobSource(ctx, src); err != nil {
+		t.Fatalf("InsertBlobSource: %v", err)
+	}
+	if err := db.InsertBlobSource(ctx, src); err != nil {
+		t.Fatalf("InsertBlobSource duplicate: %v", err)
+	}
+
+	got, err := db.ListBlobSources(ctx, src.Hash)
+	if err != nil {
+		t.Fatalf("ListBlobSources: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 source, got %d", len(got))
+	}
+	if got[0].InstanceURL != src.InstanceURL {
+		t.Fatalf("source URL mismatch: %s", got[0].InstanceURL)
+	}
+}
+
 func openTestDB(t *testing.T) *DB {
 	t.Helper()
 	f, err := os.CreateTemp("", "evermeet-test-*.db")

@@ -29,6 +29,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
+	"github.com/libp2p/go-libp2p/p2p/security/noise"
+	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
 	lukeblake3 "lukechampine.com/blake3"
 )
 
@@ -59,15 +61,18 @@ type Node struct {
 	usersTopic  *pubsub.Topic
 	usersSub    *pubsub.Subscription
 
+	isBootstrap bool
+
 	peersMu sync.Mutex
 	peers   map[peer.ID]peer.AddrInfo
 
 	evermeetHomeID   string
 	peerEvermeet     map[peer.ID]string
+	peerBootstrap    map[peer.ID]bool
 	peerEvermeetLock sync.RWMutex
 }
 
-func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID string) (*Node, error) {
+func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID string, bootstrapPeers []string) (*Node, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Load or generate a persistent Ed25519 identity for this node.
@@ -84,18 +89,30 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
 			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
 		),
+		libp2p.Security(noise.ID, noise.New),
+		libp2p.Security(libp2ptls.ID, libp2ptls.New),
 	)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("libp2p host: %w", err)
 	}
 
+	// Parse configured bootstrap peers into AddrInfo.
+	var parsedBootstrap []peer.AddrInfo
+	for _, s := range bootstrapPeers {
+		ai, err := peer.AddrInfoFromString(s)
+		if err != nil {
+			l.Printf("p2p: skipping invalid bootstrap peer %q: %v", s, err)
+			continue
+		}
+		parsedBootstrap = append(parsedBootstrap, *ai)
+	}
+
 	// Kademlia DHT in server mode so this node stores and serves records.
-	// mDNS-only bootstrap for now — no hardcoded bootstrap peers.
 	kad, err := dht.New(ctx, h,
 		dht.Mode(dht.ModeServer),
 		dht.ProtocolPrefix(dhtProtocolPrefix),
-		dht.BootstrapPeers(), // empty — mDNS will populate routing table
+		dht.BootstrapPeers(parsedBootstrap...),
 		dht.Validator(record.NamespacedValidator{
 			"pk":         record.PublicKeyValidator{},
 			"ipns":       ipns.Validator{KeyBook: h.Peerstore()},
@@ -110,6 +127,14 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 
 	if err := kad.Bootstrap(ctx); err != nil {
 		l.Printf("dht bootstrap: %v", err)
+	}
+
+	// Proactively connect to bootstrap peers so the routing table populates
+	// immediately rather than waiting for the periodic bootstrap walk.
+	for _, ai := range parsedBootstrap {
+		if err := h.Connect(ctx, ai); err != nil {
+			l.Printf("p2p: bootstrap connect %s: %v", ai.ID, err)
+		}
 	}
 
 	// GossipSub
@@ -133,6 +158,7 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 		peers:            make(map[peer.ID]peer.AddrInfo),
 		evermeetHomeID:   evermeetHomeID,
 		peerEvermeet:     make(map[peer.ID]string),
+		peerBootstrap:    make(map[peer.ID]bool),
 		peerEvermeetLock: sync.RWMutex{},
 	}
 
@@ -169,6 +195,7 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 		DisconnectedF: func(_ network.Network, c network.Conn) {
 			n.peerEvermeetLock.Lock()
 			delete(n.peerEvermeet, c.RemotePeer())
+			delete(n.peerBootstrap, c.RemotePeer())
 			n.peerEvermeetLock.Unlock()
 		},
 	})
@@ -176,6 +203,116 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 	l.Printf("P2P started peer_id=%s", h.ID())
 	for _, addr := range h.Addrs() {
 		l.Printf("  listen %s", addr.String())
+	}
+
+	return n, nil
+}
+
+// NewBootstrap starts a minimal libp2p node that only participates in the
+// Evermeet DHT as a bootstrap/relay peer. No database, no stream handlers,
+// no pubsub — just enough to help other nodes discover each other.
+func NewBootstrap(l *log.Logger, listenPort int, dataDir string, bootstrapPeers []string) (*Node, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	privKey, err := loadOrGenerateP2PKey(filepath.Join(dataDir, "p2p.key"))
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("p2p identity: %w", err)
+	}
+
+	h, err := libp2p.New(
+		libp2p.Identity(privKey),
+		libp2p.ListenAddrStrings(
+			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
+			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
+		),
+		libp2p.Security(noise.ID, noise.New),
+		libp2p.Security(libp2ptls.ID, libp2ptls.New),
+	)
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("libp2p host: %w", err)
+	}
+
+	var parsedBootstrap []peer.AddrInfo
+	for _, s := range bootstrapPeers {
+		ai, err := peer.AddrInfoFromString(s)
+		if err != nil {
+			l.Printf("bootstrap: skipping invalid peer %q: %v", s, err)
+			continue
+		}
+		parsedBootstrap = append(parsedBootstrap, *ai)
+	}
+
+	kad, err := dht.New(ctx, h,
+		dht.Mode(dht.ModeServer),
+		dht.ProtocolPrefix(dhtProtocolPrefix),
+		dht.BootstrapPeers(parsedBootstrap...),
+		dht.Validator(record.NamespacedValidator{
+			"pk":         record.PublicKeyValidator{},
+			"ipns":       ipns.Validator{KeyBook: h.Peerstore()},
+			dhtNamespace: evermeetValidator{},
+		}),
+	)
+	if err != nil {
+		h.Close()
+		cancel()
+		return nil, fmt.Errorf("kademlia dht: %w", err)
+	}
+
+	if err := kad.Bootstrap(ctx); err != nil {
+		l.Printf("dht bootstrap: %v", err)
+	}
+
+	for _, ai := range parsedBootstrap {
+		if err := h.Connect(ctx, ai); err != nil {
+			l.Printf("bootstrap connect %s: %v", ai.ID, err)
+		}
+	}
+
+	n := &Node{
+		host:             h,
+		dht:              kad,
+		rd:               drouting.NewRoutingDiscovery(kad),
+		log:              l,
+		ctx:              ctx,
+		cancel:           cancel,
+		isBootstrap:      true,
+		peers:            make(map[peer.ID]peer.AddrInfo),
+		peerEvermeet:     make(map[peer.ID]string),
+		peerBootstrap:    make(map[peer.ID]bool),
+		peerEvermeetLock: sync.RWMutex{},
+	}
+
+	n.host.SetStreamHandler(InstanceInfoProtocol, n.handleInstanceInfoStream)
+	n.host.Network().Notify(&network.NotifyBundle{
+		ConnectedF: func(_ network.Network, c network.Conn) {
+			remote := c.RemotePeer()
+			if remote == n.host.ID() {
+				return
+			}
+			go func() {
+				ctx, cancel := context.WithTimeout(n.ctx, 5*time.Second)
+				defer cancel()
+				n.exchangeInstanceInfo(ctx, remote)
+			}()
+		},
+		DisconnectedF: func(_ network.Network, c network.Conn) {
+			n.peerEvermeetLock.Lock()
+			delete(n.peerEvermeet, c.RemotePeer())
+			delete(n.peerBootstrap, c.RemotePeer())
+			n.peerEvermeetLock.Unlock()
+		},
+	})
+
+	ser := mdns.NewMdnsService(h, "evermeet", n)
+	if err := ser.Start(); err != nil {
+		l.Printf("mdns error: %v", err)
+	}
+
+	l.Printf("bootstrap node started peer_id=%s", h.ID())
+	for _, addr := range h.Addrs() {
+		l.Printf("  listen %s/p2p/%s", addr, h.ID())
 	}
 
 	return n, nil
@@ -274,31 +411,33 @@ func (n *Node) BroadcastEvent(data []byte) error {
 	return n.eventsTopic.Publish(n.ctx, data)
 }
 
+type instanceInfoMsg struct {
+	EvermeetInstanceID string `json:"evermeet_instance_id,omitempty"`
+	Bootstrap          bool   `json:"bootstrap,omitempty"`
+}
+
 func (n *Node) handleInstanceInfoStream(s network.Stream) {
 	defer s.Close()
 	remote := s.Conn().RemotePeer()
-	dec := json.NewDecoder(io.LimitReader(s, instanceInfoMaxBodySize))
-	var req struct {
-		EvermeetInstanceID string `json:"evermeet_instance_id"`
-	}
-	if err := dec.Decode(&req); err != nil {
+	var req instanceInfoMsg
+	if err := json.NewDecoder(io.LimitReader(s, instanceInfoMaxBodySize)).Decode(&req); err != nil {
 		return
 	}
+	n.peerEvermeetLock.Lock()
 	if req.EvermeetInstanceID != "" {
-		n.peerEvermeetLock.Lock()
 		n.peerEvermeet[remote] = req.EvermeetInstanceID
-		n.peerEvermeetLock.Unlock()
 	}
-	if n.evermeetHomeID == "" {
-		return
+	if req.Bootstrap {
+		n.peerBootstrap[remote] = true
 	}
-	_ = json.NewEncoder(s).Encode(map[string]string{"evermeet_instance_id": n.evermeetHomeID})
+	n.peerEvermeetLock.Unlock()
+	_ = json.NewEncoder(s).Encode(instanceInfoMsg{
+		EvermeetInstanceID: n.evermeetHomeID,
+		Bootstrap:          n.isBootstrap,
+	})
 }
 
 func (n *Node) exchangeInstanceInfo(ctx context.Context, remote peer.ID) {
-	if n.evermeetHomeID == "" {
-		return
-	}
 	s, err := n.host.NewStream(ctx, remote, InstanceInfoProtocol)
 	if err != nil {
 		return
@@ -309,20 +448,24 @@ func (n *Node) exchangeInstanceInfo(ctx context.Context, remote peer.ID) {
 		deadline = time.Now().Add(5 * time.Second)
 	}
 	_ = s.SetDeadline(deadline)
-	if err := json.NewEncoder(s).Encode(map[string]string{"evermeet_instance_id": n.evermeetHomeID}); err != nil {
+	if err := json.NewEncoder(s).Encode(instanceInfoMsg{
+		EvermeetInstanceID: n.evermeetHomeID,
+		Bootstrap:          n.isBootstrap,
+	}); err != nil {
 		return
 	}
-	var resp struct {
-		EvermeetInstanceID string `json:"evermeet_instance_id"`
-	}
+	var resp instanceInfoMsg
 	if err := json.NewDecoder(io.LimitReader(s, instanceInfoMaxBodySize)).Decode(&resp); err != nil {
 		return
 	}
+	n.peerEvermeetLock.Lock()
 	if resp.EvermeetInstanceID != "" {
-		n.peerEvermeetLock.Lock()
 		n.peerEvermeet[remote] = resp.EvermeetInstanceID
-		n.peerEvermeetLock.Unlock()
 	}
+	if resp.Bootstrap {
+		n.peerBootstrap[remote] = true
+	}
+	n.peerEvermeetLock.Unlock()
 }
 
 func (n *Node) HandlePeerFound(pi peer.AddrInfo) {
@@ -367,6 +510,7 @@ type PeerStatus struct {
 	Libp2pPeerID       string   `json:"libp2p_peer_id"`
 	Libp2pFingerprint  string   `json:"libp2p_fingerprint,omitempty"`
 	Addresses          []string `json:"addresses"`
+	Bootstrap          bool     `json:"bootstrap,omitempty"`
 }
 
 func fingerprintFromLibp2pPubKey(pub crypto.PubKey) string {
@@ -399,12 +543,14 @@ func (n *Node) Status() NodeStatus {
 		}
 		n.peerEvermeetLock.RLock()
 		home := n.peerEvermeet[p]
+		isBS := n.peerBootstrap[p]
 		n.peerEvermeetLock.RUnlock()
 		peerStats = append(peerStats, PeerStatus{
 			EvermeetInstanceID: home,
 			Libp2pPeerID:       p.String(),
 			Libp2pFingerprint:  fp,
 			Addresses:          pAddrs,
+			Bootstrap:          isBS,
 		})
 	}
 	return NodeStatus{

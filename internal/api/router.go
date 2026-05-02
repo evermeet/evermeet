@@ -158,7 +158,7 @@ func (s *Server) ensureP2P() error {
 	if s.node != nil {
 		return nil
 	}
-	n, err := node.New(s.db, s.log, s.cfg.P2P.ListenPort, s.cfg.Node.DataDir, s.homeHost())
+	n, err := node.New(s.db, s.log, s.cfg.P2P.ListenPort, s.cfg.Node.DataDir, s.homeHost(), s.cfg.P2P.BootstrapPeers)
 	if err != nil {
 		return err
 	}

@@ -110,11 +110,14 @@
 			{:else}
 				<div class="peers-list">
 					{#each p2pPeers as peer}
-						<div class="peer-card">
+						<div class="peer-card" class:peer-bootstrap={peer.bootstrap}>
 							<div class="peer-info-grid">
 								<div class="info-row">
 									<span class="label">Evermeet instance</span>
-									<span class="value mono">{peer.evermeet_instance_id || '—'}</span>
+									<span class="value mono">
+										{peer.evermeet_instance_id || '—'}
+										{#if peer.bootstrap}<span class="badge">bootstrap</span>{/if}
+									</span>
 								</div>
 								<div class="info-row">
 									<span class="label">Libp2p Peer ID</span>
@@ -243,6 +246,23 @@
 		border-radius: var(--radius-md);
 		padding: 1rem;
 		background: var(--bg);
+	}
+	.peer-bootstrap {
+		border-left-color: var(--text-accent);
+	}
+	.badge {
+		display: inline-block;
+		padding: 0.1em 0.45em;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		font-family: system-ui, sans-serif;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		background: color-mix(in srgb, var(--text-accent) 15%, transparent);
+		color: var(--text-accent);
+		vertical-align: middle;
+		margin-left: 0.35rem;
 	}
 
 	.peer-info-grid {

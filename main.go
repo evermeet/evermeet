@@ -35,9 +35,15 @@ func main() {
 	p2pPort := flag.Int("p2p-port", 0, "P2P port (overrides config)")
 	dataDir := flag.String("data", "", "Data directory (overrides config)")
 	verbose := flag.Bool("verbose", false, "Enable verbose backend logging, including HTTP request logs")
+	bootstrapMode := flag.Bool("bootstrap", false, "Run as a DHT bootstrap node only (no HTTP server or admin UI)")
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
+
+	if *bootstrapMode {
+		runBootstrap(logger, *p2pPort, *dataDir)
+		return
+	}
 
 	cfg, err := config.Load(*cfgPath)
 	if err != nil {
@@ -108,7 +114,7 @@ func main() {
 
 	var p2pNode *node.Node
 	if hasAdmins {
-		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir, homeHostStr)
+		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir, homeHostStr, cfg.P2P.BootstrapPeers)
 		if err != nil {
 			logger.Fatalf("start p2p node: %v", err)
 		}
@@ -161,6 +167,29 @@ func main() {
 		logger.Printf("shutdown error: %v", err)
 	}
 	apiServer.CloseP2P()
+}
+
+func runBootstrap(logger *log.Logger, p2pPort int, dataDir string) {
+	if p2pPort == 0 {
+		p2pPort = 4001
+	}
+	if dataDir == "" {
+		dataDir = "./data"
+	}
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		logger.Fatalf("create data dir: %v", err)
+	}
+
+	n, err := node.NewBootstrap(logger, p2pPort, dataDir, nil)
+	if err != nil {
+		logger.Fatalf("bootstrap node: %v", err)
+	}
+	defer n.Close()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	<-ctx.Done()
+	logger.Println("bootstrap node shutting down...")
 }
 
 // deriveInstanceID returns a 16-character hex string from blake3(pubkey)[:8].

@@ -476,6 +476,7 @@ export interface AdminP2PPeer {
 	libp2p_peer_id: string;
 	libp2p_fingerprint?: string;
 	addresses?: string[];
+	bootstrap?: boolean;
 }
 
 export interface AdminRuntimeMemory {

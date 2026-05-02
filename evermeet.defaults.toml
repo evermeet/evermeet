@@ -44,6 +44,11 @@ listen_port = 4001
 #   "/ip4/203.0.113.50/tcp/4001",
 # ]
 
+## Discover public IPv4 over HTTPS and append /ip4/<ip>/tcp/<listen_port> (default on).
+## Docker cannot supply the host IP; this matches typical “what is my IP” services (outbound).
+## Disable with false, EVERMEET_AUTO_ANNOUNCE_PUBLIC=0, or --no-auto-announce-public if offline-only.
+# auto_announce_public = false
+
 ## Bootstrap peers for DHT discovery (multiaddr format), one per line
 # bootstrap_peers = [
 #   "/ip4/1.2.3.4/tcp/4001/p2p/12D3KooWExamplePeerID",

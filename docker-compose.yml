@@ -35,22 +35,15 @@ services:
   # 0.0.0.0 (default "4002:4002"), not 127.0.0.1 only, or WAN peers cannot dial in.
   # Add its multiaddr to bootstrap_peers in other instances' evermeet.toml:
   #   /ip4/<YOUR_PUBLIC_IP>/tcp/4002/p2p/<PEER_ID>
-  # Pass your public IP so libp2p advertises it (logs otherwise show the bridge IP only):
-  #   --announce-addrs /ip4/<YOUR_PUBLIC_IP>/tcp/4002
+  # Public IPv4 for P2P is discovered over HTTPS by default; set EVERMEET_AUTO_ANNOUNCE_PUBLIC=0
+  # to skip (e.g. air-gapped). EVERMEET_PUBLIC_IP_URL or --announce-addrs override/customize.
   # The peer ID is printed to logs on first start.
   # ---------------------------------------------------------------------------
   # evermeet-bootstrap:
   #   image: evermeet/evermeet:latest
   #   # build: .
   #   restart: unless-stopped
-  #   command:
-  #     - "--bootstrap"
-  #     - "--p2p-port"
-  #     - "4002"
-  #     - "--data"
-  #     - "/data"
-  #     - "--announce-addrs"
-  #     - "/ip4/YOUR.PUBLIC.IP.HERE/tcp/4002"
+  #   command: ["--bootstrap", "--p2p-port", "4002", "--data", "/data"]
   #   ports:
   #     - "4002:4002"
   #   volumes:

@@ -41,6 +41,9 @@ type P2PConfig struct {
 	// AnnounceAddrs are extra multiaddrs libp2p advertises (e.g. host public IP/tcp port when the
 	// process listens on 0.0.0.0 inside Docker). Omit /p2p/<peer_id>; it is added automatically.
 	AnnounceAddrs []string `toml:"announce_addrs"`
+	// AutoAnnouncePublic adds /ip4/<outbound-visible-IPv4>/tcp/<listen_port> via HTTPS (see node package).
+	// Default true; disable with false, EVERMEET_AUTO_ANNOUNCE_PUBLIC=0, or --no-auto-announce-public.
+	AutoAnnouncePublic bool `toml:"auto_announce_public"`
 }
 
 func Load(path string) (*Config, error) {
@@ -81,7 +84,8 @@ func defaults() *Config {
 			Public:  true,
 		},
 		P2P: P2PConfig{
-			ListenPort: 4001,
+			ListenPort:         4001,
+			AutoAnnouncePublic: true,
 		},
 	}
 }

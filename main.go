@@ -38,6 +38,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "Enable verbose backend logging, including HTTP request logs")
 	bootstrapMode := flag.Bool("bootstrap", false, "Run as a DHT bootstrap node only (no HTTP server or admin UI)")
 	announceAddrsFlag := flag.String("announce-addrs", "", "comma-separated extra multiaddrs to advertise when behind Docker/NAT (no /p2p/ suffix); e.g. /ip4/203.0.113.50/tcp/4002")
+	noAutoAnnouncePublic := flag.Bool("no-auto-announce-public", false, "Skip HTTPS discovery of public IPv4 for P2P announce addrs (default is to announce)")
 	versionFlag := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
@@ -49,7 +50,7 @@ func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	if *bootstrapMode {
-		runBootstrap(logger, *p2pPort, *dataDir, splitCommaNonEmpty(*announceAddrsFlag))
+		runBootstrap(logger, *p2pPort, *dataDir, splitCommaNonEmpty(*announceAddrsFlag), wantAutoAnnouncePublic(nil, *noAutoAnnouncePublic))
 		return
 	}
 
@@ -69,6 +70,17 @@ func main() {
 	}
 	if *verbose {
 		cfg.Node.Verbose = true
+	}
+
+	if wantAutoAnnouncePublic(cfg, *noAutoAnnouncePublic) {
+		ctxAnn, cancelAnn := context.WithTimeout(context.Background(), 12*time.Second)
+		ann, err := node.AppendPublicAnnounceAddr(ctxAnn, logger, cfg.P2P.ListenPort, cfg.P2P.AnnounceAddrs)
+		cancelAnn()
+		if err != nil {
+			logger.Printf("p2p: auto announce public IP: %v", err)
+		} else {
+			cfg.P2P.AnnounceAddrs = ann
+		}
 	}
 
 	if err := os.MkdirAll(cfg.Node.DataDir, 0755); err != nil {
@@ -177,6 +189,27 @@ func main() {
 	apiServer.CloseP2P()
 }
 
+func wantAutoAnnouncePublic(cfg *config.Config, noAutoFlag bool) bool {
+	if noAutoFlag {
+		return false
+	}
+	if v, ok := os.LookupEnv("EVERMEET_AUTO_ANNOUNCE_PUBLIC"); ok {
+		v = strings.ToLower(strings.TrimSpace(v))
+		if v != "" {
+			switch v {
+			case "0", "false", "no", "off":
+				return false
+			default:
+				return true
+			}
+		}
+	}
+	if cfg != nil {
+		return cfg.P2P.AutoAnnouncePublic
+	}
+	return true
+}
+
 func splitCommaNonEmpty(s string) []string {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -192,7 +225,7 @@ func splitCommaNonEmpty(s string) []string {
 	return out
 }
 
-func runBootstrap(logger *log.Logger, p2pPort int, dataDir string, announceAddrs []string) {
+func runBootstrap(logger *log.Logger, p2pPort int, dataDir string, announceAddrs []string, autoPublic bool) {
 	if p2pPort == 0 {
 		p2pPort = 4001
 	}
@@ -201,6 +234,17 @@ func runBootstrap(logger *log.Logger, p2pPort int, dataDir string, announceAddrs
 	}
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
 		logger.Fatalf("create data dir: %v", err)
+	}
+
+	if autoPublic {
+		ctxAnn, cancelAnn := context.WithTimeout(context.Background(), 12*time.Second)
+		a2, err := node.AppendPublicAnnounceAddr(ctxAnn, logger, p2pPort, announceAddrs)
+		cancelAnn()
+		if err != nil {
+			logger.Printf("bootstrap: auto announce public IP: %v", err)
+		} else {
+			announceAddrs = a2
+		}
 	}
 
 	n, err := node.NewBootstrap(logger, p2pPort, dataDir, nil, announceAddrs)

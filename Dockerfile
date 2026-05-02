@@ -3,6 +3,8 @@ FROM node:22-alpine AS web
 WORKDIR /app/web
 COPY web/package*.json ./
 RUN npm ci
+# vite.config.js reads ../internal/version/version.go at build time
+COPY internal/version/version.go /app/internal/version/version.go
 COPY web/ ./
 RUN npm run build
 

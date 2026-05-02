@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/mail"
+	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/evermeet/evermeet/internal/calendar"
+	"github.com/evermeet/evermeet/internal/config"
 	"github.com/evermeet/evermeet/internal/events"
 	"github.com/evermeet/evermeet/internal/store"
 	"github.com/evermeet/evermeet/internal/version"
@@ -597,6 +600,46 @@ func (s *Server) eventFoundingHostedHere(fd events.FoundingDoc) bool {
 		return instanceURL == localBase
 	}
 	return s.isLocalInstanceID(fd.InstanceID)
+}
+
+func (s *Server) handleAdminGetConfig(w http.ResponseWriter, r *http.Request) {
+	if s.cfgPath == "" {
+		jsonErr(w, http.StatusInternalServerError, "config path not set")
+		return
+	}
+	data, err := os.ReadFile(s.cfgPath)
+	if err != nil && !os.IsNotExist(err) {
+		jsonErr(w, http.StatusInternalServerError, fmt.Sprintf("read config: %v", err))
+		return
+	}
+	jsonOK(w, map[string]string{"toml": string(data), "defaults": config.DefaultsTOML})
+}
+
+func (s *Server) handleAdminSaveConfig(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		TOML string `json:"toml"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	if s.cfgPath == "" {
+		jsonErr(w, http.StatusInternalServerError, "config path not set")
+		return
+	}
+	if err := config.Parse(req.TOML); err != nil {
+		jsonErr(w, http.StatusBadRequest, fmt.Sprintf("invalid toml: %v", err))
+		return
+	}
+	if err := os.WriteFile(s.cfgPath, []byte(req.TOML), 0644); err != nil {
+		jsonErr(w, http.StatusInternalServerError, fmt.Sprintf("write config: %v", err))
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
+	go func() {
+		s.log.Println("config saved — restarting process")
+		_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
+	}()
 }
 
 func normalizeAdminObjectType(objectType string) string {

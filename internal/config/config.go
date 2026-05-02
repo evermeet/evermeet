@@ -1,11 +1,16 @@
 package config
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"os"
 
 	"github.com/BurntSushi/toml"
 )
+
+//go:embed defaults.toml
+var DefaultsTOML string
 
 type Config struct {
 	Node  NodeConfig  `toml:"node"`
@@ -47,6 +52,22 @@ func Load(path string) (*Config, error) {
 		}
 	}
 	return cfg, nil
+}
+
+func Parse(tomlStr string) error {
+	_, err := toml.Decode(tomlStr, &Config{})
+	return err
+}
+
+func Save(path string, cfg *Config) error {
+	var buf bytes.Buffer
+	if err := toml.NewEncoder(&buf).Encode(cfg); err != nil {
+		return fmt.Errorf("encode config: %w", err)
+	}
+	if err := os.WriteFile(path, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("write config: %w", err)
+	}
+	return nil
 }
 
 func defaults() *Config {

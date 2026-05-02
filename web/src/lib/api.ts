@@ -64,6 +64,12 @@ export const api = {
 				method: 'PUT',
 				body: JSON.stringify({ role }),
 			}),
+		config: () => request<AdminConfig>('/api/admin/config'),
+		saveConfig: (data: AdminConfigInput) =>
+			request<{ status: string }>('/api/admin/config', {
+				method: 'PUT',
+				body: JSON.stringify(data),
+			}),
 	},
 	blobs: {
 		upload: async (file: File): Promise<{ hash: string; url: string }> => {
@@ -440,6 +446,15 @@ export interface AdminAccount {
 export interface AdminAdminsOverview {
 	my_role: AdminRole | '';
 	admins: AdminAccount[];
+}
+
+export interface AdminConfig {
+	toml: string;
+	defaults: string;
+}
+
+export interface AdminConfigInput {
+	toml: string;
 }
 
 export interface AdminEmailConfig {

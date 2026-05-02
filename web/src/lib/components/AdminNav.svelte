@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { active = 'overview' }: { active?: 'overview' | 'objects' | 'email' | 'admins' | 'p2p' } = $props();
+	let { active = 'overview' }: { active?: 'overview' | 'objects' | 'email' | 'admins' | 'p2p' | 'config' } = $props();
 </script>
 
 <nav class="admin-nav" aria-label="Admin sections">
@@ -8,6 +8,7 @@
 	<a href="/admin/objects" class:active={active === 'objects'}>Objects</a>
 	<a href="/admin/email" class:active={active === 'email'}>Email</a>
 	<a href="/admin/admins" class:active={active === 'admins'}>Admins</a>
+	<a href="/admin/config" class:active={active === 'config'}>Config</a>
 </nav>
 
 <style>

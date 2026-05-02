@@ -19,6 +19,11 @@
     "vite": "^8.0.10"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/legacy-modes": "^6.5.2",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.41.1",
     "@lingui/core": "^6.0.1",
     "marked": "^18.0.2",
     "melt": "^0.44.0"

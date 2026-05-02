@@ -1,0 +1,44 @@
+[node]
+## HTTP listen port
+port = 7331
+
+## Directory for the database, keys, and blob storage
+data_dir = "./data"
+
+## Public base URL of this instance.
+## Required for federation, outbound links, and email From defaults.
+## Defaults to http://localhost:<port> if not set.
+# base_url = "https://example.com"
+
+## Allow public event browsing and discovery by unauthenticated users
+public = true
+
+## Development mode — relaxes some security checks (do not use in production)
+# dev = false
+
+## Log every HTTP request to stderr
+# verbose = false
+
+
+[email]
+## SMTP server for outbound mail (magic links, notifications).
+## If smtp_host is not set, evermeet falls back to a local sendmail/postfix binary.
+## If neither is available, outbound email is disabled.
+# smtp_host = "smtp.example.com"
+# smtp_port = 587
+# smtp_user = "evermeet@example.com"
+# smtp_password = "secret"
+
+## From address used in outbound mail.
+## Defaults to evermeet@<base_url host> when not set.
+# from = "evermeet@example.com"
+
+
+[p2p]
+## Port for the libp2p network listener used for DHT-based federation
+listen_port = 4001
+
+## Bootstrap peers for DHT discovery (multiaddr format), one per line
+# bootstrap_peers = [
+#   "/ip4/1.2.3.4/tcp/4001/p2p/12D3KooWExamplePeerID",
+# ]

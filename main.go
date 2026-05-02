@@ -121,7 +121,7 @@ func main() {
 		logger.Fatalf("blob store: %v", err)
 	}
 
-	apiServer := api.NewServer(db, blobStore, emailClient, baseURL, instancePriv.Seed(), instanceID, logger, p2pNode, cfg)
+	apiServer := api.NewServer(db, blobStore, emailClient, baseURL, instancePriv.Seed(), instanceID, logger, p2pNode, cfg, *cfgPath)
 
 	r := chi.NewRouter()
 

@@ -37,6 +37,7 @@ type Server struct {
 	webauthn     *webauthn.WebAuthn
 	node         *node.Node
 	cfg          *config.Config
+	cfgPath      string
 	startTime    time.Time
 	dhtPublisher *routing.Publisher
 	p2pMu        sync.RWMutex
@@ -49,7 +50,7 @@ type Server struct {
 }
 
 // NewServer creates a Server with the given dependencies.
-func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, baseURL string, serverSecret []byte, instanceID string, logger *log.Logger, p2pNode *node.Node, cfg *config.Config) *Server {
+func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, baseURL string, serverSecret []byte, instanceID string, logger *log.Logger, p2pNode *node.Node, cfg *config.Config, cfgPath string) *Server {
 	u, _ := url.Parse(baseURL)
 	w, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Evermeet",
@@ -98,6 +99,7 @@ func NewServer(db *store.DB, blobStore *blob.Store, emailClient *email.Client, b
 		webauthn:     w,
 		node:         p2pNode,
 		cfg:          cfg,
+		cfgPath:      cfgPath,
 		startTime:    time.Now(),
 		dhtPublisher: pub,
 		setupToken:   setupToken,
@@ -197,6 +199,8 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/admin/objects/{type}", s.requireAdmin(s.handleAdminObjectsByType))
 	r.Get("/api/admin/email", s.requireAdmin(s.handleAdminEmailConfig))
 	r.Post("/api/admin/email/test", s.requireAdmin(s.handleAdminEmailTest))
+	r.Get("/api/admin/config", s.requireOwner(s.handleAdminGetConfig))
+	r.Put("/api/admin/config", s.requireOwner(s.handleAdminSaveConfig))
 	r.Get("/api/admin/admins", s.requireAdmin(s.handleAdminAdminsList))
 	r.Post("/api/admin/admins", s.requireOwner(s.handleAdminAdminsCreate))
 	r.Put("/api/admin/admins/{did}/role", s.requireOwner(s.handleAdminAdminsSetRole))

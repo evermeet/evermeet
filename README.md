@@ -25,6 +25,11 @@ A viable alternative to Lu.ma and Meetup.com that puts sovereignty back in the h
 ./evermeet --config evermeet.toml
 ```
 
+**With Go:**
+```bash
+go install github.com/evermeet/evermeet@latest
+```
+
 **From source:**
 ```bash
 make setup   # install web dependencies

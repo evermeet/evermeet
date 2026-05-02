@@ -38,6 +38,12 @@ public = true
 ## Port for the libp2p network listener used for DHT-based federation
 listen_port = 4001
 
+## Extra listener addresses to advertise (multiaddr, no /p2p/ suffix). Use when running behind
+## Docker or NAT so peers learn your public IP:port instead of only the container IP.
+# announce_addrs = [
+#   "/ip4/203.0.113.50/tcp/4001",
+# ]
+
 ## Bootstrap peers for DHT discovery (multiaddr format), one per line
 # bootstrap_peers = [
 #   "/ip4/1.2.3.4/tcp/4001/p2p/12D3KooWExamplePeerID",

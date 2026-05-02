@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -36,6 +37,7 @@ func main() {
 	dataDir := flag.String("data", "", "Data directory (overrides config)")
 	verbose := flag.Bool("verbose", false, "Enable verbose backend logging, including HTTP request logs")
 	bootstrapMode := flag.Bool("bootstrap", false, "Run as a DHT bootstrap node only (no HTTP server or admin UI)")
+	announceAddrsFlag := flag.String("announce-addrs", "", "comma-separated extra multiaddrs to advertise when behind Docker/NAT (no /p2p/ suffix); e.g. /ip4/203.0.113.50/tcp/4002")
 	versionFlag := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
@@ -47,7 +49,7 @@ func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	if *bootstrapMode {
-		runBootstrap(logger, *p2pPort, *dataDir)
+		runBootstrap(logger, *p2pPort, *dataDir, splitCommaNonEmpty(*announceAddrsFlag))
 		return
 	}
 
@@ -120,7 +122,7 @@ func main() {
 
 	var p2pNode *node.Node
 	if hasAdmins {
-		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir, homeHostStr, cfg.P2P.BootstrapPeers)
+		p2pNode, err = node.New(db, logger, cfg.P2P.ListenPort, cfg.Node.DataDir, homeHostStr, cfg.P2P.BootstrapPeers, cfg.P2P.AnnounceAddrs)
 		if err != nil {
 			logger.Fatalf("start p2p node: %v", err)
 		}
@@ -175,7 +177,22 @@ func main() {
 	apiServer.CloseP2P()
 }
 
-func runBootstrap(logger *log.Logger, p2pPort int, dataDir string) {
+func splitCommaNonEmpty(s string) []string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	var out []string
+	for _, p := range parts {
+		if t := strings.TrimSpace(p); t != "" {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+func runBootstrap(logger *log.Logger, p2pPort int, dataDir string, announceAddrs []string) {
 	if p2pPort == 0 {
 		p2pPort = 4001
 	}
@@ -186,7 +203,7 @@ func runBootstrap(logger *log.Logger, p2pPort int, dataDir string) {
 		logger.Fatalf("create data dir: %v", err)
 	}
 
-	n, err := node.NewBootstrap(logger, p2pPort, dataDir, nil)
+	n, err := node.NewBootstrap(logger, p2pPort, dataDir, nil, announceAddrs)
 	if err != nil {
 		logger.Fatalf("bootstrap node: %v", err)
 	}

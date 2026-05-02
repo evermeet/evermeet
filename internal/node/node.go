@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	"github.com/libp2p/go-libp2p/p2p/security/noise"
 	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
+	"github.com/multiformats/go-multiaddr"
 	lukeblake3 "lukechampine.com/blake3"
 )
 
@@ -72,7 +74,42 @@ type Node struct {
 	peerEvermeetLock sync.RWMutex
 }
 
-func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID string, bootstrapPeers []string) (*Node, error) {
+func parseAnnounceMultiaddrs(strs []string) ([]multiaddr.Multiaddr, error) {
+	var out []multiaddr.Multiaddr
+	for _, s := range strs {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		m, err := multiaddr.NewMultiaddr(s)
+		if err != nil {
+			return nil, fmt.Errorf("announce_addrs %q: %w", s, err)
+		}
+		out = append(out, m)
+	}
+	return out, nil
+}
+
+func libp2pBaseOpts(privKey crypto.PrivKey, listenPort int, announce []multiaddr.Multiaddr) []libp2p.Option {
+	opts := []libp2p.Option{
+		libp2p.Identity(privKey),
+		libp2p.ListenAddrStrings(
+			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
+			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
+		),
+		libp2p.Security(noise.ID, noise.New),
+		libp2p.Security(libp2ptls.ID, libp2ptls.New),
+	}
+	if len(announce) > 0 {
+		extra := append([]multiaddr.Multiaddr(nil), announce...)
+		opts = append(opts, libp2p.AddrsFactory(func(addrs []multiaddr.Multiaddr) []multiaddr.Multiaddr {
+			return append(append([]multiaddr.Multiaddr(nil), addrs...), extra...)
+		}))
+	}
+	return opts
+}
+
+func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID string, bootstrapPeers, announceAddrs []string) (*Node, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Load or generate a persistent Ed25519 identity for this node.
@@ -83,15 +120,12 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 		return nil, fmt.Errorf("p2p identity: %w", err)
 	}
 
-	h, err := libp2p.New(
-		libp2p.Identity(privKey),
-		libp2p.ListenAddrStrings(
-			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
-			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
-		),
-		libp2p.Security(noise.ID, noise.New),
-		libp2p.Security(libp2ptls.ID, libp2ptls.New),
-	)
+	ann, err := parseAnnounceMultiaddrs(announceAddrs)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	h, err := libp2p.New(libp2pBaseOpts(privKey, listenPort, ann)...)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("libp2p host: %w", err)
@@ -211,7 +245,7 @@ func New(db *store.DB, l *log.Logger, listenPort int, dataDir, evermeetHomeID st
 // NewBootstrap starts a minimal libp2p node that only participates in the
 // Evermeet DHT as a bootstrap/relay peer. No database, no stream handlers,
 // no pubsub — just enough to help other nodes discover each other.
-func NewBootstrap(l *log.Logger, listenPort int, dataDir string, bootstrapPeers []string) (*Node, error) {
+func NewBootstrap(l *log.Logger, listenPort int, dataDir string, bootstrapPeers, announceAddrs []string) (*Node, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	privKey, err := loadOrGenerateP2PKey(filepath.Join(dataDir, "p2p.key"))
@@ -220,15 +254,12 @@ func NewBootstrap(l *log.Logger, listenPort int, dataDir string, bootstrapPeers 
 		return nil, fmt.Errorf("p2p identity: %w", err)
 	}
 
-	h, err := libp2p.New(
-		libp2p.Identity(privKey),
-		libp2p.ListenAddrStrings(
-			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort),
-			fmt.Sprintf("/ip6/::/tcp/%d", listenPort),
-		),
-		libp2p.Security(noise.ID, noise.New),
-		libp2p.Security(libp2ptls.ID, libp2ptls.New),
-	)
+	ann, err := parseAnnounceMultiaddrs(announceAddrs)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	h, err := libp2p.New(libp2pBaseOpts(privKey, listenPort, ann)...)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("libp2p host: %w", err)

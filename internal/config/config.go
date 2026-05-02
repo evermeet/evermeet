@@ -38,6 +38,9 @@ type EmailConfig struct {
 type P2PConfig struct {
 	BootstrapPeers []string `toml:"bootstrap_peers"`
 	ListenPort     int      `toml:"listen_port"`
+	// AnnounceAddrs are extra multiaddrs libp2p advertises (e.g. host public IP/tcp port when the
+	// process listens on 0.0.0.0 inside Docker). Omit /p2p/<peer_id>; it is added automatically.
+	AnnounceAddrs []string `toml:"announce_addrs"`
 }
 
 func Load(path string) (*Config, error) {

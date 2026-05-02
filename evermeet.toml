@@ -1,2 +1,8 @@
 [node]
 verbose = true
+
+[p2p]
+bootstrap_peers = [ "/ip4/31.14.17.95/tcp/4002/p2p/12D3KooWFCMoKFjnv3xZW8eg64Sv7Z8w6KLJZsrspGGYXRbiqguL",
+]
+
+

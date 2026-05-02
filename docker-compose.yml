@@ -31,16 +31,26 @@ services:
   # ---------------------------------------------------------------------------
   # Bootstrap node (optional)
   # Uncomment to run a DHT-only bootstrap peer alongside the main node.
-  # Useful if this host has a stable public IP — add its multiaddr to
-  # bootstrap_peers in other instances' evermeet.toml:
-  #   /ip4/<YOUR_IP>/tcp/4002/p2p/<PEER_ID>
+  # The process listens on 0.0.0.0 inside the container; publish the host port on
+  # 0.0.0.0 (default "4002:4002"), not 127.0.0.1 only, or WAN peers cannot dial in.
+  # Add its multiaddr to bootstrap_peers in other instances' evermeet.toml:
+  #   /ip4/<YOUR_PUBLIC_IP>/tcp/4002/p2p/<PEER_ID>
+  # Pass your public IP so libp2p advertises it (logs otherwise show the bridge IP only):
+  #   --announce-addrs /ip4/<YOUR_PUBLIC_IP>/tcp/4002
   # The peer ID is printed to logs on first start.
   # ---------------------------------------------------------------------------
   # evermeet-bootstrap:
   #   image: evermeet/evermeet:latest
   #   # build: .
   #   restart: unless-stopped
-  #   command: ["--bootstrap", "--p2p-port", "4002", "--data", "/data"]
+  #   command:
+  #     - "--bootstrap"
+  #     - "--p2p-port"
+  #     - "4002"
+  #     - "--data"
+  #     - "/data"
+  #     - "--announce-addrs"
+  #     - "/ip4/YOUR.PUBLIC.IP.HERE/tcp/4002"
   #   ports:
   #     - "4002:4002"
   #   volumes:

@@ -34,6 +34,11 @@ make run
 
 **With Docker:**
 ```bash
+docker run -p 7331:7331 -p 4001:4001 -v $(pwd)/data:/data evermeet/evermeet:latest
+```
+
+**Build locally:**
+```bash
 docker build -t evermeet .
 docker run -p 7331:7331 -p 4001:4001 -v $(pwd)/data:/data evermeet
 ```
@@ -105,7 +110,7 @@ The web UI includes an admin panel at `/admin` with:
 
 See [`docker-compose.yml`](docker-compose.yml) for a production-ready setup including Watchtower for automatic updates.
 
-Tagged releases are automatically built and pushed to Docker Hub via GitHub Actions:
+Tagged releases are automatically built and pushed to [Docker Hub](https://hub.docker.com/r/evermeet/evermeet):
 
 ```bash
 docker pull evermeet/evermeet:latest

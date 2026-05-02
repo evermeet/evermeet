@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   evermeet:
-    image: ghcr.io/evermeet/evermeet:latest
+    image: evermeet/evermeet:latest
     # build: .   # uncomment to build locally instead
     restart: unless-stopped
     ports:
@@ -37,7 +37,7 @@ services:
   # The peer ID is printed to logs on first start.
   # ---------------------------------------------------------------------------
   # evermeet-bootstrap:
-  #   image: ghcr.io/evermeet/evermeet:latest
+  #   image: evermeet/evermeet:latest
   #   # build: .
   #   restart: unless-stopped
   #   command: ["--bootstrap", "--p2p-port", "4002", "--data", "/data"]

@@ -1,4 +1,4 @@
-.PHONY: help setup dev build test run \
+.PHONY: help setup dev build test run install \
         docker-build docker-run docker-stop \
         compose-up compose-down compose-logs \
         bootstrap release
@@ -15,6 +15,7 @@ help:
 	@echo "  build          Build web assets and Go binary"
 	@echo "  test           Run Go tests"
 	@echo "  run            Run local binary (requires build)"
+	@echo "  install        Install binary to \$$(go env GOPATH)/bin"
 	@echo "  bootstrap      Run local bootstrap-only node on port 4002"
 	@echo ""
 	@echo "Docker"
@@ -49,6 +50,10 @@ test:
 
 run:
 	./evermeet --config evermeet.toml
+
+install:
+	cd web && npm run build
+	go install -trimpath -ldflags="-s -w" .
 
 bootstrap:
 	go run . --bootstrap --p2p-port 4002 --data ./data_bootstrap

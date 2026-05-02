@@ -36,7 +36,13 @@ func main() {
 	dataDir := flag.String("data", "", "Data directory (overrides config)")
 	verbose := flag.Bool("verbose", false, "Enable verbose backend logging, including HTTP request logs")
 	bootstrapMode := flag.Bool("bootstrap", false, "Run as a DHT bootstrap node only (no HTTP server or admin UI)")
+	versionFlag := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(version.Version)
+		return
+	}
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 

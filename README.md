@@ -1,4 +1,4 @@
-# Evermeet
+# evermeet
 
 A self-hosted, federated platform for publishing and discovering events — meetups, conferences, hackathons, and more.
 

@@ -506,6 +506,13 @@ export interface AdminRuntime {
 	cpu: AdminRuntimeCPU;
 }
 
+export interface AdminDHTStats {
+	mode: string;
+	routing_table_size: number;
+	bucket_size: number;
+	network_size_est?: number;
+}
+
 export interface AdminOverview {
 	instance_id: string;
 	base_url: string;
@@ -526,6 +533,7 @@ export interface AdminOverview {
 		peers?: AdminP2PPeer[];
 		[key: string]: any;
 	};
+	dht?: AdminDHTStats;
 	runtime?: AdminRuntime;
 	config: {
 		node: Record<string, any>;

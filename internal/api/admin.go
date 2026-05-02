@@ -51,8 +51,10 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 	uptime := time.Since(s.startTime)
 	homeID := s.homeHost()
 	var p2pStatus any
+	var dhtStats any
 	if n := s.libp2pNode(); n != nil {
 		p2pStatus = n.Status()
+		dhtStats = n.DHTStats()
 	} else {
 		p2pStatus = map[string]any{
 			"evermeet_instance_id": homeID,
@@ -76,6 +78,7 @@ func (s *Server) handleAdminOverview(w http.ResponseWriter, r *http.Request) {
 			"blobs":     blobCount,
 		},
 		"p2p":     p2pStatus,
+		"dht":     dhtStats,
 		"runtime": adminRuntimeSnapshot(),
 		"config": map[string]any{
 			"node": s.cfg.Node,

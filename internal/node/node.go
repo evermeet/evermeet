@@ -561,6 +561,30 @@ func (n *Node) Status() NodeStatus {
 	}
 }
 
+type DHTStats struct {
+	Mode             string `json:"mode"`
+	RoutingTableSize int    `json:"routing_table_size"`
+	BucketSize       int    `json:"bucket_size"`
+	NetworkSizeEst   int32  `json:"network_size_est,omitempty"`
+}
+
+func (n *Node) DHTStats() DHTStats {
+	mode := "server"
+	if n.dht.Mode() == dht.ModeClient {
+		mode = "client"
+	}
+	rt := n.dht.RoutingTable()
+	stats := DHTStats{
+		Mode:             mode,
+		RoutingTableSize: rt.Size(),
+		BucketSize:       n.dht.BucketSize(),
+	}
+	if est, err := n.dht.NetworkSize(); err == nil {
+		stats.NetworkSizeEst = est
+	}
+	return stats
+}
+
 // InstancePubKey returns the raw Ed25519 public key bytes of this node's
 // persistent identity. Used by /.well-known/evermeet-node-key.
 func (n *Node) InstancePubKey() ([]byte, error) {

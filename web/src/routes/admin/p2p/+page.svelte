@@ -90,6 +90,28 @@
 			</div>
 		</section>
 
+		{#if overview.dht}
+			<section class="panel">
+				<h2>DHT</h2>
+				<div class="info-grid">
+					<div class="info-row">
+						<span class="label">Mode</span>
+						<span class="value"><code>{overview.dht.mode}</code></span>
+					</div>
+					<div class="info-row">
+						<span class="label">Routing table</span>
+						<span class="value">{overview.dht.routing_table_size} peers (bucket size {overview.dht.bucket_size})</span>
+					</div>
+					{#if overview.dht.network_size_est}
+					<div class="info-row">
+						<span class="label">Network size est.</span>
+						<span class="value">~{overview.dht.network_size_est} nodes</span>
+					</div>
+					{/if}
+				</div>
+			</section>
+		{/if}
+
 		<section class="panel">
 			<h2>Listening addresses</h2>
 			{#if p2pAddresses.length}

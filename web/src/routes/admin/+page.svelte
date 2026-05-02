@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api, type AdminOverview } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -48,7 +49,7 @@
 	const countCards = $derived(
 		overview
 			? [
-					['Admins', overview.counts.admins, '/admin/admins'],
+					[intl.t('admin.nav.admins'), overview.counts.admins, '/admin/admins'],
 					['Users', overview.counts.users, '/admin/objects/users'],
 					['Events', overview.counts.events, '/admin/objects/events'],
 					['Calendars', overview.counts.calendars, '/admin/objects/calendars'],
@@ -67,14 +68,14 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Admin Overview</h1>
-			<p class="muted">Basic status and operational overview for this Evermeet instance.</p>
+			<h1>{intl.t('admin.overview.title')}</h1>
+			<p class="muted">{intl.t('admin.overview.desc')}</p>
 		</div>
 	</div>
 	<AdminNav active="overview" />
 
 	{#if loading}
-		<p class="muted">Loading admin overview...</p>
+		<p class="muted">{intl.t('admin.overview.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if overview}
@@ -88,26 +89,26 @@
 		</section>
 
 		<section class="panel">
-			<h2>Instance</h2>
+			<h2>{intl.t('admin.instance.title')}</h2>
 			<div class="info-grid">
 				<div class="info-row">
-					<span class="label">Instance ID</span>
+					<span class="label">{intl.t('admin.instance.id')}</span>
 					<span class="value mono">{overview.instance_id}</span>
 				</div>
 				<div class="info-row">
-					<span class="label">Base URL</span>
+					<span class="label">{intl.t('admin.instance.baseUrl')}</span>
 					<span class="value mono">{overview.base_url}</span>
 				</div>
 				<div class="info-row">
-					<span class="label">Version</span>
+					<span class="label">{intl.t('admin.instance.version')}</span>
 					<span class="value"><span class="badge">{overview.version}</span></span>
 				</div>
 				<div class="info-row">
-					<span class="label">Uptime</span>
+					<span class="label">{intl.t('admin.instance.uptime')}</span>
 					<span class="value"><strong>{overview.uptime}</strong></span>
 				</div>
 				<div class="info-row">
-					<span class="label">Started At</span>
+					<span class="label">{intl.t('admin.instance.startedAt')}</span>
 					<span class="value mono">{new Date(overview.started_at).toLocaleString()}</span>
 				</div>
 			</div>
@@ -115,67 +116,67 @@
 
 		{#if overview.runtime}
 			<section class="panel">
-				<h2>System</h2>
+				<h2>{intl.t('admin.system.title')}</h2>
 				<p class="muted small-print">
 					OS and architecture from the Go build target; memory and scheduler stats from this process. Load averages
 					appear on Linux when <code class="mono">/proc/loadavg</code> is available.
 				</p>
 				<div class="info-grid">
 					<div class="info-row">
-						<span class="label">Operating system</span>
+						<span class="label">{intl.t('admin.system.os')}</span>
 						<span class="value mono">{overview.runtime.os}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Architecture</span>
+						<span class="label">{intl.t('admin.system.arch')}</span>
 						<span class="value mono">{overview.runtime.arch}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Go runtime</span>
+						<span class="label">{intl.t('admin.system.goRuntime')}</span>
 						<span class="value mono">{overview.runtime.go_version}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Heap in use</span>
+						<span class="label">{intl.t('admin.system.heapInUse')}</span>
 						<span class="value mono">{formatBytes(overview.runtime.memory.heap_inuse_bytes)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Heap allocated</span>
+						<span class="label">{intl.t('admin.system.heapAlloc')}</span>
 						<span class="value mono">{formatBytes(overview.runtime.memory.heap_alloc_bytes)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Heap reserved</span>
+						<span class="label">{intl.t('admin.system.heapReserved')}</span>
 						<span class="value mono">{formatBytes(overview.runtime.memory.heap_sys_bytes)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Stack in use</span>
+						<span class="label">{intl.t('admin.system.stackInUse')}</span>
 						<span class="value mono">{formatBytes(overview.runtime.memory.stack_inuse_bytes)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Total from OS</span>
+						<span class="label">{intl.t('admin.system.totalFromOs')}</span>
 						<span class="value mono">{formatBytes(overview.runtime.memory.sys_bytes)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">GC runs</span>
+						<span class="label">{intl.t('admin.system.gcRuns')}</span>
 						<span class="value mono">{overview.runtime.memory.gc_count}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">GC CPU (cumulative)</span>
+						<span class="label">{intl.t('admin.system.gcCpu')}</span>
 						<span class="value mono">{pct(overview.runtime.memory.gc_cpu_fraction)}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Logical CPUs</span>
+						<span class="label">{intl.t('admin.system.logicalCpus')}</span>
 						<span class="value mono">{overview.runtime.cpu.num_cpu}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">GOMAXPROCS</span>
+						<span class="label">{intl.t('admin.system.gomaxprocs')}</span>
 						<span class="value mono">{overview.runtime.cpu.gomaxprocs}</span>
 					</div>
 					<div class="info-row">
-						<span class="label">Goroutines</span>
+						<span class="label">{intl.t('admin.system.goroutines')}</span>
 						<span class="value mono">{overview.runtime.cpu.goroutines}</span>
 					</div>
 					{#if overview.runtime.cpu.loadavg_1 != null && overview.runtime.cpu.loadavg_5 != null && overview.runtime.cpu.loadavg_15 != null}
 						<div class="info-row">
-							<span class="label">Load avg (1 / 5 / 15 m)</span>
+							<span class="label">{intl.t('admin.system.loadAvg')}</span>
 							<span class="value mono">
 								{overview.runtime.cpu.loadavg_1?.toFixed(2)} / {overview.runtime.cpu.loadavg_5?.toFixed(2)} /
 								{overview.runtime.cpu.loadavg_15?.toFixed(2)}
@@ -187,9 +188,9 @@
 		{/if}
 
 		<section class="panel">
-			<h2>Active Configuration</h2>
+			<h2>{intl.t('admin.activeConfig')}</h2>
 			<div class="config-group">
-				<h3>Node</h3>
+				<h3>{intl.t('admin.node')}</h3>
 				<div class="info-grid">
 					{#each Object.entries(overview.config.node) as [key, value]}
 						<div class="info-row">

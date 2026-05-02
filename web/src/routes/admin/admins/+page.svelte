@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api, type AdminAccount, type AdminRole } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -82,20 +83,20 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Admins</h1>
-			<p class="muted">Manage admin accounts and roles for this instance.</p>
+			<h1>{intl.t('admin.nav.admins')}</h1>
+			<p class="muted">{intl.t('admin.admins.desc')}</p>
 		</div>
 	</div>
 	<AdminNav active="admins" />
 
 	{#if loading}
-		<p class="muted">Loading admins...</p>
+		<p class="muted">{intl.t('admin.admins.loading')}</p>
 	{:else}
 		{#if error}<p class="error">{error}</p>{/if}
 		{#if success}<p class="success">{success}</p>{/if}
 
 		<section class="panel">
-			<h2>Add Admin</h2>
+			<h2>{intl.t('admin.admins.add')}</h2>
 			{#if canManage}
 				<div class="form-row">
 					<input
@@ -109,16 +110,16 @@
 						<option value="owner">owner</option>
 					</select>
 					<button onclick={addAdmin} disabled={saving || !email.trim()}>
-						{saving ? 'Saving...' : 'Add admin'}
+						{saving ? 'Saving...' : intl.t('admin.admins.addBtn')}
 					</button>
 				</div>
 			{:else}
-				<p class="muted">Only owners can add new admins.</p>
+				<p class="muted">{intl.t('admin.admins.onlyOwners')}</p>
 			{/if}
 		</section>
 
 		<section class="panel">
-			<h2>Current Admins</h2>
+			<h2>{intl.t('admin.admins.current')}</h2>
 			<div class="list">
 				{#each admins as admin}
 					<div class="row">

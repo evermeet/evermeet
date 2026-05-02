@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -111,7 +112,7 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Config</h1>
+			<h1>{intl.t('admin.nav.config')}</h1>
 			<p class="muted">Editing <code>evermeet.toml</code> — the server will restart after saving.</p>
 		</div>
 	</div>
@@ -124,11 +125,11 @@
 	{:else}
 		<div class="layout">
 			<div class="col">
-				<h2>Active config</h2>
+				<h2>{intl.t('admin.config.active')}</h2>
 				<form onsubmit={save}>
 					<div class="editor-wrap" bind:this={editorContainer}></div>
 					<div class="actions">
-						<button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save & restart'}</button>
+						<button type="submit" disabled={saving}>{saving ? 'Saving…' : intl.t('admin.config.saveRestart')}</button>
 						{#if saveError}<span class="error">{saveError}</span>{/if}
 						{#if saved}<span class="success">Saved — server is restarting.</span>{/if}
 					</div>

@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	let { active = 'overview' }: { active?: 'overview' | 'objects' | 'email' | 'admins' | 'p2p' | 'config' } = $props();
 </script>
 
 <nav class="admin-nav" aria-label="Admin sections">
-	<a href="/admin" class:active={active === 'overview'}>Overview</a>
-	<a href="/admin/p2p" class:active={active === 'p2p'}>Network</a>
-	<a href="/admin/objects" class:active={active === 'objects'}>Objects</a>
-	<a href="/admin/email" class:active={active === 'email'}>Email</a>
-	<a href="/admin/admins" class:active={active === 'admins'}>Admins</a>
-	<a href="/admin/config" class:active={active === 'config'}>Config</a>
+	<a href="/admin" class:active={active === 'overview'}>{intl.t('admin.nav.overview')}</a>
+	<a href="/admin/p2p" class:active={active === 'p2p'}>{intl.t('admin.nav.network')}</a>
+	<a href="/admin/objects" class:active={active === 'objects'}>{intl.t('admin.nav.objects')}</a>
+	<a href="/admin/email" class:active={active === 'email'}>{intl.t('admin.nav.email')}</a>
+	<a href="/admin/admins" class:active={active === 'admins'}>{intl.t('admin.nav.admins')}</a>
+	<a href="/admin/config" class:active={active === 'config'}>{intl.t('admin.nav.config')}</a>
 </nav>
 
 <style>

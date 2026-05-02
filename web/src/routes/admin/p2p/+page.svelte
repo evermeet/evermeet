@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api, type AdminOverview, type AdminP2PPeer } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -41,7 +42,7 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Network</h1>
+			<h1>{intl.t('admin.nav.network')}</h1>
 			<p class="muted">Libp2p node identity, listen addresses, and connected peers.</p>
 		</div>
 	</div>

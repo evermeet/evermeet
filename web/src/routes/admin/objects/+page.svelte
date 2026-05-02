@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api, type AdminObjectSummary } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -40,14 +41,14 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Objects</h1>
+			<h1>{intl.t('admin.nav.objects')}</h1>
 			<p class="muted">Overview of database objects, counts, and approximate stored bytes by type.</p>
 		</div>
 	</div>
 	<AdminNav active="objects" />
 
 	{#if loading}
-		<p class="muted">Loading objects...</p>
+		<p class="muted">{intl.t('admin.objects.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else}

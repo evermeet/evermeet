@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { api, type AdminObjectItem, type AdminObjectList, type AdminObjectType } from '$lib/api.js';
@@ -64,17 +65,17 @@
 		<div>
 			<p class="eyebrow">Admin</p>
 			<h1>{list?.label ?? type}</h1>
-			<p class="muted">Paginated database object listing.</p>
+			<p class="muted">{intl.t('admin.objects.listDesc')}</p>
 		</div>
 	</div>
 	<AdminNav active="objects" />
 
 	<div class="back-row">
-		<a href="/admin/objects">← Back to Objects</a>
+		<a href="/admin/objects">{intl.t('admin.objects.back')}</a>
 	</div>
 
 	{#if loading && !list}
-		<p class="muted">Loading objects...</p>
+		<p class="muted">{intl.t('admin.objects.loading')}</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else if list}
@@ -82,13 +83,13 @@
 			<div class="list-header">
 				<p class="muted">Showing {offset + 1}-{Math.min(offset + limit, list.count)} of {list.count}</p>
 				<div class="pager">
-					<button disabled={!canPrev || loading} onclick={() => loadPage(Math.max(0, offset - limit))}>Previous</button>
-					<button disabled={!canNext || loading} onclick={() => loadPage(offset + limit)}>Next</button>
+					<button disabled={!canPrev || loading} onclick={() => loadPage(Math.max(0, offset - limit))}>{intl.t('admin.pager.previous')}</button>
+					<button disabled={!canNext || loading} onclick={() => loadPage(offset + limit)}>{intl.t('admin.pager.next')}</button>
 				</div>
 			</div>
 
 			{#if list.items.length === 0}
-				<p class="muted">No objects found.</p>
+				<p class="muted">{intl.t('admin.objects.empty')}</p>
 			{:else}
 				<div class="object-list">
 					{#each list.items as item}

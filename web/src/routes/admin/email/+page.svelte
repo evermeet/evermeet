@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { intl } from '$lib/i18n.svelte.js';
 	import { goto } from '$app/navigation';
 	import { api, type AdminEmailConfig } from '$lib/api.js';
 	import { auth } from '$lib/auth.svelte.js';
@@ -59,7 +60,7 @@
 	<div class="page-header">
 		<div>
 			<p class="eyebrow">Admin</p>
-			<h1>Email</h1>
+			<h1>{intl.t('admin.nav.email')}</h1>
 			<p class="muted">Outbound mail from <code>evermeet.toml</code> — SMTP, or sendmail when SMTP is unset.</p>
 		</div>
 	</div>

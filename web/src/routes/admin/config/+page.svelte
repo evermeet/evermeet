@@ -7,7 +7,8 @@
 	import { EditorState } from '@codemirror/state';
 	import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 	import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-	import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
+	import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle, HighlightStyle } from '@codemirror/language';
+	import { tags } from '@lezer/highlight';
 	import { toml } from '@codemirror/legacy-modes/mode/toml';
 
 	let editorContainer = $state<HTMLDivElement | null>(null);
@@ -20,16 +21,27 @@
 	let saveError = $state('');
 	let saved = $state(false);
 
+	const darkHighlightStyle = HighlightStyle.define([
+		{ tag: tags.comment,                   color: '#6a9955' },
+		{ tag: [tags.atom, tags.bool],         color: '#7cb8e8' },
+		{ tag: tags.string,                    color: '#ce9178' },
+		{ tag: [tags.number, tags.literal],    color: '#b5cea8' },
+		{ tag: tags.meta,                      color: '#4e7a4e' },
+		{ tag: tags.invalid,                   color: '#f44747' },
+	]);
+
 	function makeExtensions(readonly = false) {
+		const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 		return [
 			...(readonly ? [] : [history(), keymap.of([...defaultKeymap, ...historyKeymap])]),
 			lineNumbers(),
 			...(readonly ? [] : [highlightActiveLine()]),
 			StreamLanguage.define(toml),
-			syntaxHighlighting(defaultHighlightStyle),
+			syntaxHighlighting(dark ? darkHighlightStyle : defaultHighlightStyle),
 			EditorState.readOnly.of(readonly),
 			EditorView.theme({
 				'&': { height: '100%', fontSize: '0.875rem' },
+				'&.cm-focused': { outline: 'none' },
 				'.cm-scroller': { fontFamily: 'monospace', lineHeight: '1.6', overflow: 'auto' },
 				'.cm-content': { padding: '0.75rem 0' },
 				'.cm-line': { padding: '0 0.75rem' },
@@ -173,9 +185,10 @@
 	.editor-wrap.readonly { opacity: 0.8; }
 
 	.editor-wrap :global(.cm-editor) { height: 100%; outline: none; }
-	.editor-wrap :global(.cm-editor.cm-focused) {
-		outline: none;
-		box-shadow: 0 0 0 2px var(--border-focus, #4f8ef7);
+	.editor-wrap :global(.cm-editor.cm-focused) { outline: none; }
+
+	@media (prefers-color-scheme: dark) {
+		.editor-wrap :global(.cm-cursor) { border-left-color: #fff !important; }
 	}
 	/* light mode gutter — one-dark overrides these in dark mode */
 	.editor-wrap :global(.cm-gutters) {

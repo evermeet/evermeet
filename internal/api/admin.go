@@ -638,7 +638,17 @@ func (s *Server) handleAdminSaveConfig(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "ok"})
 	go func() {
 		s.log.Println("config saved — restarting process")
-		_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
+		time.Sleep(200 * time.Millisecond)
+		exe, err := os.Executable()
+		if err != nil {
+			s.log.Printf("restart: could not find executable: %v", err)
+			_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
+			return
+		}
+		if err := syscall.Exec(exe, os.Args, os.Environ()); err != nil {
+			s.log.Printf("restart: exec failed: %v", err)
+			_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
+		}
 	}()
 }
 

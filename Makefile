@@ -1,3 +1,5 @@
+export CGO_ENABLED=0
+
 .PHONY: help setup dev build test run install \
         docker-build docker-run docker-stop \
         compose-up compose-down compose-logs \

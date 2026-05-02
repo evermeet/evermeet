@@ -2,4 +2,4 @@
 package version
 
 // Version is the Evermeet release identifier (shown in logs, /health, admin API).
-const Version = "v0.1.0-alpha.1"
+const Version = "v0.1.0-alpha.2"

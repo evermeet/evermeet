@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"strings"
 	"time"
@@ -246,6 +247,60 @@ func (s *Server) handleAdminAdminsSetRole(w http.ResponseWriter, r *http.Request
 	}
 	if err := s.db.SetAdminRole(r.Context(), did, role); err != nil {
 		jsonErr(w, http.StatusInternalServerError, "update role failed")
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleAdminEmailConfig(w http.ResponseWriter, r *http.Request) {
+	ec := s.cfg.Email
+	transport := "none"
+	sendmailPath := ""
+	if s.email != nil {
+		transport = s.email.Transport()
+		sendmailPath = s.email.SendmailPath()
+	}
+	effectiveFrom := ""
+	if s.email != nil {
+		effectiveFrom = s.email.FromAddress()
+	}
+	jsonOK(w, map[string]any{
+		"sending_enabled": s.email != nil,
+		"transport":       transport,
+		"sendmail_path":   sendmailPath,
+		"smtp_host":       ec.SMTPHost,
+		"smtp_port":       ec.SMTPPort,
+		"smtp_user":       ec.SMTPUser,
+		"from":            ec.From,
+		"effective_from":  effectiveFrom,
+		"password_set":    ec.SMTPPass != "",
+	})
+}
+
+func (s *Server) handleAdminEmailTest(w http.ResponseWriter, r *http.Request) {
+	if s.email == nil {
+		jsonErr(w, http.StatusServiceUnavailable, "Outbound email is not configured (set smtp_host for SMTP, or install sendmail/postfix and set node.base_url so From can default to evermeet@<host>)")
+		return
+	}
+	var body struct {
+		To string `json:"to"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	to := strings.TrimSpace(body.To)
+	if to == "" {
+		jsonErr(w, http.StatusBadRequest, "to is required")
+		return
+	}
+	addr, err := mail.ParseAddress(to)
+	if err != nil {
+		jsonErr(w, http.StatusBadRequest, "invalid email address")
+		return
+	}
+	if err := s.email.SendTest(addr.Address); err != nil {
+		jsonErr(w, http.StatusBadGateway, fmt.Sprintf("send failed: %v", err))
 		return
 	}
 	jsonOK(w, map[string]string{"status": "ok"})

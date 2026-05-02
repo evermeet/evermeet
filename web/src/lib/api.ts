@@ -47,6 +47,12 @@ export const api = {
 		objects: () => request<AdminObjectsOverview>('/api/admin/objects'),
 		objectsByType: (type: AdminObjectType, limit = 50, offset = 0) =>
 			request<AdminObjectList>(`/api/admin/objects/${type}?limit=${limit}&offset=${offset}`),
+		email: () => request<AdminEmailConfig>('/api/admin/email'),
+		emailTest: (data: { to: string }) =>
+			request<{ status: string }>('/api/admin/email/test', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
 		admins: () => request<AdminAdminsOverview>('/api/admin/admins'),
 		createAdmin: (data: { did?: string; email?: string; role: AdminRole }) =>
 			request<{ status: string }>('/api/admin/admins', {
@@ -434,6 +440,20 @@ export interface AdminAccount {
 export interface AdminAdminsOverview {
 	my_role: AdminRole | '';
 	admins: AdminAccount[];
+}
+
+export interface AdminEmailConfig {
+	sending_enabled: boolean;
+	transport: 'none' | 'smtp' | 'sendmail';
+	/** Populated when transport is sendmail */
+	sendmail_path?: string;
+	smtp_host: string;
+	smtp_port: number;
+	smtp_user: string;
+	from: string;
+	/** Actual From address in use (sendmail may default to evermeet@ + base URL hostname). */
+	effective_from: string;
+	password_set: boolean;
 }
 
 export interface AdminP2PPeer {

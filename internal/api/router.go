@@ -195,6 +195,8 @@ func (s *Server) Router() http.Handler {
 	r.Get("/api/admin/overview", s.requireAdmin(s.handleAdminOverview))
 	r.Get("/api/admin/objects", s.requireAdmin(s.handleAdminObjectsOverview))
 	r.Get("/api/admin/objects/{type}", s.requireAdmin(s.handleAdminObjectsByType))
+	r.Get("/api/admin/email", s.requireAdmin(s.handleAdminEmailConfig))
+	r.Post("/api/admin/email/test", s.requireAdmin(s.handleAdminEmailTest))
 	r.Get("/api/admin/admins", s.requireAdmin(s.handleAdminAdminsList))
 	r.Post("/api/admin/admins", s.requireOwner(s.handleAdminAdminsCreate))
 	r.Put("/api/admin/admins/{did}/role", s.requireOwner(s.handleAdminAdminsSetRole))

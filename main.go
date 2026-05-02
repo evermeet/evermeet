@@ -73,9 +73,13 @@ func main() {
 	if baseURL == "" {
 		baseURL = fmt.Sprintf("http://localhost:%d", cfg.Node.Port)
 	}
+	mailDefaultHost := ""
 	homeHostStr := instanceID
-	if u, err := url.Parse(baseURL); err == nil && u.Host != "" {
-		homeHostStr = instanceID + "@" + u.Host
+	if u, err := url.Parse(baseURL); err == nil {
+		mailDefaultHost = u.Hostname()
+		if u.Host != "" {
+			homeHostStr = instanceID + "@" + u.Host
+		}
 	}
 
 	logger.Printf("evermeet %s starting", version.Version)
@@ -90,16 +94,10 @@ func main() {
 	}
 	defer db.Close()
 
-	// Optional email client (nil in dev if SMTP not configured).
-	var emailClient *email.Client
-	if cfg.Email.SMTPHost != "" {
-		emailClient = email.New(email.Config{
-			Host: cfg.Email.SMTPHost,
-			Port: cfg.Email.SMTPPort,
-			User: cfg.Email.SMTPUser,
-			Pass: cfg.Email.SMTPPass,
-			From: cfg.Email.From,
-		})
+	// Optional email client: SMTP from config, or local sendmail (From or evermeet@<base host>).
+	emailClient, emailDesc := email.NewClient(cfg.Email, mailDefaultHost)
+	if emailDesc != "" {
+		logger.Printf("email: %s", emailDesc)
 	}
 
 	ctxBoot := context.Background()
